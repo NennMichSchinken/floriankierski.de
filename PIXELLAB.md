@@ -287,16 +287,35 @@ das sieht man bei 400px Rapport auf breiten Bildschirmen die Wiederholung.
 
 Beide sind beliebig oft wiederholbar und schreiben nach `assets/img/px/`.
 
+### Stand vom 18.08.2026
+
+Die Szene ist fertig und Florian ist zufrieden damit. Sie steht live.
+
+Auf der Wiese stehen 25 Requisiten, von Florian selbst im Editor gesetzt:
+Turm, zwei Trauerweiden, ein Laubbaum, sieben Büsche, zehn Blumen. Dazu vier
+pickende Hühner — eines vor dem Turm, drei links als Gruppe. Der Turm kam als
+Tag-Sprite in Seitenansicht zurück und passt jetzt; das alte 3/4-Nachtgebäude
+ist weg.
+
+Die Werkzeugkette steht: Editor setzen → „Szene speichern" → `szene.json` in
+den Hauptordner → `python tools/szene-anwenden.py`. Das Skript schreibt
+zwischen die Markierungen, rechnet den z-index aus der Tiefe und zählt die
+Versionsnummern hoch. **Nichts davon von Hand kopieren** — daran ist es
+dreimal gescheitert.
+
 ### Was als Nächstes dran wäre
 
 - **Ein Tag-Wang-Satz für die Wiese.** Die Fläche ist immer noch die
   umgefärbte Nachtkachel. Prompt Richtung „sunlit grassy terrain" statt „dark
   nocturnal", dann fällt `tag-palette.py` für den Boden weg.
-- **Florians Turm zurückholen** — aber als Tag-Sprite in Seitenansicht, nicht
-  das alte 3/4-Nachtgebäude. Er ist inhaltlich das schönste Element der Seite
-  und fehlt jetzt.
-- **Mehr Leben auf der Wiese.** Es stehen zwei Büsche und ein Baum. Hühner
-  (`raw/pixellab/chicken-raw.png`) oder ein Zaun würden der Fläche guttun.
+- **Der Turm steht auf 1×** (99 px). Bei 2× wären es 198 px und er sprengt die
+  Bodenzone. Wer ihn größer will, muss ihn mit halber nativer Höhe neu
+  erzeugen — dann ergibt 2× dieselbe Erscheinungsgröße bei sauberem Raster.
+- **`flower1-5` steht komplett hinter der Texttafel** und ist damit unsichtbar,
+  `flower1-6` und `tree2-2` zur Hälfte. Bewusst so gelassen, Florian weiß es.
+- **Der Hero ist beim Kürzen rund 80 px flacher geworden**, damit „Kapitel 1"
+  oben anschneidet. Falls die Szene dadurch gedrungen wirkt, ist das der
+  Tausch, an dem man drehen kann: `min-height` in `.hero`.
 
 ### Nicht noch einmal versuchen
 
