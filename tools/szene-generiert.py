@@ -119,3 +119,8 @@ if __name__ == '__main__':
     sichern(auf_inhalt(lade('bush.png')), 'bush.png')
 
     sichern(auf_inhalt(teich_auf_tag(lade('teich.png'))), 'teich.png')
+
+    # Diese drei kamen schon in Tagesfarben - nur beschneiden, nicht umfaerben.
+    sichern(auf_inhalt(lade('flower1.png')), 'flower1.png')
+    sichern(auf_inhalt(lade('bush1.png')), 'bush1.png')
+    sichern(auf_inhalt(lade('bush2.png')), 'bush2.png')
