@@ -38,6 +38,20 @@
   .griff img{display:block;width:100%;height:auto;
              image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 
+  /* Umriss der Texttafel. Nur eine Markierung, kein echtes Element der Seite. */
+  .tafel-platz{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:40;
+    max-width:830px;width:calc(100% - 2.5rem);height:570px;
+    margin-inline:max(1.25rem,calc((100% - 1180px) / 2)) auto;
+    left:0;right:0;pointer-events:none;
+    border:2px dashed rgba(240,200,96,.75);
+    background:repeating-linear-gradient(45deg,rgba(240,200,96,.07) 0 10px,transparent 10px 20px);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tafel-platz span{font-size:.85rem;color:rgba(255,240,200,.85);
+    background:rgba(20,16,30,.7);padding:.3rem .7rem;border-radius:4px}
+  .tafel-platz.aus{display:none}
+
   .liste{padding:0 1.5rem 1rem}
   table{border-collapse:collapse;width:100%;font-size:.86rem}
   th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #2e2a45}
@@ -80,6 +94,8 @@
     <button id="hinzu">+ hinzufügen</button>
   </span>
   <button id="reset">Auf den aktuellen Stand zurücksetzen</button>
+  <label style="cursor:pointer"><input type="checkbox" id="tafel" checked>
+    Texttafel einblenden</label>
   <span style="margin-left:auto;color:#a49dbe;font-size:.85rem">
     <kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd>
     = 1&nbsp;px, mit <kbd>Shift</kbd> = 10&nbsp;px
@@ -101,6 +117,13 @@
         <div class="scene__band scene__band--trees"></div>
         <div class="scene__ground"><div class="scene__props" id="props"></div></div>
         <div class="scene__vignette"></div>
+      </div>
+      <!-- Platzhalter fuer die Texttafel. Ohne den platziert man blind gegen
+           den Bereich, in dem spaeter Name und Pitch stehen. Gleiche Masse
+           wie .hero__inner auf der Seite: max 830px breit, links buendig zur
+           Textspalte, senkrecht mittig. -->
+      <div class="tafel-platz" id="tafel-platz">
+        <span>Hier steht der Text — was hierhin gerät, sieht niemand</span>
       </div>
     </section>
   </div>
@@ -135,6 +158,7 @@
 var SPRITES = {
   'tree.png':       [80, 101],
   'bush.png':       [64, 27],
+  'teich.png':      [153, 64],
   'cloud.png':      [29, 16],
   'cloud-small.png':[30, 18]
 };
@@ -289,6 +313,10 @@ document.getElementById('hinzu').addEventListener('click', function(){
                    anker:'left', x:45, y:20, faktor:2});
   gewaehlt = requisiten.length - 1;
   zeichnen();
+});
+
+document.getElementById('tafel').addEventListener('change', function(e){
+  document.getElementById('tafel-platz').classList.toggle('aus', !e.target.checked);
 });
 
 document.getElementById('reset').addEventListener('click', function(){

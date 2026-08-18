@@ -24,6 +24,7 @@ Drei Nacharbeiten sind noetig:
 
 Aufruf aus dem Projekt-Hauptordner:   python tools/szene-generiert.py
 """
+import colorsys
 import os
 from PIL import Image
 
@@ -36,6 +37,39 @@ SCHATTEN = (0x3a, 0x63, 0x33)
 # Maronenbraun und Rotbraun der Erdkanten-Palette -> Nadelbaumgruen
 LAUB = {(0x70, 0x4c, 0x5b): (0x3d, 0x6b, 0x36),
         (0x8f, 0x67, 0x5b): (0x53, 0x84, 0x44)}
+
+
+def teich_auf_tag(im):
+    """Der Teich ist ein Nachtbild: fast schwarzer Rand, dunkles Tuerkis.
+
+    Zwei Gruppen werden getrennt behandelt, erkennbar am Farbton:
+      - Rand (violett-schwarz, H 240-340) wird zu Erde, passend zur Vorderkante
+      - Wasser (H 140-210) wird heller und geht ins Tagesblau
+
+    Die Helligkeit wird linear angehoben, nicht ueber eine Gammakurve: die
+    Vorlage nutzt nur V 0.17 bis 0.64, eine Kurve wuerde das zusammenstauchen
+    und die Flaeche platt machen. Dasselbe Vorgehen wie in tag-palette.py.
+    """
+    px = im.load()
+    cache = {}
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = px[x, y]
+            if a == 0:
+                continue
+            if (r, g, b) not in cache:
+                h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+                h *= 360
+                if 235 <= h <= 345:                 # Rand -> Erde
+                    h, s, v = 15, s * 0.62, 0.20 + v * 1.55
+                else:                               # Wasser -> Tagesblau
+                    h, s, v = h + 16, s * 0.80, 0.34 + v * 1.05
+                rr, gg, bb = colorsys.hsv_to_rgb((h % 360) / 360,
+                                                 min(max(s, 0), 1),
+                                                 min(max(v, 0), 1))
+                cache[(r, g, b)] = (round(rr * 255), round(gg * 255), round(bb * 255))
+            px[x, y] = cache[(r, g, b)] + (a,)
+    return im
 
 
 def lade(name):
@@ -83,3 +117,5 @@ if __name__ == '__main__':
     sichern(auf_inhalt(t), 'tree.png')
 
     sichern(auf_inhalt(lade('bush.png')), 'bush.png')
+
+    sichern(auf_inhalt(teich_auf_tag(lade('teich.png'))), 'teich.png')
