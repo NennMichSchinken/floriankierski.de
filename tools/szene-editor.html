@@ -65,6 +65,10 @@
       padding:1rem;overflow-x:auto;font-size:.83rem;line-height:1.6;margin:0;
       white-space:pre-wrap;word-break:break-all}
   .hinweis{color:#a49dbe;font-size:.85rem;margin:.5rem 0 0}
+  .warnung{margin:1.4rem 0 0;padding:.7rem .9rem;border-radius:6px;font-size:.88rem;
+    background:rgba(240,200,96,.10);border:1px solid rgba(240,200,96,.45);color:#f4e3b8}
+  .kopieren{margin-left:.6rem;font-size:.78rem;padding:.2rem .5rem;font-weight:400}
+  .kopieren.fertig{background:#2a7d52;border-color:#2a7d52;color:#eafff4}
   kbd{background:#241f38;border:1px solid #403960;border-radius:3px;
       padding:.05em .35em;font-size:.85em}
 </style>
@@ -140,10 +144,16 @@
 </div>
 
 <div class="ausgabe">
-  <h2>1. Nach <code>index.html</code>, hinein in <code>&lt;div class="scene__props"&gt;</code></h2>
+  <p class="warnung">Der Editor ändert die Website <strong>nicht</strong>. Was
+     hier unten steht, musst du selbst in die zwei Dateien übertragen — sonst
+     bleibt die Seite, wie sie ist.</p>
+
+  <h2>1. Nach <code>index.html</code>, hinein in <code>&lt;div class="scene__props"&gt;</code>
+      <button class="kopieren" data-ziel="html-aus">kopieren</button></h2>
   <pre id="html-aus"></pre>
 
-  <h2>2. Nach <code>assets/css/style.css</code>, zu den übrigen <code>.prop--</code>Regeln</h2>
+  <h2>2. Nach <code>assets/css/style.css</code>, zu den übrigen <code>.prop--</code>Regeln
+      <button class="kopieren" data-ziel="css-aus">kopieren</button></h2>
   <pre id="css-aus"></pre>
 
   <p class="hinweis">Danach in <code>index.html</code> die Zahl hinter
@@ -313,6 +323,17 @@ document.getElementById('hinzu').addEventListener('click', function(){
                    anker:'left', x:45, y:20, faktor:2});
   gewaehlt = requisiten.length - 1;
   zeichnen();
+});
+
+Array.prototype.forEach.call(document.querySelectorAll('.kopieren'), function(b){
+  b.addEventListener('click', function(){
+    var text = document.getElementById(b.dataset.ziel).textContent;
+    navigator.clipboard.writeText(text).then(function(){
+      b.textContent = 'kopiert';
+      b.classList.add('fertig');
+      setTimeout(function(){ b.textContent = 'kopieren'; b.classList.remove('fertig'); }, 1600);
+    });
+  });
 });
 
 document.getElementById('tafel').addEventListener('change', function(e){
