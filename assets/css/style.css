@@ -300,7 +300,6 @@ ul,ol{margin:0;padding:0;list-style:none}
 .prop--tower-1{width:99px;left:80.6%;bottom:38.3%;z-index:63}
 .prop--tree-1{width:160px;left:85.8%;bottom:26.8%;z-index:74}
 .prop--bush-1{width:128px;left:78.9%;bottom:13.6%;z-index:87}
-.prop--teich-1{width:306px;left:1%;bottom:24.3%;z-index:77}
 .prop--bush-2{width:128px;left:2.5%;bottom:14.3%;z-index:87}
 .prop--bush-3{width:64px;left:80.2%;bottom:38.9%;z-index:62}
 .prop--tree2-2{width:86px;left:-1.3%;bottom:57.1%;z-index:44}
@@ -320,29 +319,46 @@ ul,ol{margin:0;padding:0;list-style:none}
 .prop--bush-7{width:192px;left:46%;bottom:5.7%;z-index:95}
 /* REQUISITEN ENDE */
 
-/* Das Huhn ist kein gewoehnliches Bild, sondern ein Streifen aus neun
-   Einzelbildern, den CSS durchschaltet — dieselbe Technik wie beim Begleiter
-   am unteren Rand. steps(9) springt von Bild zu Bild statt weich zu
-   ueberblenden; alles andere waere bei Pixelgrafik falsch.
-   Es steht bewusst ausserhalb der Markierungen, damit szene-anwenden.py es
-   nicht ueberschreibt. */
+/* ---------- Huehner ----------
+   Kein gewoehnliches Bild, sondern ein Streifen aus neun Einzelbildern, den
+   CSS durchschaltet — dieselbe Technik wie beim Begleiter am unteren Rand.
+   steps(9) springt von Bild zu Bild statt weich zu ueberblenden; alles andere
+   waere bei Pixelgrafik falsch.
+
+   Sie stehen ausserhalb der Markierungen, damit szene-anwenden.py sie nicht
+   ueberschreibt. Die z-index-Werte folgen derselben Rechnung wie dort:
+   100 minus bottom plus 1, also weiter unten = weiter vorn. */
 .prop--chicken{
-  width:80px;height:72px;                  /* 2x von 40x36 */
   background-image:url('/assets/img/px/chicken.png?v=1');
-  background-size:720px 72px;              /* 9 Bilder a 80px */
   background-repeat:no-repeat;
   image-rendering:pixelated;image-rendering:crisp-edges;
-  animation:huhn 1.4s steps(9) infinite;
+  animation-duration:1.4s;animation-timing-function:steps(9);
+  animation-iteration-count:infinite;
 }
-@keyframes huhn{from{background-position:0 0}to{background-position:-720px 0}}
-/* Gespiegelt, falls es einmal andersherum schauen soll */
+/* Zwei Groessen, beide ganze Vielfache der nativen 40x36.
+   Jede braucht ihre eigene Bildfolge: background-position in Prozent bezieht
+   sich auf die Differenz zwischen Rahmen und Kachel, nicht auf die Bildbreite
+   — bei 720px Streifen in 80px Rahmen liefe es dadurch in die falsche
+   Richtung. Deshalb feste Pixelwerte, je 9 Bilder mal Rahmenbreite. */
+.prop--chicken.is-gross{width:80px;height:72px;background-size:720px 72px;
+  animation-name:huhn-gross}
+.prop--chicken.is-klein{width:40px;height:36px;background-size:360px 36px;
+  animation-name:huhn-klein}
+@keyframes huhn-gross{from{background-position:0 0}to{background-position:-720px 0}}
+@keyframes huhn-klein{from{background-position:0 0}to{background-position:-360px 0}}
+
+/* Gespiegelt. transform kippt auch den Ursprung, deshalb steht die Regel
+   NACH den Positionen — sonst kaempft sie mit left/right. */
 .prop--chicken.is-west{transform:scaleX(-1)}
-/* Vor dem Turm (der steht bei left:80.6%), etwas tiefer — dadurch wirkt es
-   naeher am Betrachter. bottom:27% ist wichtig: darunter liegen die 64px der
-   Erdkante, dort staende es auf der Boeschung statt in der Wiese.
-   Links verankert wie alle uebrigen Requisiten, damit es beim Verbreitern
-   des Fensters mit dem Turm zusammenbleibt. */
-.prop--chicken{left:79%;bottom:27%;z-index:74}
+
+/* Eines vor dem Turm, drei links in der Wiese, wo vorher der Teich lag.
+   Unterschiedliche Groessen und Blickrichtungen, und jedes pickt zu einem
+   anderen Zeitpunkt — im Gleichtakt sieht eine Gruppe aufgezogen aus. */
+.prop--chicken-1{left:79%;bottom:27%;z-index:74}
+.prop--chicken-2{left:3.5%;bottom:25%;z-index:76;animation-delay:-.45s}
+.prop--chicken-3{left:9.5%;bottom:31%;z-index:70;animation-delay:-.9s}
+.prop--chicken-4{left:1%;bottom:36%;z-index:65;animation-delay:-1.15s}
+
 @media (max-width:1000px){.prop--chicken{display:none}}
 /* Unter 1180 px wird es rechts eng, unter 1000 px steht der Baum hinter der
    Tafel — dann weicht er, wie der Begleiter auch. */

@@ -27,7 +27,7 @@
 <link rel="preload" href="/assets/fonts/silkscreen-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <!-- ?v= bei jeder Aenderung hochzaehlen, sonst zeigen Browser die alte Fassung -->
-<link rel="stylesheet" href="/assets/css/style.css?v=18">
+<link rel="stylesheet" href="/assets/css/style.css?v=21">
 
 <script>
 /* Gespeicherte Darstellung vor dem ersten Rendern setzen — verhindert Aufblitzen. */
@@ -127,7 +127,6 @@ document.documentElement.setAttribute('data-mode',m);}catch(e){}
         <img src="/assets/img/px/tower.png?v=1" alt="" class="prop prop--tower-1" width="99" height="248">
         <img src="/assets/img/px/tree.png?v=1" alt="" class="prop prop--tree-1" width="80" height="101">
         <img src="/assets/img/px/bush.png?v=1" alt="" class="prop prop--bush-1" width="64" height="27">
-        <img src="/assets/img/px/teich.png?v=1" alt="" class="prop prop--teich-1" width="153" height="64">
         <img src="/assets/img/px/bush.png?v=1" alt="" class="prop prop--bush-2" width="64" height="27">
         <img src="/assets/img/px/bush.png?v=1" alt="" class="prop prop--bush-3" width="64" height="27">
         <img src="/assets/img/px/tree2.png?v=1" alt="" class="prop prop--tree2-2" width="86" height="102">
@@ -146,8 +145,12 @@ document.documentElement.setAttribute('data-mode',m);}catch(e){}
         <img src="/assets/img/px/bush.png?v=1" alt="" class="prop prop--bush-6" width="64" height="27">
         <img src="/assets/img/px/bush.png?v=1" alt="" class="prop prop--bush-7" width="64" height="27">
         <!-- REQUISITEN ENDE -->
-        <!-- Animiert, deshalb ein span mit Hintergrundbild statt img -->
-        <span class="prop prop--chicken"></span>
+        <!-- Animiert, deshalb spans mit Hintergrundbild statt img.
+             is-west spiegelt die Blickrichtung. -->
+        <span class="prop prop--chicken is-klein prop--chicken-1"></span>
+        <span class="prop prop--chicken is-gross prop--chicken-2"></span>
+        <span class="prop prop--chicken is-klein is-west prop--chicken-3"></span>
+        <span class="prop prop--chicken is-klein prop--chicken-4"></span>
       </div>
     </div>
     <div class="scene__vignette"></div>
@@ -660,6 +663,6 @@ document.documentElement.setAttribute('data-mode',m);}catch(e){}
   <button class="lb__nav lb__nav--next" id="lbNext" type="button" aria-label="Nächstes Bild">&#8250;</button>
 </div>
 
-<script src="/assets/js/main.js?v=18" defer></script>
+<script src="/assets/js/main.js?v=21" defer></script>
 </body>
 </html>

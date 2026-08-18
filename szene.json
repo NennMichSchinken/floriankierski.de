@@ -32,14 +32,6 @@
     "faktor": 2
   },
   {
-    "datei": "teich.png",
-    "klasse": "prop--teich-1",
-    "anker": "left",
-    "x": 1,
-    "y": 24.3,
-    "faktor": 2
-  },
-  {
     "datei": "bush.png",
     "klasse": "prop--bush-2",
     "anker": "left",
