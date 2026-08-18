@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Szene-Editor — Requisiten setzen</title>
+
+<!-- Die echte Seiten-CSS. Dadurch sieht die Vorschau unten exakt so aus wie
+     der Hero auf der Seite: gleicher Himmel, gleiche Bänder, gleicher Boden.
+     Ändert sich style.css, ändert sich diese Vorschau automatisch mit. -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<style>
+  body{margin:0;background:#14121f;color:#e8e2f2;
+       font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .kopf{padding:1.2rem 1.5rem;border-bottom:2px solid #2e2a45}
+  .kopf h1{margin:0 0 .3rem;font-size:1.15rem}
+  .kopf p{margin:0;color:#a49dbe;font-size:.9rem;max-width:82ch}
+  code{background:#241f38;padding:.05em .35em;border-radius:3px;font-size:.92em}
+
+  .leiste{display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;
+          padding:.8rem 1.5rem;border-bottom:2px solid #2e2a45;background:#191627}
+  .leiste label{font-size:.85rem;color:#a49dbe;margin-right:.4rem}
+  select,button{font:inherit;font-size:.88rem;background:#241f38;color:#e8e2f2;
+       border:1px solid #403960;border-radius:4px;padding:.4rem .6rem;cursor:pointer}
+  button:hover{background:#302847}
+
+  .buehne{padding:1.5rem;overflow-x:auto}
+  .rahmen{position:relative;margin:0 auto;border:2px solid #2e2a45;overflow:hidden;background:#000}
+  .rahmen .hero{min-height:0;padding:0;height:100%}
+
+  /* Die Seiten-CSS setzt pointer-events:none auf .scene, damit die Szene keine
+     Klicks abfängt. Für die Anfasser muss das hier wieder aufgehoben werden. */
+  .griff{position:absolute;z-index:60;cursor:grab;outline:2px dashed transparent;
+         pointer-events:auto;touch-action:none}
+  .griff:hover{outline-color:rgba(240,200,96,.6)}
+  .griff.aktiv{outline:2px solid #f0c860;cursor:grabbing}
+  .griff img{display:block;width:100%;height:auto;
+             image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
+
+  .liste{padding:0 1.5rem 1rem}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #2e2a45}
+  th{color:#a49dbe;font-weight:600}
+  tr.aktiv{background:#241f38}
+  td button{padding:.2rem .45rem;font-size:.8rem}
+
+  .ausgabe{padding:0 1.5rem 2.5rem}
+  .ausgabe h2{font-size:.95rem;margin:1.4rem 0 .5rem}
+  pre{background:#0e0c17;border:1px solid #2e2a45;border-radius:6px;
+      padding:1rem;overflow-x:auto;font-size:.83rem;line-height:1.6;margin:0;
+      white-space:pre-wrap;word-break:break-all}
+  .hinweis{color:#a49dbe;font-size:.85rem;margin:.5rem 0 0}
+  kbd{background:#241f38;border:1px solid #403960;border-radius:3px;
+      padding:.05em .35em;font-size:.85em}
+</style>
+</head>
+<body>
+
+<div class="kopf">
+  <h1>Szene-Editor</h1>
+  <p>Requisiten mit der Maus schieben, mit den Pfeiltasten fein nachjustieren.
+     Unten fallen die fertigen Zeilen für <code>index.html</code> und
+     <code>assets/css/style.css</code> heraus. Diese Seite ändert nichts an der
+     Website — sie rechnet nur die Positionen aus, einsetzen musst du selbst.</p>
+</div>
+
+<div class="leiste">
+  <span><label>Fensterbreite</label>
+    <select id="breite">
+      <option value="1440">1440 — großer Bildschirm</option>
+      <option value="1280" selected>1280 — Standard-Laptop</option>
+      <option value="1024">1024 — kleiner Laptop</option>
+      <option value="900">900 — hier verschwindet der Baum</option>
+      <option value="375">375 — Handy</option>
+    </select>
+  </span>
+  <span><label>Neu einsetzen</label>
+    <select id="neu"></select>
+    <button id="hinzu">+ hinzufügen</button>
+  </span>
+  <button id="reset">Auf den aktuellen Stand zurücksetzen</button>
+  <span style="margin-left:auto;color:#a49dbe;font-size:.85rem">
+    <kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd>
+    = 1&nbsp;px, mit <kbd>Shift</kbd> = 10&nbsp;px
+  </span>
+</div>
+
+<div class="buehne">
+  <div class="rahmen" id="rahmen">
+    <section class="hero">
+      <div class="scene" aria-hidden="true">
+        <div class="scene__sky"></div>
+        <div class="scene__body is-sun"></div>
+        <div class="scene__clouds">
+          <img src="/assets/img/px/cloud.png" alt="" class="cloud cloud--1" width="29" height="16">
+          <img src="/assets/img/px/cloud-small.png" alt="" class="cloud cloud--2" width="30" height="18">
+          <img src="/assets/img/px/cloud.png" alt="" class="cloud cloud--3" width="29" height="16">
+        </div>
+        <div class="scene__band scene__band--hills"></div>
+        <div class="scene__band scene__band--trees"></div>
+        <div class="scene__ground"><div class="scene__props" id="props"></div></div>
+        <div class="scene__vignette"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="liste">
+  <table>
+    <thead><tr>
+      <th>Sprite</th><th>Klasse</th><th>Verankert an</th>
+      <th>Breite</th><th>Position</th><th></th>
+    </tr></thead>
+    <tbody id="tabelle"></tbody>
+  </table>
+</div>
+
+<div class="ausgabe">
+  <h2>1. Nach <code>index.html</code>, hinein in <code>&lt;div class="scene__props"&gt;</code></h2>
+  <pre id="html-aus"></pre>
+
+  <h2>2. Nach <code>assets/css/style.css</code>, zu den übrigen <code>.prop--</code>Regeln</h2>
+  <pre id="css-aus"></pre>
+
+  <p class="hinweis">Danach in <code>index.html</code> die Zahl hinter
+     <code>style.css?v=</code> um eins hochzählen, sonst zeigt der Browser
+     die alte Fassung.</p>
+</div>
+
+<script>
+/* Native Sprite-Größen in Pixeln. Die dargestellte Breite sollte immer ein
+   ganzzahliges Vielfaches davon sein - sonst werden die Pixel ungleich breit
+   und das Bild franst aus. Der Editor warnt, wenn es kein ganzes ist. */
+var SPRITES = {
+  'tree.png':       [80, 101],
+  'bush.png':       [64, 27],
+  'cloud.png':      [29, 16],
+  'cloud-small.png':[30, 18]
+};
+
+/* Startaufstellung: genau das, was gerade auf der Seite steht. */
+var START = [
+  {datei:'bush.png', klasse:'prop--bush-1', anker:'left',  x:6,  y:12, faktor:2},
+  {datei:'bush.png', klasse:'prop--bush-2', anker:'left',  x:34, y:7,  faktor:2},
+  {datei:'tree.png', klasse:'prop--tree',   anker:'right', x:6,  y:16, faktor:2}
+];
+
+var requisiten = [];
+var gewaehlt = null;
+
+var rahmen = document.getElementById('rahmen');
+var props  = document.getElementById('props');
+
+/* Alle Positionen beziehen sich auf die Bodenzone, nicht auf den ganzen Hero.
+   Genau so rechnet auch die Seite: .scene__props liegt mit inset:0 in
+   .scene__ground, und das ist 280px hoch. */
+function bodenMasse(){
+  var b = document.querySelector('.scene__ground').getBoundingClientRect();
+  return {breite: b.width, hoehe: b.height};
+}
+
+function zeichnen(){
+  props.innerHTML = '';
+  requisiten.forEach(function(r, i){
+    var nw = SPRITES[r.datei][0];
+    var g = document.createElement('div');
+    g.className = 'griff' + (i === gewaehlt ? ' aktiv' : '');
+    g.style.width = Math.round(nw * r.faktor) + 'px';
+    g.style[r.anker] = r.x + '%';
+    g.style.bottom = r.y + '%';
+    g.innerHTML = '<img src="/assets/img/px/' + r.datei + '" alt="">';
+    g.addEventListener('pointerdown', function(e){ starteZiehen(e, i); });
+    props.appendChild(g);
+  });
+  tabelleZeichnen();
+  ausgabeZeichnen();
+}
+
+function starteZiehen(e, i){
+  e.preventDefault();
+  gewaehlt = i;
+  var r = requisiten[i];
+  var m = bodenMasse();
+  var startX = e.clientX, startY = e.clientY;
+  var x0 = r.x, y0 = r.y;
+  /* Rechts verankert heißt: nach rechts ziehen macht den Abstand kleiner. */
+  var richtung = (r.anker === 'right') ? -1 : 1;
+
+  function bewegen(ev){
+    r.x = Math.round((x0 + richtung * (ev.clientX - startX) / m.breite * 100) * 10) / 10;
+    r.y = Math.round((y0 - (ev.clientY - startY) / m.hoehe * 100) * 10) / 10;
+    zeichnen();
+  }
+  function loslassen(){
+    window.removeEventListener('pointermove', bewegen);
+    window.removeEventListener('pointerup', loslassen);
+  }
+  window.addEventListener('pointermove', bewegen);
+  window.addEventListener('pointerup', loslassen);
+  zeichnen();
+}
+
+document.addEventListener('keydown', function(e){
+  if (gewaehlt === null) return;
+  var pfeile = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,1], ArrowDown:[0,-1]};
+  if (!pfeile[e.key]) return;
+  e.preventDefault();
+  var dx = pfeile[e.key][0], dy = pfeile[e.key][1];
+  var px = e.shiftKey ? 10 : 1;
+  var m = bodenMasse();
+  var r = requisiten[gewaehlt];
+  var richtung = (r.anker === 'right') ? -1 : 1;
+  r.x = Math.round((r.x + richtung * dx * px / m.breite * 100) * 10) / 10;
+  r.y = Math.round((r.y + dy * px / m.hoehe * 100) * 10) / 10;
+  zeichnen();
+});
+
+function tabelleZeichnen(){
+  var t = document.getElementById('tabelle');
+  t.innerHTML = '';
+  requisiten.forEach(function(r, i){
+    var nw = SPRITES[r.datei][0];
+    var tr = document.createElement('tr');
+    if (i === gewaehlt) tr.className = 'aktiv';
+    tr.innerHTML =
+      '<td>' + r.datei + '</td>' +
+      '<td><code>.' + r.klasse + '</code></td>' +
+      '<td><button data-tu="anker" data-i="' + i + '">' +
+        (r.anker === 'left' ? 'links' : 'rechts') + '</button></td>' +
+      '<td>' + Math.round(nw * r.faktor) + ' px &nbsp; ' +
+        '<button data-tu="kleiner" data-i="' + i + '">&minus;</button> ' +
+        r.faktor + '&times; ' +
+        '<button data-tu="groesser" data-i="' + i + '">+</button></td>' +
+      '<td>' + r.x + ' % / ' + r.y + ' %</td>' +
+      '<td><button data-tu="weg" data-i="' + i + '">entfernen</button></td>';
+    t.appendChild(tr);
+  });
+  Array.prototype.forEach.call(t.querySelectorAll('button'), function(b){
+    b.addEventListener('click', function(){
+      var i = +b.dataset.i, r = requisiten[i];
+      if (b.dataset.tu === 'anker')    r.anker = (r.anker === 'left') ? 'right' : 'left';
+      if (b.dataset.tu === 'groesser') r.faktor = Math.min(4, r.faktor + 0.5);
+      if (b.dataset.tu === 'kleiner')  r.faktor = Math.max(0.5, r.faktor - 0.5);
+      if (b.dataset.tu === 'weg')    { requisiten.splice(i, 1); gewaehlt = null; }
+      zeichnen();
+    });
+  });
+}
+
+function ausgabeZeichnen(){
+  document.getElementById('html-aus').textContent = requisiten.map(function(r){
+    var nw = SPRITES[r.datei][0], nh = SPRITES[r.datei][1];
+    return '<img src="/assets/img/px/' + r.datei + '?v=1" alt="" class="prop ' +
+           r.klasse + '" width="' + nw + '" height="' + nh + '">';
+  }).join('\n');
+
+  document.getElementById('css-aus').textContent = requisiten.map(function(r){
+    var nw = SPRITES[r.datei][0];
+    var warnung = (r.faktor % 1 !== 0)
+      ? '   /* ' + r.faktor + 'x ist kein ganzes Vielfaches - die Pixel werden ungleich breit */'
+      : '';
+    return '.' + r.klasse + '{width:' + Math.round(nw * r.faktor) + 'px;' +
+           r.anker + ':' + r.x + '%;bottom:' + r.y + '%;z-index:6}' + warnung;
+  }).join('\n');
+}
+
+document.getElementById('breite').addEventListener('change', function(e){
+  var w = +e.target.value;
+  rahmen.style.width = w + 'px';
+  rahmen.style.height = Math.round(Math.min(w * 0.62, 860)) + 'px';
+  zeichnen();
+});
+
+var auswahl = document.getElementById('neu');
+Object.keys(SPRITES).forEach(function(d){
+  var o = document.createElement('option');
+  o.value = d;
+  o.textContent = d + '  (' + SPRITES[d][0] + '×' + SPRITES[d][1] + ')';
+  auswahl.appendChild(o);
+});
+
+document.getElementById('hinzu').addEventListener('click', function(){
+  var d = auswahl.value;
+  var stamm = d.replace('.png', '').replace(/[^a-z0-9]/g, '-');
+  var n = 1;
+  while (requisiten.some(function(r){ return r.klasse === 'prop--' + stamm + '-' + n; })) n++;
+  requisiten.push({datei:d, klasse:'prop--' + stamm + '-' + n,
+                   anker:'left', x:45, y:20, faktor:2});
+  gewaehlt = requisiten.length - 1;
+  zeichnen();
+});
+
+document.getElementById('reset').addEventListener('click', function(){
+  requisiten = START.map(function(r){ return Object.assign({}, r); });
+  gewaehlt = null;
+  zeichnen();
+});
+
+rahmen.style.width = '1280px';
+rahmen.style.height = '793px';
+requisiten = START.map(function(r){ return Object.assign({}, r); });
+zeichnen();
+</script>
+</body>
+</html>

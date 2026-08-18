@@ -198,6 +198,78 @@ Vorschau mit dem Zusatz `-thumb`. Die Galerie erwartet beides:
 
 ---
 
+## Die Szene selbst gestalten
+
+Für das Setzen von Requisiten liegt ein Werkzeug bei. Lokalen Server starten
+und aufrufen:
+
+```bash
+python -m http.server 5173
+```
+
+Dann `http://localhost:5173/tools/szene-editor.html`. Die Seite lädt dieselbe
+`style.css` wie die Website, die Vorschau stimmt also garantiert mit dem
+echten Hero überein. Requisiten mit der Maus schieben, mit den Pfeiltasten auf
+den Pixel genau nachjustieren, Fensterbreite oben umstellen. Unten fallen die
+fertigen Zeilen für `index.html` und `style.css` heraus — einsetzen musst du
+sie selbst, das Werkzeug fasst die Website nicht an.
+
+### Wie die Szene aufgebaut ist
+
+Die Ebenen liegen von hinten nach vorn über `z-index` gestapelt:
+
+| z-index | Ebene |
+|---|---|
+| 0 | Himmel, Sonne, Wolken |
+| 2 | `band-hills` — ferne Hügelkette |
+| 3 | `band-trees` — Baumreihe |
+| auto | die Wiese |
+| **6** | **Requisiten — hier kommt Neues hin** |
+| 12 | Erdkante, überdeckt alles davor |
+| 13 | Schattenkante nach unten |
+
+Etwas mit `z-index:6` steht also vor der Baumreihe und hinter der Erdkante.
+Genau dort gehören Bäume, Büsche, Hühner und Zäune hin.
+
+### Drei Regeln, die man nicht brechen sollte
+
+**1. Breite immer ein ganzes Vielfaches der nativen Größe.** `tree.png` ist
+80 px breit, also 80, 160 oder 240 — nie 132. Bei krummen Faktoren werden
+manche Pixelspalten breiter als andere und das Bild franst sichtbar aus. Der
+Editor warnt, wenn ein Wert krumm ist.
+
+**2. `bottom` ist die Tiefe.** Alle Requisiten sitzen in der Bodenzone
+(280 px hoch). Kleineres `bottom` heißt weiter vorn, also **größer**
+darstellen; größeres `bottom` heißt weiter hinten, also kleiner. Wer das
+umdreht, zerstört den Tiefeneindruck.
+
+**3. Rechts stehende Dinge an `right` verankern, nicht an `left`.** Sonst
+wandern sie bei breiten Fenstern in die Textspalte hinein. Umgekehrt genauso.
+
+### Wenn rechts der Platz knapp wird
+
+Die Texttafel ist bis zu 830 px breit. Unter etwa 1000 px Fensterbreite bleibt
+rechts nichts mehr übrig — deshalb wird der Baum dort ausgeblendet, wie der
+Begleiter am unteren Rand auch:
+
+```css
+@media (max-width:1000px){.prop--tree{display:none}}
+```
+
+Das ist keine Notlösung, sondern die saubere Antwort: lieber ein Element
+weniger als eines, das zur Hälfte hinter der Tafel steht.
+
+### Neue Sprites
+
+Neue Requisiten müssen **mit fest vorgegebener Palette** erzeugt werden, sonst
+passen sie farblich nicht. Wie das geht, steht in
+[PIXELLAB.md](PIXELLAB.md) — dort auch, warum das der entscheidende Schritt
+ist und welche Fallen dabei lauern. Nach dem Erzeugen die Datei in
+`tools/pixellab-roh/` legen und in `tools/szene-generiert.py` eintragen, dann
+bleibt die Kette nachvollziehbar.
+
+---
+
 ## Die Pixel-Grafik
 
 Alle Sprites stammen aus PixelLab. Florians eigener Character gibt Palette,

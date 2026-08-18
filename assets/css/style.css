@@ -296,10 +296,12 @@ ul,ol{margin:0;padding:0;list-style:none}
 .prop--tree{width:160px;right:6%;bottom:16%;z-index:6}
 .prop--bush{width:128px;z-index:6}
 .prop--bush-1{left:6%;bottom:12%}
-.prop--bush-2{left:34%;bottom:7%;width:96px}
+.prop--bush-2{left:34%;bottom:7%}
 /* Unter 1180 px wird es rechts eng, unter 1000 px steht der Baum hinter der
    Tafel — dann weicht er, wie der Begleiter auch. */
-@media (max-width:1180px){.prop--tree{right:2%;width:132px}}
+/* Nur naeher an den Rand ruecken, Breite unveraendert: 132px waeren 1.65x
+   der nativen 80px und die Pixel wuerden ungleich breit. */
+@media (max-width:1180px){.prop--tree{right:1%}}
 @media (max-width:1000px){.prop--tree{display:none}}
 @media (max-width:820px){.prop--bush-2{display:none}}
 
@@ -829,7 +831,8 @@ body.lb-open{overflow:hidden}
   .scene__ground::after{height:48px;background-size:384px 48px}
   .scene__band--hills{bottom:172px;height:108px;background-size:1200px 108px}
   .scene__band--trees{bottom:132px;height:96px;background-size:1200px 96px}
-  .prop--bush-1{width:96px;left:4%;bottom:10%}
+  /* 64px = glatt 1x. 96px waeren 1.5x und die Pixel wuerden ungleich breit. */
+  .prop--bush-1{width:64px;left:4%;bottom:10%}
   .quests{padding-left:2rem}
   .quest__marker{left:-2rem;width:16px;height:16px}
   [data-mode="plain"] .quest__marker{left:-1.85rem}
