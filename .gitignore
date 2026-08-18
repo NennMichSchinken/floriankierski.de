@@ -1,0 +1,12 @@
+# Ausgangsmaterial und Bewerbungsunterlagen.
+# GitHub Pages liefert den GESAMTEN Repo-Inhalt unter der Domain aus - es gibt
+# keine Trennung zwischen Quelldatei und veroeffentlicht. Was hier liegt, ist
+# oeffentlich. raw/ enthaelt Lebenslaeufe und ein Anschreiben mit Anschrift
+# und Telefonnummer und darf deshalb nie ins Repo.
+raw/
+
+# Reine Verdopplung des Ordners daneben, 5 MB. Der Ordner selbst bleibt.
+_versionen/*.zip
+
+# Editor
+.claude/
