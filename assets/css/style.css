@@ -356,6 +356,8 @@ ul,ol{margin:0;padding:0;list-style:none}
    anderen Zeitpunkt — im Gleichtakt sieht eine Gruppe aufgezogen aus. */
 .prop--chicken-1{left:79%;bottom:27%;z-index:74}
 .prop--chicken-2{left:3.5%;bottom:25%;z-index:76;animation-delay:-.45s}
+/* is-gross wird gerade von keinem Huhn benutzt, bleibt aber stehen — die
+   Groesse ist ein sauberes Vielfaches und jederzeit wieder einsetzbar. */
 .prop--chicken-3{left:9.5%;bottom:31%;z-index:70;animation-delay:-.9s}
 .prop--chicken-4{left:1%;bottom:36%;z-index:65;animation-delay:-1.15s}
 
