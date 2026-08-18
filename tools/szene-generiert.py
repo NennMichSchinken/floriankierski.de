@@ -123,6 +123,36 @@ def schatten_darunter(im, breite=0.82, flachheit=6.5, alpha=100):
     return neu
 
 
+def gras_am_fuss(im, buescheln=26, hoehe=(3, 9), saat=11):
+    """Grashalme ueber die Unterkante zeichnen.
+
+    Ein Schatten allein laesst ein Gebaeude auf der Wiese stehen. Damit es
+    darin steht, muss Gras davor wachsen - ein paar Halme, die die Unterkante
+    ueberlappen, reichen dafuer voellig aus.
+
+    Feste Saat, damit jeder Durchlauf dasselbe Ergebnis liefert.
+    """
+    import random
+    zufall = random.Random(saat)
+    kasten = im.getbbox()
+    if not kasten:
+        return im
+    links, _, rechts, unten = kasten
+    d = ImageDraw.Draw(im)
+    toene = [(0x5c, 0x8e, 0x4b), (0x3d, 0x6b, 0x36), (0x7a, 0xa8, 0x5c)]
+    for _ in range(buescheln):
+        x = zufall.randint(links - 2, rechts + 1)
+        h = zufall.randint(hoehe[0], hoehe[1])
+        farbe = toene[zufall.randrange(len(toene))]
+        neigung = zufall.choice((-1, 0, 0, 1))
+        for i in range(h):
+            d.point((x + (i * neigung) // 3, unten - 1 - i), fill=farbe + (255,))
+        if h > 5:                      # dickere Halme bekommen einen zweiten Strich
+            for i in range(h - 3):
+                d.point((x + 1 + (i * neigung) // 3, unten - 1 - i), fill=farbe + (255,))
+    return im
+
+
 def auf_inhalt(im):
     k = im.getbbox()
     return im.crop(k) if k else im
@@ -161,5 +191,6 @@ if __name__ == '__main__':
     sichern(auf_inhalt(lade('bush2.png')), 'bush2.png')
     sichern(auf_inhalt(schatten_darunter(lade('tree2.png'))), 'tree2.png')
     # Der Turm steht auf breitem Stein - flacherer, breiterer Schatten
-    sichern(auf_inhalt(schatten_darunter(lade('tower.png'),
-                                         breite=0.95, flachheit=9, alpha=115)), 'tower.png')
+    sichern(auf_inhalt(gras_am_fuss(
+        schatten_darunter(lade('tower.png'), breite=0.95, flachheit=9, alpha=115),
+        buescheln=30)), 'tower.png')

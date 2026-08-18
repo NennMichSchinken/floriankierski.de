@@ -204,6 +204,26 @@ if (location.protocol === 'file:') {
   document.getElementById('pfad-warnung').style.display = 'block';
 }
 
+/* Der Stand wird bei jeder Aenderung im Browser gespeichert und beim Oeffnen
+   wieder geladen. Ohne das ist die Arbeit beim Schliessen des Fensters weg -
+   genau das ist passiert, bevor es diese Zeilen gab. */
+var SPEICHER = 'fk-szene-editor';
+
+function merken(){
+  try { localStorage.setItem(SPEICHER, JSON.stringify(requisiten)); } catch (e) {}
+}
+
+function geladenerStand(){
+  try {
+    var roh = localStorage.getItem(SPEICHER);
+    if (!roh) return null;
+    var d = JSON.parse(roh);
+    /* Sprites, die es nicht mehr gibt, ueberspringen - sonst bricht alles */
+    d = d.filter(function(r){ return SPRITES[r.datei]; });
+    return d.length ? d : null;
+  } catch (e) { return null; }
+}
+
 var requisiten = [];
 var gewaehlt = null;
 
@@ -233,6 +253,7 @@ function zeichnen(){
   });
   tabelleZeichnen();
   ausgabeZeichnen();
+  merken();
 }
 
 function starteZiehen(e, i){
@@ -384,7 +405,18 @@ document.getElementById('reset').addEventListener('click', function(){
 
 rahmen.style.width = '1280px';
 rahmen.style.height = '793px';
-requisiten = START.map(function(r){ return Object.assign({}, r); });
+
+var gesichert = geladenerStand();
+requisiten = gesichert || START.map(function(r){ return Object.assign({}, r); });
+if (gesichert) {
+  var n = document.createElement('p');
+  n.className = 'hinweis';
+  n.style.cssText = 'padding:.5rem 1.5rem;margin:0;color:#9fe8c0';
+  n.textContent = 'Dein letzter Stand wurde geladen (' + gesichert.length +
+                  ' Requisiten). Über "Auf den aktuellen Stand zurücksetzen" ' +
+                  'kommst du zurück zu dem, was gerade auf der Website steht.';
+  document.querySelector('.buehne').before(n);
+}
 zeichnen();
 </script>
 </body>
