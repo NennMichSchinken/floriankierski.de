@@ -292,11 +292,36 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* Requisiten auf der Wiese. Alles in doppelter Pixelgroesse und in
    Seitenansicht — dieselbe Regel wie fuer die Baender. */
 .prop{position:absolute;image-rendering:pixelated;image-rendering:crisp-edges}
-/* Der Baum steht rechts ausserhalb der Textspalte. 160px = 2x seine 80px. */
+/* Zwischen den beiden Markierungen schreibt tools/szene-anwenden.py. Wer hier
+   von Hand etwas eintraegt, verliert es beim naechsten Durchlauf. Alles, was
+   bleiben soll — Medienabfragen etwa —, gehoert unterhalb der Endmarkierung. */
+/* REQUISITEN ANFANG */
+.prop--bush-1{width:128px;left:6%;bottom:12%;z-index:6}
+.prop--bush-2{width:128px;left:34%;bottom:7%;z-index:6}
 .prop--tree{width:160px;right:6%;bottom:16%;z-index:6}
-.prop--bush{width:128px;z-index:6}
-.prop--bush-1{left:6%;bottom:12%}
-.prop--bush-2{left:34%;bottom:7%}
+/* REQUISITEN ENDE */
+
+/* Das Huhn ist kein gewoehnliches Bild, sondern ein Streifen aus neun
+   Einzelbildern, den CSS durchschaltet — dieselbe Technik wie beim Begleiter
+   am unteren Rand. steps(9) springt von Bild zu Bild statt weich zu
+   ueberblenden; alles andere waere bei Pixelgrafik falsch.
+   Es steht bewusst ausserhalb der Markierungen, damit szene-anwenden.py es
+   nicht ueberschreibt. */
+.prop--chicken{
+  width:80px;height:72px;                  /* 2x von 40x36 */
+  background-image:url('/assets/img/px/chicken.png?v=1');
+  background-size:720px 72px;              /* 9 Bilder a 80px */
+  background-repeat:no-repeat;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  animation:huhn 1.4s steps(9) infinite;
+  z-index:7;                               /* vor dem Turm, nicht dahinter */
+}
+@keyframes huhn{from{background-position:0 0}to{background-position:-720px 0}}
+/* Gespiegelt, falls es einmal andersherum schauen soll */
+.prop--chicken.is-west{transform:scaleX(-1)}
+/* Position: vor dem Turm, etwas tiefer — dadurch wirkt es naeher am Betrachter */
+.prop--chicken{right:14%;bottom:9%}
+@media (max-width:1000px){.prop--chicken{display:none}}
 /* Unter 1180 px wird es rechts eng, unter 1000 px steht der Baum hinter der
    Tafel — dann weicht er, wie der Begleiter auch. */
 /* Nur naeher an den Rand ruecken, Breite unveraendert: 132px waeren 1.65x
@@ -872,6 +897,7 @@ body.lb-open{overflow:hidden}
     transition-duration:.001ms!important}
   .reveal{opacity:1;transform:none}
   .cloud,.ember{animation:none}
+  .prop--chicken{animation:none}
   .cloud--1{left:12%}.cloud--2{left:48%}.cloud--3{left:72%}
   .spark{display:none}
   .buddy{display:none}

@@ -106,6 +106,8 @@
     <select id="neu"></select>
     <button id="hinzu">+ hinzufügen</button>
   </span>
+  <button id="speichern" style="background:#f0c860;color:#2a1408;border-color:#a8801f;font-weight:600">
+    Szene speichern</button>
   <button id="reset">Auf den aktuellen Stand zurücksetzen</button>
   <label style="cursor:pointer"><input type="checkbox" id="tafel" checked>
     Texttafel einblenden</label>
@@ -345,6 +347,18 @@ document.getElementById('hinzu').addEventListener('click', function(){
                    anker:'left', x:45, y:20, faktor:2});
   gewaehlt = requisiten.length - 1;
   zeichnen();
+});
+
+/* Speichert die Aufstellung als szene.json. tools/szene-anwenden.py traegt sie
+   danach in index.html und style.css ein - damit entfaellt das Kopieren von
+   Hand, an dem es bisher jedes Mal haengen geblieben ist. */
+document.getElementById('speichern').addEventListener('click', function(){
+  var blob = new Blob([JSON.stringify(requisiten, null, 2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'szene.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
 });
 
 Array.prototype.forEach.call(document.querySelectorAll('.kopieren'), function(b){

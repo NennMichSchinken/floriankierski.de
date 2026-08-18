@@ -1,0 +1,5 @@
+[
+  {"datei":"bush.png","klasse":"prop--bush-1","anker":"left","x":6,"y":12,"faktor":2},
+  {"datei":"bush.png","klasse":"prop--bush-2","anker":"left","x":34,"y":7,"faktor":2},
+  {"datei":"tree.png","klasse":"prop--tree","anker":"right","x":6,"y":16,"faktor":2}
+]

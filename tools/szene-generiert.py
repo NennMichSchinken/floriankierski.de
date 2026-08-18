@@ -26,7 +26,7 @@ Aufruf aus dem Projekt-Hauptordner:   python tools/szene-generiert.py
 """
 import colorsys
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROH = 'tools/pixellab-roh'
 ZIEL = 'assets/img/px'
@@ -88,6 +88,41 @@ def tausche(im, karte, ab_zeile=0, alpha=None):
     return n
 
 
+def schatten_darunter(im, breite=0.82, flachheit=6.5, alpha=100):
+    """Weiche Ellipse am Fuss, sonst scheint das Objekt ueber der Wiese zu schweben.
+
+    Die Ellipse sitzt mittig auf der Unterkante - halb darueber, halb darunter,
+    wie ein Schattenwurf bei hochstehender Sonne. Dafuer waechst die Leinwand
+    unten um die halbe Ellipsenhoehe, damit nichts abgeschnitten wird.
+
+    breite     Anteil der Sprite-Breite, den der Schatten einnimmt
+    flachheit  je groesser, desto flacher die Ellipse
+    alpha      0-255, wie kraeftig der Schatten ist
+    """
+    kasten = im.getbbox()
+    if not kasten:
+        return im
+    links, oben, rechts, unten = kasten
+    breite_px = int((rechts - links) * breite)
+    hoehe_px = max(4, int(breite_px / flachheit))
+
+    neu = Image.new('RGBA', (im.width, im.height + hoehe_px // 2), (0, 0, 0, 0))
+    schatten = Image.new('RGBA', neu.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(schatten)
+    mitte_x = (links + rechts) // 2
+    d.ellipse([mitte_x - breite_px // 2, unten - hoehe_px // 2,
+               mitte_x + breite_px // 2, unten + hoehe_px // 2],
+              fill=SCHATTEN + (alpha,))
+    # weicher Kern, damit die Kante nicht wie ein Aufkleber wirkt
+    d.ellipse([mitte_x - breite_px // 3, unten - hoehe_px // 3,
+               mitte_x + breite_px // 3, unten + hoehe_px // 3],
+              fill=SCHATTEN + (min(255, alpha + 45),))
+
+    neu.alpha_composite(schatten)
+    neu.alpha_composite(im, (0, 0))
+    return neu
+
+
 def auf_inhalt(im):
     k = im.getbbox()
     return im.crop(k) if k else im
@@ -124,5 +159,7 @@ if __name__ == '__main__':
     sichern(auf_inhalt(lade('flower1.png')), 'flower1.png')
     sichern(auf_inhalt(lade('bush1.png')), 'bush1.png')
     sichern(auf_inhalt(lade('bush2.png')), 'bush2.png')
-    sichern(auf_inhalt(lade('tree2.png')), 'tree2.png')
-    sichern(auf_inhalt(lade('tower.png')), 'tower.png')
+    sichern(auf_inhalt(schatten_darunter(lade('tree2.png'))), 'tree2.png')
+    # Der Turm steht auf breitem Stein - flacherer, breiterer Schatten
+    sichern(auf_inhalt(schatten_darunter(lade('tower.png'),
+                                         breite=0.95, flachheit=9, alpha=115)), 'tower.png')
