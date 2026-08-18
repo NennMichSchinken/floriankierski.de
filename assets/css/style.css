@@ -296,35 +296,28 @@ ul,ol{margin:0;padding:0;list-style:none}
    von Hand etwas eintraegt, verliert es beim naechsten Durchlauf. Alles, was
    bleiben soll — Medienabfragen etwa —, gehoert unterhalb der Endmarkierung. */
 /* REQUISITEN ANFANG */
-/* Achtung: prop--tree2-1 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--tree2-1{width:129px;left:74.3%;bottom:50.4%;z-index:6}
-/* Achtung: prop--tower-1 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--tower-1{width:148px;left:80.6%;bottom:38.3%;z-index:6}
-.prop--tree-1{width:160px;left:85.8%;bottom:26.8%;z-index:6}
-.prop--bush-1{width:128px;left:78.9%;bottom:13.6%;z-index:6}
-/* Achtung: prop--teich-1 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--teich-1{width:230px;left:1%;bottom:24.3%;z-index:6}
-.prop--bush-2{width:128px;left:2.5%;bottom:14.3%;z-index:6}
-.prop--bush-3{width:64px;left:80.2%;bottom:38.9%;z-index:6}
-/* Achtung: prop--tree2-2 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--tree2-2{width:129px;left:-1.3%;bottom:57.1%;z-index:6}
-.prop--flower1-1{width:23px;left:87.8%;bottom:37.5%;z-index:6}
-.prop--flower1-2{width:23px;left:92.6%;bottom:37.5%;z-index:6}
-.prop--flower1-3{width:23px;left:88.2%;bottom:23.9%;z-index:6}
-.prop--flower1-4{width:23px;left:0.9%;bottom:53.6%;z-index:6}
-.prop--flower1-5{width:23px;left:6.4%;bottom:60.7%;z-index:6}
-.prop--flower1-6{width:23px;left:2.7%;bottom:54.6%;z-index:6}
-.prop--bush-4{width:128px;left:82.8%;bottom:12.5%;z-index:6}
-.prop--flower1-7{width:23px;left:49%;bottom:24%;z-index:6}
-/* Achtung: prop--flower1-8 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--flower1-8{width:34px;left:42.1%;bottom:20%;z-index:6}
-.prop--flower1-9{width:23px;left:37.5%;bottom:16.4%;z-index:6}
-/* Achtung: prop--flower1-10 ist 1.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--flower1-10{width:34px;left:52.8%;bottom:18.6%;z-index:6}
-.prop--bush-5{width:128px;left:43.3%;bottom:11.8%;z-index:6}
-.prop--bush-6{width:128px;left:37.3%;bottom:6.1%;z-index:6}
-/* Achtung: prop--bush-7 ist 2.50x der nativen Breite - kein ganzes Vielfaches, die Pixel werden ungleich breit */
-.prop--bush-7{width:160px;left:46%;bottom:5.7%;z-index:6}
+.prop--tree2-1{width:86px;left:74.3%;bottom:50.4%;z-index:51}
+.prop--tower-1{width:99px;left:80.6%;bottom:38.3%;z-index:63}
+.prop--tree-1{width:160px;left:85.8%;bottom:26.8%;z-index:74}
+.prop--bush-1{width:128px;left:78.9%;bottom:13.6%;z-index:87}
+.prop--teich-1{width:306px;left:1%;bottom:24.3%;z-index:77}
+.prop--bush-2{width:128px;left:2.5%;bottom:14.3%;z-index:87}
+.prop--bush-3{width:64px;left:80.2%;bottom:38.9%;z-index:62}
+.prop--tree2-2{width:86px;left:-1.3%;bottom:57.1%;z-index:44}
+.prop--flower1-1{width:23px;left:87.8%;bottom:37.5%;z-index:63}
+.prop--flower1-2{width:23px;left:92.6%;bottom:37.5%;z-index:63}
+.prop--flower1-3{width:23px;left:88.2%;bottom:23.9%;z-index:77}
+.prop--flower1-4{width:23px;left:0.9%;bottom:53.6%;z-index:47}
+.prop--flower1-5{width:23px;left:6.4%;bottom:60.7%;z-index:40}
+.prop--flower1-6{width:23px;left:2.7%;bottom:54.6%;z-index:46}
+.prop--bush-4{width:128px;left:82.8%;bottom:12.5%;z-index:89}
+.prop--flower1-7{width:23px;left:49%;bottom:24%;z-index:77}
+.prop--flower1-8{width:46px;left:42.1%;bottom:20%;z-index:81}
+.prop--flower1-9{width:23px;left:37.5%;bottom:16.4%;z-index:85}
+.prop--flower1-10{width:46px;left:52.8%;bottom:18.6%;z-index:82}
+.prop--bush-5{width:128px;left:43.3%;bottom:11.8%;z-index:89}
+.prop--bush-6{width:128px;left:37.3%;bottom:6.1%;z-index:95}
+.prop--bush-7{width:192px;left:46%;bottom:5.7%;z-index:95}
 /* REQUISITEN ENDE */
 
 /* Das Huhn ist kein gewoehnliches Bild, sondern ein Streifen aus neun
@@ -340,7 +333,6 @@ ul,ol{margin:0;padding:0;list-style:none}
   background-repeat:no-repeat;
   image-rendering:pixelated;image-rendering:crisp-edges;
   animation:huhn 1.4s steps(9) infinite;
-  z-index:7;                               /* vor dem Turm, nicht dahinter */
 }
 @keyframes huhn{from{background-position:0 0}to{background-position:-720px 0}}
 /* Gespiegelt, falls es einmal andersherum schauen soll */
@@ -350,7 +342,7 @@ ul,ol{margin:0;padding:0;list-style:none}
    Erdkante, dort staende es auf der Boeschung statt in der Wiese.
    Links verankert wie alle uebrigen Requisiten, damit es beim Verbreitern
    des Fensters mit dem Turm zusammenbleibt. */
-.prop--chicken{left:79%;bottom:27%}
+.prop--chicken{left:79%;bottom:27%;z-index:74}
 @media (max-width:1000px){.prop--chicken{display:none}}
 /* Unter 1180 px wird es rechts eng, unter 1000 px steht der Baum hinter der
    Tafel — dann weicht er, wie der Begleiter auch. */

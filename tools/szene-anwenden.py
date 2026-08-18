@@ -61,6 +61,20 @@ def baue_html(szene):
     return '\n'.join(zeilen)
 
 
+def tiefe(y):
+    """z-index aus der Hoehe im Bild.
+
+    Was weiter unten steht (kleines bottom), ist naeher am Betrachter und muss
+    vor dem stehen, was weiter oben sitzt. Ohne diese Rechnung entscheidet die
+    Reihenfolge im HTML - und dann steht schon mal ein Huhn vor einem Busch,
+    der eigentlich davor liegt.
+
+    Der Wertebereich stoert nichts: .scene__props hat selbst z-index 5 und
+    bildet damit einen eigenen Stapel. Die Erdkante davor (12) bleibt vorn.
+    """
+    return int(round(100 - float(y))) + 1
+
+
 def baue_css(szene):
     zeilen = []
     for r in szene:
@@ -70,8 +84,8 @@ def baue_css(szene):
             zeilen.append('/* Achtung: %s ist %.2fx der nativen Breite - kein '
                           'ganzes Vielfaches, die Pixel werden ungleich breit */'
                           % (r['klasse'], r['faktor']))
-        zeilen.append('.%s{width:%dpx;%s:%s%%;bottom:%s%%;z-index:6}'
-                      % (r['klasse'], breite, r['anker'], r['x'], r['y']))
+        zeilen.append('.%s{width:%dpx;%s:%s%%;bottom:%s%%;z-index:%d}'
+                      % (r['klasse'], breite, r['anker'], r['x'], r['y'], tiefe(r['y'])))
     return '\n'.join(zeilen)
 
 
