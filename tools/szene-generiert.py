@@ -124,3 +124,5 @@ if __name__ == '__main__':
     sichern(auf_inhalt(lade('flower1.png')), 'flower1.png')
     sichern(auf_inhalt(lade('bush1.png')), 'bush1.png')
     sichern(auf_inhalt(lade('bush2.png')), 'bush2.png')
+    sichern(auf_inhalt(lade('tree2.png')), 'tree2.png')
+    sichern(auf_inhalt(lade('tower.png')), 'tower.png')
