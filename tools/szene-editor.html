@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Werkzeugseite, die sich staendig aendert: nie zwischenspeichern. Sonst
+     sieht man nach dem Eintragen neuer Sprites weiter die alte Liste und
+     sucht den Fehler an der falschen Stelle. -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>Szene-Editor — Requisiten setzen</title>
 
 <!-- Die echte Seiten-CSS. Dadurch sieht die Vorschau unten exakt so aus wie
@@ -77,6 +82,10 @@
 
 <div class="kopf">
   <h1>Szene-Editor</h1>
+  <p id="pfad-warnung" style="display:none;color:#ffb4a2;font-weight:600">
+     Diese Seite wurde als Datei geöffnet, nicht über den Server. Die Sprites
+     können so nicht geladen werden. Starte <code>python -m http.server 5173</code>
+     im Projektordner und rufe <code>http://localhost:5173/tools/szene-editor.html</code> auf.</p>
   <p>Requisiten mit der Maus schieben, mit den Pfeiltasten fein nachjustieren.
      Unten fallen die fertigen Zeilen für <code>index.html</code> und
      <code>assets/css/style.css</code> heraus. Diese Seite ändert nichts an der
@@ -186,6 +195,12 @@ var START = [
   {datei:'bush.png', klasse:'prop--bush-2', anker:'left',  x:34, y:7,  faktor:2},
   {datei:'tree.png', klasse:'prop--tree',   anker:'right', x:6,  y:16, faktor:2}
 ];
+
+/* Ohne Server laufen die absoluten Pfade (/assets/...) ins Leere. Statt einer
+   leeren Wiese lieber sagen, was los ist. */
+if (location.protocol === 'file:') {
+  document.getElementById('pfad-warnung').style.display = 'block';
+}
 
 var requisiten = [];
 var gewaehlt = null;
