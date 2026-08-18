@@ -329,7 +329,7 @@ ul,ol{margin:0;padding:0;list-style:none}
    ueberschreibt. Die z-index-Werte folgen derselben Rechnung wie dort:
    100 minus bottom plus 1, also weiter unten = weiter vorn. */
 .prop--chicken{
-  background-image:url('/assets/img/px/chicken.png?v=1');
+  background-image:url('/assets/img/px/chicken.png?v=2');
   background-repeat:no-repeat;
   image-rendering:pixelated;image-rendering:crisp-edges;
   animation-duration:1.4s;animation-timing-function:steps(9);

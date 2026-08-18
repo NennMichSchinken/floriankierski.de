@@ -153,6 +153,40 @@ def gras_am_fuss(im, buescheln=26, hoehe=(3, 9), saat=11):
     return im
 
 
+def huhn_streifen(ordner='huhn', bilder=9, grundton=(0xcb, 0xbf, 0xae),
+                  ab_zeile=5, schwelle=7):
+    """Setzt die Einzelbilder der Huhn-Animation zu einem Streifen zusammen.
+
+    PixelLab legt jedem Bild eine Grundflaeche unter die Fuesse - einen flachen
+    Balken im hellsten Gefiederton. Auf gruener Wiese liest sich der als
+    gelblicher Fleck und sieht aus wie ein Fehler.
+
+    Erkannt wird er ueber die Zeilenbreite: derselbe Farbton kommt zwar auch im
+    Gefieder vor, aber nie mit so vielen Pixeln nebeneinander in den untersten
+    Zeilen. Alles ab `schwelle` Pixeln in den letzten `ab_zeile` Zeilen ist der
+    Balken und wird zu einem gruenen Schatten - ganz weglassen liesse die
+    Tiere schweben.
+    """
+    rahmen = []
+    for i in range(bilder):
+        im = Image.open(os.path.join(ROH, ordner, '%d.png' % i)).convert('RGBA')
+        px = im.load()
+        for y in range(im.height - ab_zeile, im.height):
+            treffer = [x for x in range(im.width)
+                       if px[x, y][3] > 60 and px[x, y][:3] == grundton]
+            if len(treffer) >= schwelle:
+                for x in treffer:
+                    px[x, y] = SCHATTEN + (70,)
+        rahmen.append(im)
+
+    b, h = rahmen[0].size
+    blatt = Image.new('RGBA', (b * len(rahmen), h), (0, 0, 0, 0))
+    for i, r in enumerate(rahmen):
+        blatt.alpha_composite(r, (i * b, 0))
+    print('huhn: %d Bilder a %dx%d -> Streifen %dx%d' % (len(rahmen), b, h, *blatt.size))
+    return blatt
+
+
 def auf_inhalt(im):
     k = im.getbbox()
     return im.crop(k) if k else im
@@ -189,6 +223,7 @@ if __name__ == '__main__':
     sichern(auf_inhalt(lade('flower1.png')), 'flower1.png')
     sichern(auf_inhalt(lade('bush1.png')), 'bush1.png')
     sichern(auf_inhalt(lade('bush2.png')), 'bush2.png')
+    sichern(huhn_streifen(), 'chicken.png')
     sichern(auf_inhalt(schatten_darunter(lade('tree2.png'))), 'tree2.png')
     # Der Turm steht auf breitem Stein - flacherer, breiterer Schatten
     sichern(auf_inhalt(gras_am_fuss(
