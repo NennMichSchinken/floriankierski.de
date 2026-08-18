@@ -196,8 +196,14 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* =========================================================================
    Hero + Pixel-Szene
    ========================================================================= */
-.hero{position:relative;min-height:min(94vh,860px);display:flex;align-items:center;
-  padding:5rem 0 9rem;overflow:hidden}
+/* Die Hoehe kommt aus min-height, nicht aus dem Inhalt: der braucht nur rund
+   690px. Vorher standen hier 94vh/860px — dadurch war der Hero auf gaengigen
+   Bildschirmen hoeher als das Fenster, und unter der Erdkante folgte eine
+   leere Flaeche, bevor ueberhaupt etwas kam. Die Seite sah damit zu Ende aus.
+   Mit 82vh/780px schneidet die naechste Ueberschrift oben an und zeigt, dass
+   es weitergeht. */
+.hero{position:relative;min-height:min(82vh,780px);display:flex;align-items:center;
+  padding:2.5rem 0 3rem;overflow:hidden}
 /* Ohne Pixel-Szene braucht der Hero keine Bauhöhe für Wiese und Himmel. */
 [data-mode="plain"] .hero{min-height:auto;padding:4.5rem 0 4rem}
 
@@ -500,6 +506,13 @@ ul,ol{margin:0;padding:0;list-style:none}
 .sec--dark{background:var(--bg-deep)}
 .sec--contact{background:linear-gradient(180deg,var(--bg) 0%,var(--sky-1) 100%);padding-bottom:7rem}
 [data-mode="plain"] .sec--contact{background:var(--bg-alt)}
+
+/* Der erste Abschnitt rueckt dichter an den Hero. Sonst endet die Seite fuer
+   den Betrachter optisch an der Unterkante des Bildes: darunter kommt nur eine
+   leere Flaeche, und dass es weitergeht, sieht man erst nach dem Scrollen.
+   So schneidet "Kapitel 1" oben an und macht neugierig. */
+#ueber{padding-top:2rem}
+[data-mode="plain"] #ueber{padding-top:3.5rem}
 
 /* dezente Holz-/Rasterstruktur nur im Pixel-Modus */
 .sec::before{
