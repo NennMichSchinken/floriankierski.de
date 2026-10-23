@@ -1,0 +1,44 @@
+{
+ "bild": [
+  1857,
+  1489
+ ],
+ "hintergrund": "#FFC8A4",
+ "marker": {
+  "Atelier": {
+   "x": 0.5707,
+   "y": 0.4257,
+   "verdeckt": false
+  },
+  "HireMe": {
+   "x": 0.5213,
+   "y": 0.6854,
+   "verdeckt": false
+  },
+  "Wohnung": {
+   "x": 0.4525,
+   "y": 0.6241,
+   "verdeckt": false
+  },
+  "Spielhalle": {
+   "x": 0.6591,
+   "y": 0.6021,
+   "verdeckt": false
+  },
+  "Elektronik": {
+   "x": 0.3702,
+   "y": 0.6347,
+   "verdeckt": false
+  },
+  "Kiosk": {
+   "x": 0.382,
+   "y": 0.5176,
+   "verdeckt": true
+  },
+  "Uhrmacher": {
+   "x": 0.5905,
+   "y": 0.5176,
+   "verdeckt": true
+  }
+ }
+}

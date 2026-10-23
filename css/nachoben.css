@@ -1,0 +1,26 @@
+/* Knopf „nach oben“ für alle Unterseiten (Runde 95, Florians Wahl): rund und warmweiß wie die Seitennavigation, Pfeil in
+   der Ladenfarbe, beim Zeigen in Ladenfarbe gefüllt (wie die Pfeile im Fahrplan der Reise). Unten rechts, links neben
+   dem eigenen Scrollbalken der Karte; erscheint nach einer Bildschirmhöhe (nachoben.js). Unten mittig die Pille der
+   Seitennavigation bzw. der Fahrplan: der Knopf auf ihrer Höhe rechts daneben; am Handy wird die Pille dafür schmaler
+   und rückt nach links (Florians Wahl, darüber lag er auf der Stationskarte des Ateliers). Farben von der Seite: --k,
+   --k-text; den Abstand zum unteren Rand kann die Seite mit --nachoben-unten setzen (Reise: Mitte des Fahrplans). */
+.nachoben { position: fixed; z-index: 41; right: 40px; bottom: calc(var(--nachoben-unten, 24px) + env(safe-area-inset-bottom));
+  display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%;
+  background: #fff9f2; color: var(--k-text, #0b7491); box-shadow: 0 14px 40px rgba(58, 42, 53, .18); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; opacity: 0; translate: 0 12px; visibility: hidden;
+  transition: opacity .25s, translate .25s, background-color .15s, color .15s, visibility 0s .25s; }
+.nachoben.da { opacity: 1; translate: 0 0; visibility: visible;
+  transition: opacity .25s, translate .25s, background-color .15s, color .15s; }
+.nachoben:hover, .nachoben:focus-visible { background: var(--k, #1a9cbf); color: #fff; outline: none; }
+.nachoben svg { width: 20px; height: 20px; }
+.nachoben .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Pille unten mittig (wie seitennav.css): auf ihrer Höhe rechts daneben */
+@media (max-width: 1179.98px), (max-height: 559.98px) {
+  .nachoben { right: 16px; bottom: calc(var(--nachoben-unten, 15px) + env(safe-area-inset-bottom)); width: 44px; height: 44px; }
+}
+/* zu schmal für beide mittig: die Pille links, schmaler um Knopf und Abstand (immer, damit sie nicht springt) */
+@media (max-width: 519.98px) {
+  .seitennav { left: 16px; translate: none; width: calc(100% - 84px); }
+}
+@media (prefers-reduced-motion: reduce) { .nachoben, .nachoben.da { translate: none; transition: none; } }

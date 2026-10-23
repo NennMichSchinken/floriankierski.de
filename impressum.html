@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Impressum · Florian Kierski</title>
+<meta name="description" content="Impressum von floriankierski.de">
+<meta name="robots" content="noindex">
+<!-- Impressum (Livegang F, Runde 98): Text mit Platzhaltern, Florian lässt ihn prüfen (keine Rechtsberatung). Seine
+     Anschrift steht nur hier. In der Gasse als Karte (?seite=impressum), direkt aufgerufen allein lesbar. -->
+<script>
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    const de = q ? q === 'de' : localStorage.getItem('nullAlleySprache') === 'de';
+    if (de) { document.documentElement.dataset.sprache = 'de'; document.documentElement.lang = 'de'; }
+  } catch (e) { /* Englisch */ }
+  if (window.parent !== window && new URLSearchParams(location.search).has('eingebettet')) {
+    document.documentElement.classList.add('eingebettet');
+  }
+</script>
+<link rel="stylesheet" href="schriften/schriften.css">
+<link rel="stylesheet" href="css/recht.css">
+</head>
+<body>
+<nav class="leiste" aria-label="Navigation">
+  <div class="sprache" role="group" aria-label="Language / Sprache">
+    <button type="button" data-sprache="en">EN</button><button type="button" data-sprache="de">DE</button>
+  </div>
+  <a class="pille heim" href="./" title="Florian Kierski">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>Home</a>
+</nav>
+
+<main lang="de-DE">   <!-- der Text ist immer deutsch (lang="de" allein blendet die Sprachregel aus) -->
+  <p class="kicker">floriankierski.de</p>
+  <h1>Impressum</h1>
+  <p class="hinweis" lang="en">This legal notice is in German.</p>
+
+  <h2>Angaben gemäß § 5 DDG</h2>
+  <address>
+    Florian Kierski<br>
+    An den Platanen 1<br>
+    16225 Eberswalde<br>
+    Deutschland
+  </address>
+
+  <h2>Kontakt</h2>
+  <p>E-Mail: <a href="mailto:florian@floriankierski.de">florian@floriankierski.de</a></p>
+
+  <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+  <p>Florian Kierski, Anschrift wie oben.</p>
+
+  <h2>Haftung für Links</h2>
+  <p>Diese Website verlinkt auf Seiten anderer Anbieter, zum Beispiel GitHub. Für deren Inhalte ist allein der jeweilige
+    Anbieter verantwortlich. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar; werden mir welche
+    bekannt, entferne ich den Link.</p>
+
+  <h2>Urheberrecht</h2>
+  <p>Texte, Bilder und die 3D-Szenen dieser Website stammen von mir, sofern nicht anders angegeben. Verwendete Software,
+    Schriften und Symbole anderer stehen mit ihren Lizenzen in der Datei
+    <a href="lizenzen.txt" target="_blank" rel="noopener">Lizenzen</a>.</p>
+
+  <h2>Marken</h2>
+  <p>FINAL FANTASY ist eine eingetragene Marke der Square Enix Holdings Co., Ltd. AION ist eine Marke der NCSOFT
+    Corporation. Meine Tools sind unabhängige Projekte und weder mit Square Enix noch mit NCSOFT verbunden.</p>
+
+  <footer class="fuss">
+    <a href="datenschutz.html" data-seite="datenschutz">Datenschutz</a>
+    <a class="heim" href="./">Home</a>
+  </footer>
+</main>
+<div class="balken" id="balken" aria-hidden="true"><i></i></div>
+
+<script src="js/karte.js"></script>
+<script src="js/recht.js"></script>
+</body>
+</html>

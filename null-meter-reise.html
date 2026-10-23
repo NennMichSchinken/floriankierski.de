@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>HamMeter · Florian Kierski</title>
+<meta name="description" content="HamMeter: a clean, easy-to-read damage meter for FFXIV and Aion 2.">
+<!-- Runde 56: die Null-Meter-Seite als Reise mit dem Lieferzug (Florian: Draufsicht, Strecke wie eine Reise, drei
+     Güterwagen, Weiche mit zwei echten Ästen, Bilder auf einer Werbetafel). Runde 57 (Florians Feedback): Der Zug fährt
+     beim ersten Scrollen los und fährt weich an und hält weich (Fahrt folgt dem Scrollen mit Trägheit, wie der Zug der
+     Gasse), Weiche gleich hinter dem Stellwerk, auf jedem Ast Werbetafel mit den Bildern dieses Spiels, große
+     Installations-Haltestelle mit „Erledigt“ je Schritt (jeder lädt seinen Teil, wer weiterscrollt, nimmt den Rest so
+     mit), nichts wird mehr ausgegraut. Runde 58: einmal scrollen = nächster Halt (Rasten), Punkte der Karten auf den
+     Häusern, Karten nie am Bildschirmrand. Welt aus 3d/diorama/strecke.py (→ 3d/web/out/strecke.glb und .json), die
+     Spielhalle aus der Raum-Vignette 3d/web/out/raum_spielhalle.glb. Inhalte nur aus den Repos (README, CHANGELOG).
+     Vorschau-Server. -->
+<script>
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    const de = q ? q === 'de' : localStorage.getItem('nullAlleySprache') === 'de';
+    if (de) { document.documentElement.dataset.sprache = 'de'; document.documentElement.lang = 'de'; }
+  } catch (e) { /* Englisch */ }
+  // Runde 62: als Karte über der Gasse (diorama-web-test.html, iframe mit ?eingebettet)
+  if (window.parent !== window && new URLSearchParams(location.search).has('eingebettet')) {
+    document.documentElement.classList.add('eingebettet');
+  }
+  // Runde 75 (Florian): Unterseiten erscheinen immer als Karte über der Gasse. Direkt aufgerufen geht es dorthin, ein
+  // Halt kommt mit (?halt=…); mit ?allein bleibt die Reise allein, zum Testen.
+  else if (window.parent === window && !new URLSearchParams(location.search).has('allein')) {
+    const halt = new URLSearchParams(location.search).get('halt');
+    location.replace('./?seite=null-meter' + (halt ? '&halt=' + encodeURIComponent(halt) : ''));
+  }
+</script>
+<link rel="stylesheet" href="schriften/schriften.css">
+<style>
+  :root {
+    --hg: #FFC8A4; --papier: #fff9f2;
+    --k: #da2a84; --k-text: #c81f74; --k-dunkel: color-mix(in srgb, var(--k) 70%, #2d2b45);
+    --k-flaeche: color-mix(in srgb, var(--k) 6%, var(--papier));
+    --k-hell: color-mix(in srgb, var(--k) 13%, #fff); --k-rand: color-mix(in srgb, var(--k) 24%, #fff);
+    --tinte: #2d2b45; --tinte2: #5d5770; --birne: #fff3c9; --gruen: #2f9e76; --gruen-hell: #e2f5ec;
+    --neon-grund: #1d1a2c; --neon-pink: #ff8fd0; --neon-cyan: #85f3ff;
+    --schatten: 0 12px 32px rgba(107, 51, 49, .16);
+    --nachoben-unten: 18px;                                /* Knopf „nach oben“ auf Höhe des Fahrplans (Runde 95) */
+  }
+  :root[data-sprache="de"] [lang="en"]:not(html), :root:not([data-sprache="de"]) [lang="de"]:not(html) { display: none !important; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--hg); }
+  html { scroll-snap-type: y mandatory; }                     /* eine Raste je Halt (Runde 58) */
+  .raste { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; scroll-snap-stop: always; }
+  body { color: var(--tinte); font: 18px/1.55 'Hanken Grotesk', system-ui, sans-serif; overflow-x: clip; }
+  a { color: var(--k-text); }
+  button { font-family: inherit; }
+  svg.sym { width: 1.1em; height: 1.1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round; }
+  #welt { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .bahn { position: relative; pointer-events: none; }
+  #linien { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #linien line { stroke: var(--k); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 0.1 9; }
+  #linien circle { fill: #fff; stroke: var(--k); stroke-width: 4; }
+
+  .leiste { position: fixed; top: 0; left: 0; right: 0; z-index: 8; display: flex; justify-content: flex-end;
+    align-items: center; gap: 10px; padding: 18px clamp(16px, 3vw, 32px); pointer-events: none; }
+  .leiste > * { pointer-events: auto; }
+  :root.eingebettet { --hg: #FFC691; }                        /* Boden oben, wie die Fläche hinter der Karte (Gasse) */
+  .eingebettet .leiste { padding-top: 24px; }                /* oben rechts schneidet die schräge Kante des Blatts */
+  html.eingebettet { scrollbar-width: none; }                 /* im Blatt ohne Scrollbalken (der Fahrplan zeigt den Stand) */
+  html.eingebettet::-webkit-scrollbar { display: none; }
+  .pille { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 0;
+    background: rgba(255, 249, 242, .92); color: var(--tinte); font: 700 15px/1.2 'Hanken Grotesk', system-ui, sans-serif;
+    text-decoration: none; box-shadow: 0 3px 12px rgba(45, 43, 69, .12); cursor: pointer; white-space: nowrap; }
+  .pille.pink { background: var(--k); color: #fff; }
+  .rechts { display: flex; gap: 10px; align-items: center; }
+  .sprache { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255, 249, 242, .92);
+    box-shadow: 0 3px 12px rgba(45, 43, 69, .12); }
+  .sprache button { border: 0; background: none; font: 700 14px/1 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--tinte); padding: 8px 12px; border-radius: 999px; cursor: pointer; opacity: .65; }
+  .sprache button[aria-pressed="true"] { background: var(--k-hell); color: var(--k-text); opacity: 1; }
+
+  /* Abfahrt: Titel als Leuchtschild, fährt mit dem Zug davon */
+  .titel { position: fixed; left: clamp(16px, 5vw, 80px); top: 50%; z-index: 5; max-width: 480px;
+    transform: translateY(-50%); will-change: opacity, translate; }
+  .ort { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+    background: var(--k-hell); color: var(--k-text); font-weight: 700; font-size: 15px; }
+  .kicker { margin: 18px 0 0; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--k-text); }
+  .schild-titel { position: relative; display: inline-block; margin: 16px 0 8px -6px; padding: 26px 40px 30px; border-radius: 28px;
+    background: var(--k); transform: rotate(-2deg); box-shadow: inset 0 0 0 6px var(--k-dunkel), 0 16px 34px rgba(107, 51, 49, .22); }
+  .schild-titel h1 { position: relative; margin: 0; color: #fff; font-size: clamp(46px, 5.6vw, 78px); line-height: .95; font-weight: 800;
+    letter-spacing: -.02em; text-shadow: 0 0 22px rgba(255, 255, 255, .45); white-space: nowrap; }
+  .birnen { position: absolute; inset: 0; pointer-events: none; }
+  .birnen i { position: absolute; width: 11px; height: 11px; margin: -5.5px; border-radius: 50%; background: var(--birne);
+    box-shadow: 0 0 8px 2px rgba(255, 214, 120, .85); animation: lauf 1.5s infinite; animation-delay: calc(var(--n) * -.5s); }
+  @keyframes lauf { 0%, 64% { opacity: 1; } 66%, 100% { opacity: .38; } }
+  .unter { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .unter li { padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--k-rand); background: rgba(255, 255, 255, .7);
+    font-weight: 700; font-size: 14px; }
+  .titel p.intro { margin: 14px 0 0; font-size: 18px; background: rgba(255, 249, 242, .82); border-radius: 18px; padding: 12px 16px; }
+  .titel .knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .knopf { display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 999px; border: 0;
+    font: 800 16px/1.1 'Hanken Grotesk', system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .15s; }
+  .knopf:hover { transform: translateY(-2px); }
+  .knopf.voll { background: var(--k); color: #fff; box-shadow: 0 8px 22px color-mix(in srgb, var(--k) 35%, transparent); }
+  .knopf.leer { background: var(--papier); color: var(--tinte); box-shadow: var(--schatten); }
+  .knopf.klein { padding: 9px 16px; font-size: 15px; box-shadow: 0 5px 14px color-mix(in srgb, var(--k) 30%, transparent); }
+  .los .sym { animation: wippen 1.8s ease-in-out infinite; }
+  @keyframes wippen { 50% { transform: translateY(4px); } }
+
+  /* Karten an den Halten, mit gepunkteter Linie zum Halt */
+  .karte { position: fixed; left: 0; top: 0; z-index: 4; width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 170px);
+    overflow: auto; padding: 20px 22px; border-radius: 28px; background: var(--papier); box-shadow: var(--schatten);
+    opacity: 0; pointer-events: none; will-change: transform, opacity; scrollbar-width: thin; }
+  .karte.an { pointer-events: auto; }
+  /* Ohne WebGL (Livegang H, siehe ohne3d im Skript): Titel und Halte untereinander, kein Zug, kein Fahrplan, keine
+     Hinweise auf Fracht und Zug */
+  .ohne-3d #welt, .ohne-3d #linien, .ohne-3d #marken, .ohne-3d .laden, .ohne-3d .fahrplan, .ohne-3d .bahn,
+  .ohne-3d .balken, .ohne-3d .titel .los, .ohne-3d .dazu, .ohne-3d #k-stellwerk .hinweis, .ohne-3d .nur-3d {
+    display: none !important; }
+  html.ohne-3d { scroll-snap-type: none; }
+  .ohne-3d .leiste { position: absolute; }                    /* scrollt mit, lag sonst über den Karten */
+  .ohne-3d .titel { position: relative; left: auto; top: auto; transform: none; translate: none; opacity: 1 !important;
+    max-width: 640px; margin: 0 auto; padding: 104px 16px 28px; }
+  .ohne-3d #karten { display: flex; flex-direction: column; gap: 18px; max-width: 640px; margin: 0 auto;
+    padding: 0 16px 96px; }
+  .ohne-3d .karte { position: relative; left: auto; top: auto; width: auto; max-height: none; overflow: visible;
+    opacity: 1 !important; transform: none !important; pointer-events: auto; }
+  .ohne-3d .spiel.gewaehlt { border-color: var(--k); }
+  .karte .halt { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 10px; background: var(--k);
+    color: #fff; font-size: 13px; font-weight: 800; }
+  .karte h2 { margin: 10px 0 6px; font-size: 28px; line-height: 1.1; font-weight: 800; }
+  .karte p { margin: 0 0 8px; }
+  .karte .vor { color: var(--tinte2); font-size: 16px; }
+  .karte ul, .karte ol { margin: 0; padding-left: 20px; font-size: 16px; }
+  .karte li + li { margin-top: 5px; }
+  .dazu { display: inline-flex; margin-top: 12px; padding: 5px 12px; border-radius: 999px; background: var(--k-hell);
+    color: var(--k-text); font-weight: 800; font-size: 14px; }
+  .karte.feier, .karte.dunkel { background: var(--neon-grund); color: #f4f1ff; }
+  .karte.feier h2 { color: #fff; text-shadow: 0 0 14px var(--neon-pink); }
+  .karte.dunkel .vor, .karte.feier .vor { color: #c9c4e0; }
+  .karte.feier .dazu, .karte.dunkel .dazu { background: rgba(255, 143, 208, .16); color: var(--neon-pink); }
+  .merkmale { display: grid; gap: 8px; }
+  .ticket { display: flex; gap: 10px; align-items: flex-start; padding: 10px 18px; background: #ffd97a; color: #4a2b14;
+    -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+            mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+    outline: 2px dashed rgba(122, 64, 20, .35); outline-offset: -6px; font-size: 15px; line-height: 1.35; }
+  .ticket:nth-child(odd) { transform: rotate(-1deg); } .ticket:nth-child(3n) { background: #ffc46b; }
+  .ticket b { display: block; font-size: 15px; }
+  .spiele { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+  /* Spielwahl (Runde 59): zwei gleichwertige Knöpfe, keiner vorausgewählt; ein Klick stellt die Weiche und fährt los */
+  .spiel { display: flex; flex-direction: column; text-align: left; padding: 12px 14px; border-radius: 20px;
+    border: 2px solid var(--k-rand); background: #fff; color: inherit; font: inherit; cursor: pointer;
+    transition: transform .15s, border-color .15s, box-shadow .15s; }
+  .spiel:hover, .spiel:focus-visible { transform: translateY(-2px) rotate(-1deg); border-color: var(--k);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--k) 18%, transparent); outline: none; }
+  .spiel b { display: block; font-size: 19px; font-weight: 800; }
+  .spiel span.t { display: block; margin-top: 2px; font-size: 14px; line-height: 1.35; color: var(--tinte2); flex: 1; }
+  .spiel .los-knopf { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+    padding: 7px 13px; border-radius: 999px; background: var(--k); color: #fff; font-size: 14px; font-weight: 800; }
+  .spiel:hover .los-knopf .sym, .spiel:focus-visible .los-knopf .sym { transform: translateX(3px); }
+  .los-knopf .sym { transition: transform .15s; }
+  :root[data-ast="F"] [data-nur="A"], :root[data-ast="A"] [data-nur="F"] { display: none; }
+  .neon { position: relative; margin: 10px 0 4px; padding: 12px 14px; border-radius: 16px; background: var(--neon-grund);
+    color: var(--neon-cyan); font: 14px/1.6 ui-monospace, 'Cascadia Mono', Consolas, monospace; overflow-x: auto; }
+  .karte.dunkel .neon { background: #2a2540; }
+  .neon b { color: var(--neon-pink); font-weight: 400; }
+  .neon.url { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; }
+  .neon.url .repo { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .kopieren { flex: none; border: 0; border-radius: 999px; padding: 8px 12px; background: rgba(255, 255, 255, .14); color: #fff;
+    font: 700 13px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; }
+  code { font: .9em ui-monospace, 'Cascadia Mono', Consolas, monospace; background: var(--k-hell); padding: 1px 5px; border-radius: 6px; }
+  .befehle { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+  .befehle dd { margin: 0; }
+  .zwei { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 12px; }
+  .kasten { padding: 12px 14px; border-radius: 18px; background: var(--k-flaeche); font-size: 15px; }
+  .kasten h3 { margin: 0; font-size: 16px; }
+  .kasten .nr { font-size: 26px; font-weight: 800; color: var(--k-text); line-height: 1.1; }
+  .kasten ul { margin-top: 6px; font-size: 14px; }
+  details { padding: 10px 14px; border-radius: 16px; background: var(--k-flaeche); font-size: 15px; }
+  details + details { margin-top: 8px; }
+  summary { cursor: pointer; font-weight: 800; }
+  details p { margin: 6px 0 0 !important; color: var(--tinte2); }
+  details ul { margin-top: 6px !important; font-size: 14px !important; color: var(--tinte2); }
+  .karte.feier .knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .karte.feier .knopf.leer { background: rgba(255, 255, 255, .12); color: #fff; box-shadow: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0 !important; list-style: none; }
+  .chips li { padding: 4px 10px; border-radius: 999px; background: #fff; border: 1.5px solid var(--k-rand); font-size: 13px; font-weight: 700; }
+  .karte .chips li + li { margin-top: 0; }
+
+  /* Installation (Runde 57): Schritte zum Abhaken, jeder lädt seinen Teil auf den Zug */
+  .guide { list-style: none; margin: 12px 0 0; padding: 0 !important; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px;
+    font-size: 15px !important; }
+  .karte .guide li + li { margin-top: 0; }
+  .guide li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 18px; background: var(--k-flaeche);
+    transition: background .25s, box-shadow .25s; }
+  .guide .nr { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #fff;
+    border: 2px solid var(--k-rand); color: var(--k-text); font-weight: 800; font-size: 14px; }
+  .guide li > div { min-width: 0; flex: 1; padding-top: 3px; }
+  .guide li.jetzt { background: #fff; box-shadow: 0 0 0 3px var(--k-hell), 0 6px 16px rgba(107, 51, 49, .1); }
+  .guide li.jetzt .nr { background: var(--k); border-color: var(--k); color: #fff; }
+  .guide li.fertig .nr { background: var(--gruen); border-color: var(--gruen); color: #fff; }
+  .tun { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .tun .dazu { margin-top: 0; }
+  .link { border: 0; background: none; padding: 4px 0; color: var(--k-text); font: 700 14px/1.2 'Hanken Grotesk', system-ui, sans-serif;
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .guide-leiste { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; }
+  .hinweis { color: var(--tinte2); font-size: 14px; margin: 10px 0 0 !important; }
+  .fertig-text { margin: 12px 0 0 !important; padding: 10px 14px; border-radius: 16px; background: var(--gruen-hell); color: #1d6a4e;
+    font-weight: 700; font-size: 15px; }
+  #marken { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+  /* Nummern über der wartenden Fracht: klein, nur der Schritt, der dran ist, groß und pink */
+  .marke { position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+    border-radius: 50%; background: #fff; border: 2px solid var(--k-rand); color: var(--k-text); font-weight: 800; font-size: 12px;
+    box-shadow: 0 3px 8px rgba(45, 43, 69, .16); opacity: 0; will-change: transform, opacity; }
+  .marke.jetzt { z-index: 1; width: 32px; height: 32px; margin: -16px 0 0 -16px; border: 3px solid var(--k); background: var(--k);
+    color: #fff; font-size: 15px; animation: puls 1.6s ease-in-out infinite; }
+  @keyframes puls { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--k) 22%, transparent), 0 4px 10px rgba(45, 43, 69, .2); } }
+
+  /* Fahrplan (Runde 59): Pfeile zum vorigen und nächsten Halt, Punkte springen direkt hin (der Zug fährt durch) */
+  .fahrplan { position: fixed; left: 50%; bottom: 18px; z-index: 6; transform: translateX(-50%); display: inline-flex;
+    align-items: center; gap: 10px; padding: 6px; border-radius: 999px; background: rgba(255, 249, 242, .94);
+    box-shadow: var(--schatten); font-weight: 800; font-size: 14px; white-space: nowrap; max-width: calc(100vw - 32px);
+    -webkit-user-select: none; user-select: none; }            /* schnelles Klicken markiert keinen Text (Runde 61) */
+  #fahrplan-text { display: inline-block; text-align: center; }   /* Breite des längsten Halts, gesetzt im Skript */
+  .fahrplan .pfeil { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+    background: var(--k-hell); color: var(--k-text); cursor: pointer; transition: background .15s, color .15s; }
+  .fahrplan .pfeil:hover, .fahrplan .pfeil:focus-visible { background: var(--k); color: #fff; outline: none; }
+  .fahrplan .pfeil:disabled { opacity: .35; cursor: default; background: var(--k-hell); color: var(--k-text); }
+  .fahrplan .punkte { display: inline-flex; }
+  .fahrplan .punkte button { display: grid; place-items: center; width: 18px; height: 24px; padding: 0; border: 0;
+    background: none; cursor: pointer; }
+  .fahrplan .punkte button::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--k-rand);
+    transition: transform .15s, box-shadow .15s; }
+  .fahrplan .punkte button.da::before { background: var(--k); }
+  .fahrplan .punkte button.hier::before { transform: scale(1.3); box-shadow: 0 0 0 3px var(--k-hell); }
+  .fahrplan .punkte button:hover::before, .fahrplan .punkte button:focus-visible::before { transform: scale(1.5); }
+  .fahrplan .punkte button:focus-visible { outline: none; }
+  /* Runde 60: gewählter Halt, der Zug fährt gleich los: ein Ring füllt sich in der Pause (0,8 s) */
+  @property --fuell { syntax: '<number>'; inherits: false; initial-value: 0; }
+  .fahrplan .punkte button { position: relative; }
+  .fahrplan .punkte button.wartet::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px;
+    margin: -10px 0 0 -10px; border-radius: 50%; background: conic-gradient(var(--k) calc(var(--fuell) * 1turn), transparent 0);
+    -webkit-mask: radial-gradient(circle, transparent 7.5px, #000 8px); mask: radial-gradient(circle, transparent 7.5px, #000 8px);
+    animation: fuellen .8s linear forwards; }
+  @keyframes fuellen { from { --fuell: 0; } to { --fuell: 1; } }
+  .laden { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: var(--hg);
+    font-weight: 800; color: var(--k-text); transition: opacity .6s; }
+  .laden.weg { opacity: 0; pointer-events: none; }
+
+  /* Eigener Scrollbalken in der Karte (Runde 67, Florian: ohne Balken fehlte das Feedback): innen am rechten Rand, runder
+     heller Steg, Griff in der Ladenfarbe, beim Zeigen und Ziehen breiter. Ziehen oder Klicken wählt den Halt an der
+     Stelle (wie eine Raste). Nur in der Karte; allein hat die Seite den Balken des Browsers. */
+  .balken { display: none; }
+  .eingebettet .balken { display: block; position: fixed; right: 8px; top: 96px; bottom: 28px; width: 16px; z-index: 9;
+    cursor: pointer; touch-action: none; }
+  .balken::before, .balken i { position: absolute; left: 50%; width: 6px; translate: -50% 0; border-radius: 999px; }
+  .balken::before { content: ''; top: 0; bottom: 0; background: rgba(255, 249, 242, .7);
+    box-shadow: inset 0 0 0 1px rgba(107, 51, 49, .07); transition: width .15s; }
+  .balken i { top: 0; height: 40px; background: var(--k); box-shadow: 0 2px 6px rgba(107, 51, 49, .18);
+    transition: width .15s; }
+  .balken:hover::before, .balken.zieht::before, .balken:hover i, .balken.zieht i { width: 10px; }
+
+  @media (max-width: 700px) {
+    .titel { top: auto; bottom: 84px; transform: none; right: 16px; left: 16px; }
+    .schild-titel { padding: 18px 26px 22px; }
+    .titel p.intro { font-size: 15px; }
+    .karte { width: calc(100% - 32px); max-height: 52vh; }   /* Lage (16 px Rand) setzt das Skript, Runde 102 */
+    .fahrplan .punkte { display: none; }
+    .eingebettet .balken { right: 3px; top: 84px; bottom: 96px; width: 12px; }
+    .balken::before, .balken i { width: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .birnen i, .los .sym, .marke.jetzt { animation: none; }
+    .fahrplan .punkte button.wartet::after { animation: none; --fuell: 1; }
+  }
+</style>
+<script src="js/karte.js" defer></script>
+<link rel="stylesheet" href="css/nachoben.css">
+<script src="js/nachoben.js" defer></script>
+<script type="importmap">
+{ "imports": {
+  "three": "./lib/three/build/three.module.min.js",
+  "three/addons/": "./lib/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="welt" aria-label="The delivery train on its way to the arcade"></canvas>
+<svg id="linien" aria-hidden="true"></svg>
+<div id="marken" aria-hidden="true"></div>
+<div class="laden" id="laden"><span lang="en">Loading the line …</span><span lang="de">Strecke lädt …</span></div>
+
+<nav class="leiste" aria-label="Navigation">
+  <div class="rechts">
+    <button type="button" class="pille pink" data-zu="stellwerk">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+      <span lang="en">Install</span><span lang="de">Installieren</span></button>
+    <div class="sprache" role="group" aria-label="Language / Sprache">
+      <button type="button" data-sprache="en">EN</button><button type="button" data-sprache="de">DE</button>
+    </div>
+    <!-- Schließen rechts mit „Home“ (Florian, Runde 63; vorher links „✕ Null Alley“) -->
+    <a class="pille heim" href="./" title="Florian Kierski">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>Home</a>
+  </div>
+</nav>
+
+<div class="titel" id="titel">
+  <span class="ort"><span lang="en">Departure · Florian Kierski</span><span lang="de">Abfahrt · Florian Kierski</span></span>
+  <p class="kicker"><span lang="en">By Florian Kierski</span><span lang="de">Von Florian Kierski</span></p>
+  <div class="schild-titel" id="schild-titel"><span class="birnen" aria-hidden="true"></span><h1>HamMeter</h1></div>
+  <ul class="unter"><li><span lang="en">Damage meter</span><span lang="de">Damage Meter</span></li><li>FFXIV</li><li>Aion 2</li></ul>
+  <p class="intro"><span lang="en">A clean, easy-to-read damage meter. My concept and direction, the code is
+    written with AI (Claude Code). <span class="nur-3d">The train picks up everything the arcade needs on the way.</span></span>
+    <span lang="de">Ein klares, gut lesbares Damage Meter. Konzept und Steuerung von mir, den Code schreibt
+    KI (Claude Code). <span class="nur-3d">Der Zug holt unterwegs alles, was die Spielhalle braucht.</span></span></p>
+  <div class="knoepfe">
+    <span class="knopf leer los"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></svg>
+      <span lang="en">Scroll to ride along</span><span lang="de">Scrollen und mitfahren</span></span>
+    <button type="button" class="knopf voll" data-zu="stellwerk"><span lang="en">Straight to installing</span><span lang="de">Direkt zum Installieren</span></button>
+  </div>
+</div>
+<div id="karten"></div>
+<nav class="fahrplan" id="fahrplan" aria-label="Stops / Halte">
+  <button type="button" class="pfeil" data-weiter="-1" aria-label="Previous stop / Voriger Halt"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+  <span id="fahrplan-text"></span><span class="punkte" id="fahrplan-punkte"></span>
+  <button type="button" class="pfeil" data-weiter="1" aria-label="Next stop / Nächster Halt"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button>
+</nav>
+<div class="bahn" id="bahn"></div>
+<div class="balken" id="balken" aria-hidden="true"><i></i></div>
+
+<script>
+  (() => {                                                   // Glühbirnen ums Leuchtschild (ohne 3D)
+    const titel = document.getElementById('schild-titel');
+    const birnen = () => {
+      const w = titel.offsetWidth, h = titel.offsetHeight, r = 15, abst = 27, p = [];
+      const kante = (x0, y0, x1, y1) => {
+        const n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / abst));
+        for (let i = 0; i < n; i++) p.push([x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n]);
+      };
+      kante(r, r, w - r, r); kante(w - r, r, w - r, h - r); kante(w - r, h - r, r, h - r); kante(r, h - r, r, r);
+      titel.querySelector('.birnen').innerHTML = p.map(([x, y], i) => `<i style="left:${x}px;top:${y}px;--n:${i % 3}"></i>`).join('');
+    };
+    birnen();
+    if (document.fonts) document.fonts.ready.then(birnen);
+    addEventListener('resize', birnen);                       // Schild ändert mit der Breite seine Größe
+  })();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { gemeinsam, voxelMaterial, bereite } from './js/voxel.js';
+import { glbLader } from './js/laden.js';
+
+const RUHIG = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const V3 = THREE.Vector3, Y = new V3(0, 1, 0);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const glatt = k => k * k * (3 - 2 * k);
+const backOut = k => { const c = 1.70158; return 1 + (c + 1) * (k - 1) ** 3 + c * (k - 1) ** 2; };
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+const L = (en, de) => `<span lang="en">${en}</span><span lang="de">${de}</span>`;
+const de = () => root.dataset.sprache === 'de';
+let OHNE3D = false;                                           // ohne WebGL (Livegang H, ohne3d unten)
+
+// ---------------------------------------------------------------- Als Karte über der Gasse (Runde 62, karte.js)
+// Die Gasse zeigt diese Seite in einem Blatt (iframe). Meldungen an sie: bereit (erstes Bild), schliessen (✕ Home
+// oder Esc), sprache. Von ihr: pause/weiter (Blatt zu/auf, dann zeichnet die Seite nicht) und sprache.
+const EINGEBETTET = KARTE.eingebettet, melde = KARTE.melde;
+let pausiert = false;
+KARTE.verbinde({ pause: an => { pausiert = an; } });
+
+// ---------------------------------------------------------------- Weg und erledigte Schritte (im Browser gemerkt)
+const SPEICHER = 'nullMeterReise';
+let ast = 'F', erledigt = { F: 0, A: 0 };
+try {
+  const g = JSON.parse(localStorage.getItem(SPEICHER) || 'null');
+  if (g && (g.ast === 'F' || g.ast === 'A')) ast = g.ast;
+  if (g && g.erledigt) erledigt = { F: Math.max(0, +g.erledigt.F || 0), A: Math.max(0, +g.erledigt.A || 0) };
+} catch (e) { /* ohne Speicher */ }
+function merke() { try { localStorage.setItem(SPEICHER, JSON.stringify({ ast, erledigt })); } catch (e) { /* egal */ } }
+
+// ---------------------------------------------------------------- Inhalte (nur aus den Repos: README, CHANGELOG)
+const IINACT = 'https://github.com/marzent/IINACT', NPCAP = 'https://npcap.com/#download';
+const GH_F = 'https://github.com/NennMichSchinken/HamMeter', GH_A = 'https://github.com/NennMichSchinken/HamMeter-Aion2';
+const REPO = 'https://raw.githubusercontent.com/NennMichSchinken/HamMeter/main/repo.json';
+const repoKasten = `<div class="neon url"><span class="repo">${REPO}</span><button type="button" class="kopieren">${L('Copy', 'Kopieren')}</button></div>`;
+const dazu = d => `<span class="dazu">+ ${d}</span>`;
+const SPIEL = { F: 'FFXIV', A: 'Aion 2' };
+const SCHRITTE = {
+  F: [L('In game, open the Dalamud settings with <code>/xlsettings</code>.', 'Im Spiel die Dalamud-Einstellungen öffnen mit <code>/xlsettings</code>.'),
+      L('Go to the <strong>Experimental</strong> tab.', 'Zum Reiter <strong>Experimental</strong> gehen.'),
+      L('Under <strong>Custom Plugin Repositories</strong>, add this address:', 'Unter <strong>Custom Plugin Repositories</strong> diese Adresse eintragen:') + repoKasten,
+      L('Click <strong>+</strong>, then <strong>Save</strong>.', 'Auf <strong>+</strong> klicken, dann <strong>Save</strong>.'),
+      L('Open the plugin installer with <code>/xlplugins</code>, search for <strong>HamMeter</strong> and install it.', 'Den Plugin-Installer öffnen mit <code>/xlplugins</code>, nach <strong>HamMeter</strong> suchen und installieren.'),
+      L('Make sure IINACT is installed and running.', 'Darauf achten, dass IINACT installiert ist und läuft.')],
+  A: [L(`<strong>Download</strong> <code>HamMeter-Setup-&lt;version&gt;.exe</code> from the <a href="${GH_A}/releases/latest">latest release</a> and run it.`,
+        `<strong>Lade</strong> <code>HamMeter-Setup-&lt;version&gt;.exe</code> vom <a href="${GH_A}/releases/latest">neuesten Release</a> und starte es.`),
+      L('<strong>Pick “With Npcap”</strong> in the setup (recommended). The setup installs it for you and checks it.',
+        '<strong>Wähle „With Npcap“</strong> im Setup (empfohlen). Das Setup installiert es für dich und prüft es.'),
+      L('<strong>Set Aion 2 to borderless windowed</strong> and play. The meter shows up with your first fight.',
+        '<strong>Stell Aion 2 auf rahmenloses Fenster</strong> und spiel. Das Meter erscheint mit deinem ersten Kampf.')],
+};
+const FRACHT_TEXT = {
+  F: [L('claw machine', 'Greifautomat'), L('second claw machine', 'zweiter Greifautomat'), L('air hockey table', 'Airhockey-Tisch'),
+      L('prize counter', 'Preistheke'), L('drinks machine', 'Getränkeautomat'), L('puck and mallets', 'Puck und Schläger')],
+  A: [L('two claw machines', 'zwei Greifautomaten'), L('air hockey with puck and mallets', 'Airhockey mit Puck und Schlägern'),
+      L('prize counter and drinks machine', 'Preistheke und Getränkeautomat')],
+};
+const BRAUCHST = {
+  F: L(`You need <a href="${IINACT}">IINACT</a>, installed and running. HamMeter reads the encounter data from it over Dalamud IPC and does not parse the game itself.`,
+       `Du brauchst <a href="${IINACT}">IINACT</a>, installiert und gestartet. HamMeter liest die Kampfdaten daraus über Dalamud IPC und liest das Spiel nicht selbst aus.`),
+  A: L(`You need Windows 10 or 11 (64-bit) and Aion 2 in <strong>borderless windowed</strong> mode (no overlay can draw over exclusive fullscreen). <a href="${NPCAP}">Npcap</a> comes with the setup.`,
+       `Du brauchst Windows 10 oder 11 (64 Bit) und Aion 2 im Modus <strong>rahmenloses Fenster</strong> (über exklusivem Vollbild kann kein Overlay zeichnen). <a href="${NPCAP}">Npcap</a> bringt das Setup mit.`),
+};
+const NACH = {
+  F: '',
+  A: `<p class="hinweis">${L("Without Npcap, HamMeter needs administrator rights on every start and VPNs or ping boosters don't work. Updates are offered inside HamMeter. Uninstall from <strong>Apps &amp; Features</strong>; nothing stays behind.",
+    'Ohne Npcap braucht HamMeter bei jedem Start Administratorrechte, und VPNs oder Ping-Booster gehen nicht. Updates bietet HamMeter selbst an. Entfernen über <strong>Apps &amp; Features</strong>; nichts bleibt zurück.')}</p>`,
+};
+const TICKETS = [[L('Five metrics', 'Fünf Werte'), L('Damage done and taken, healing done and taken, deaths.', 'Schaden ausgeteilt und erlitten, Heilung gewirkt und erhalten, Tode.')],
+  [L('Every fight', 'Jeder Kampf'), L('The current fight, overall and a history of past fights.', 'Der aktuelle Kampf, Gesamt und ein Verlauf früherer Kämpfe.')],
+  [L('Fresh in every dungeon', 'Frisch in jedem Dungeon'), L('The meter starts empty when you enter instanced content.', 'Das Meter startet leer, wenn du eine Instanz betrittst.')],
+  [L('Your colours', 'Eigene Farben'), L('Job or class icons, colours per job or class or per role.', 'Job- bzw. Klassensymbole, Farben je Job bzw. Klasse oder je Rolle.')],
+  [L('Test mode', 'Testmodus'), L('Try the look without a fight.', 'Das Aussehen ausprobieren, ohne zu kämpfen.')]];
+const halt = t => `<span class="halt">${t}</span>`;
+function guide(a) {                                           // Installations-Karte: Schritte zum Abhaken
+  const n = SCHRITTE[a].length, e = Math.min(erledigt[a], n);
+  return `${halt(L(`${SPIEL[a]} · Installation`, `${SPIEL[a]} · Installation`))}<h2>${L('Install', 'Installieren')}</h2>
+    <p class="vor">${BRAUCHST[a]}</p>
+    <ol class="guide">${SCHRITTE[a].map((t, i) => `<li class="${i < e ? 'fertig' : i === e ? 'jetzt' : ''}">
+      <span class="nr">${i < e ? '✓' : i + 1}</span><div>${t}${i === e ? `<div class="tun">
+        <button type="button" class="knopf voll klein" data-erledigt="${a}">${L('Done', 'Erledigt')} ✓</button>${dazu(FRACHT_TEXT[a][i])}</div>` : ''}</div></li>`).join('')}</ol>
+    ${OHNE3D ? (e >= n ? `<p class="fertig-text">${L('All steps done.', 'Alle Schritte erledigt.')}</p>`   // ohne Zug (Livegang H)
+      : `<p class="hinweis">${L('Tick off each step when it is done.', 'Hak jeden Schritt ab, wenn er erledigt ist.')}</p>`)
+      : e >= n ? `<p class="fertig-text">${L('All aboard! Scroll on, the train takes everything to the arcade.', 'Alles an Bord! Scroll weiter, der Zug bringt alles zur Spielhalle.')}</p>`
+      : `<p class="hinweis">${L('Each step you finish loads its part onto the train. Just reading? Scroll on, the rest hops on by itself.', 'Jeder erledigte Schritt lädt seinen Teil auf den Zug. Nur am Lesen? Scroll weiter, der Rest springt von allein auf.')}</p>`}
+    ${e > 0 ? `<div class="guide-leiste"><button type="button" class="link" data-zurueck="${a}">${L('Back one step', 'Einen Schritt zurück')}</button>
+      <button type="button" class="link" data-neu="${a}">${L('Start over', 'Neu anfangen')}</button></div>` : ''}${NACH[a]}`;
+}
+const KARTEN = {
+  depot: { html: () => `${halt(L('Depot', 'Depot'))}<h2>${L('What it does', 'Was es kann')}</h2>
+    <p class="vor">${L('What both versions do, in FFXIV and in Aion 2.', 'Was beide Versionen können, in FFXIV und in Aion 2.')}</p>
+    <div class="merkmale">${TICKETS.map(([b, t]) => `<div class="ticket"><div><b>${b}</b>${t}</div></div>`).join('')}</div>
+    ${dazu(L('six arcade cabinets', 'sechs Spielautomaten'))}` },
+  stellwerk: { html: () => `${halt(L('Signal box', 'Stellwerk'))}<h2>${L('Which game?', 'Welches Spiel?')}</h2>
+    <p class="vor">${L('Two games, two ways. Pick yours: the switch is set and the train takes your branch with pictures, installation and tips for that game.',
+      'Zwei Spiele, zwei Wege. Wähl deins: Die Weiche wird gestellt und der Zug fährt deinen Ast, mit Bildern, Installation und Tipps für dieses Spiel.')}</p>
+    <div class="spiele">${['F', 'A'].map(a => `
+      <button type="button" class="spiel" data-ast="${a}"><b>${SPIEL[a]}</b><span class="t">${a === 'F'
+        ? L('A Dalamud plugin. Reads the encounter data from IINACT.', 'Ein Plugin für Dalamud. Liest die Kampfdaten von IINACT.')
+        : L("An overlay on top of the game. Reads the game's network traffic.", 'Ein Overlay über dem Spiel. Liest den Netzwerkverkehr des Spiels.')}</span>
+        <span class="los-knopf">${L('Ride on', 'Losfahren')}<svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></button>`).join('')}
+    </div>
+    <p class="hinweis">${L('Just scrolling on takes the', 'Einfach weiterscrollen fährt den')} <span data-nur="F">FFXIV</span><span data-nur="A">Aion 2</span> ${L('branch.', 'Ast.')}</p>
+    ${dazu(L('dance machine and racing game', 'Tanzautomat und Rennspiel'))}` },
+  werbung_F: { html: () => `${halt(L('FFXIV · Billboard', 'FFXIV · Werbetafel'))}<h2>${L('How it looks', 'So sieht es aus')}</h2>
+    <p class="vor">${L('The FFXIV version: a clean, modern overlay with rounded bars and a customizable header.', 'Die Version für FFXIV: ein klares, modernes Overlay mit runden Balken und einstellbarer Kopfzeile.')}</p>
+    <ul><li>${L('Extensive settings: sizes, spacing, opacity, colours and more.', 'Viele Einstellungen: Größen, Abstände, Deckkraft, Farben und mehr.')}</li>
+      <li>${L("Since 1.0.3: job tags with a glass look, border and text follow each job's colour.", 'Seit 1.0.3: Job-Schilder im Glas-Look, Rand und Schrift folgen der Farbe des Jobs.')}</li></ul>
+    ${dazu(L('the big screen', 'der große Schirm'))}` },
+  werbung_A: { html: () => `${halt(L('Aion 2 · Billboard', 'Aion 2 · Werbetafel'))}<h2>${L('How it looks', 'So sieht es aus')}</h2>
+    <p class="vor">${L('Version 0.4 in test mode: a boss fight with the skill details, and a bar opened for its top skills. Click a picture to enlarge it.',
+      'Version 0.4 im Testmodus: ein Bosskampf mit den Skill-Details und eine aufgeklappte Leiste mit den Top-Skills. Klick auf ein Bild vergrößert es.')}</p>
+    <ul><li>${L("<strong>Matches the game.</strong> Damage, crit, back attack, front attack, double, perfect and multi hit match the in-game damage analyzer, total and per skill.",
+        '<strong>Passt zum Spiel.</strong> Schaden, Krit, Rückenangriff, Frontangriff, Doppel-, Perfekt- und Mehrfachtreffer stimmen mit dem Schadensanalysator im Spiel überein, gesamt und je Skill.')}</li>
+      <li>${L('<strong>Made for groups.</strong> You and your party only, never players who are merely nearby.', '<strong>Für Gruppen gemacht.</strong> Nur du und deine Gruppe, nie Spieler, die bloß in der Nähe sind.')}</li>
+      <li>${L('<strong>Skill details.</strong> Click a bar for the top skills, or open <em>Details</em> for every skill, the hit rates and a chart of the fight.',
+        '<strong>Skill-Details.</strong> Klick auf eine Leiste zeigt die Top-Skills, <em>Details</em> jeden Skill, die Trefferquoten und einen Verlauf des Kampfs.')}</li>
+      <li>${L('<strong>Every pack is its own fight.</strong> Walking between packs never lowers your DPS; bosses get a fight of their own with a crown.',
+        '<strong>Jede Gruppe Gegner ist ein eigener Kampf.</strong> Laufwege senken deinen DPS nie; Bosse bekommen einen eigenen Kampf mit Krone.')}</li></ul>
+    <ul class="chips"><li>${L('Signed self-updates', 'Signierte Updates')}</li><li>${L('Skill names in English or German', 'Skill-Namen auf Englisch oder Deutsch')}</li>
+      <li>${L('Nine bar styles', 'Neun Balken-Stile')}</li><li>${L('Works with VPNs and ping boosters', 'Läuft mit VPNs und Ping-Boostern')}</li><li>${L('Sits in the tray', 'Sitzt im Infobereich')}</li></ul>
+    ${dazu(L('the big screen', 'der große Schirm'))}` },
+  install_F: { html: () => guide('F') },
+  install_A: { html: () => guide('A') },
+  kiosk_F: { klasse: 'dunkel', html: () => `${halt(L('FFXIV · Kiosk', 'FFXIV · Kiosk'))}<h2>${L('Commands', 'Befehle')}</h2>
+    <div class="neon"><dl class="befehle">
+      <dt><b>/hammeter</b> ${L('or', 'oder')} <b>/ham</b></dt><dd>${L('show or hide the meter', 'Meter ein- und ausblenden')}</dd>
+      <dt><b>/hammeter config</b></dt><dd>${L('open the settings', 'Einstellungen öffnen')}</dd>
+      <dt><b>/hammeter test</b></dt><dd>${L('test mode on or off', 'Testmodus an oder aus')}</dd>
+      <dt><b>/hammeter clear</b></dt><dd>${L('reset the current data', 'aktuelle Daten zurücksetzen')}</dd>
+      <dt><b>/hammeter end</b></dt><dd>${L('end the current IINACT encounter', 'aktuellen Kampf in IINACT beenden')}</dd></dl></div>
+    ${dazu(L('the regulars get on', 'die Stammgäste steigen ein'))}` },
+  sicher_A: { html: () => `${halt(L('Aion 2 · Gatehouse', 'Aion 2 · Wachhaus'))}<h2>${L('Safe by design', 'Sicher gebaut')}</h2>
+    <p class="vor">${L('HamMeter touches as little as it can.', 'HamMeter greift so wenig ein wie möglich.')}</p>
+    <ul><li>${L("<strong>Read-only.</strong> It reads the network packets of Aion2.exe's own connections and drops everything else. No game memory, no code injection, nothing sent to the game.",
+        '<strong>Nur lesen.</strong> Es liest die Netzwerkpakete der eigenen Verbindungen von Aion2.exe und verwirft alles andere. Kein Spielspeicher, kein eingeschleuster Code, nichts geht ans Spiel.')}</li>
+      <li>${L('<strong>No data leaves your PC.</strong> The only connection is the update check to GitHub on start, and you can turn it off.',
+        '<strong>Keine Daten verlassen deinen PC.</strong> Die einzige Verbindung ist die Update-Prüfung bei GitHub beim Start, und die lässt sich abschalten.')}</li>
+      <li>${L("<strong>Signed updates.</strong> <em>Update now</em> only runs a setup signed with the author's key.",
+        '<strong>Signierte Updates.</strong> <em>Update now</em> startet nur ein Setup, das mit dem Schlüssel des Autors signiert ist.')}</li>
+      <li>${L('<strong>No admin rights</strong> with Npcap. Nothing is stored except your settings; fights live in memory and are gone when HamMeter closes.',
+        '<strong>Keine Administratorrechte</strong> mit Npcap. Gespeichert werden nur deine Einstellungen; Kämpfe liegen im Speicher und sind weg, wenn HamMeter schließt.')}</li></ul>
+    ${dazu(L('the regulars get on', 'die Stammgäste steigen ein'))}` },
+  info: { html: () => `${halt(L('Info', 'Info'))}<h2>${L('Latest versions', 'Neueste Versionen')}</h2>
+    <div class="zwei"><div class="kasten"><h3>FFXIV</h3><div class="nr">1.0.3</div>${L('18 June 2026', '18. Juni 2026')}
+      <p style="margin: 6px 0 0"><a href="${GH_F}/releases">${L('All releases', 'Alle Releases')}</a></p></div>
+      <div class="kasten"><h3>Aion 2</h3><div class="nr">0.4.0</div>${L('9 October 2026', '9. Oktober 2026')}
+      <p style="margin: 6px 0 0"><a href="${GH_A}/blob/main/CHANGELOG.md">${L('Changelog', 'Changelog')}</a></p></div></div>
+    <details><summary>${L("What's new in Aion 2 0.4.0", 'Neu in Aion 2 0.4.0')}</summary><ul>
+      <li>${L("Click a bar to see that player's top skills with crit, back attack and double hit rates.", 'Klick auf eine Leiste zeigt die Top-Skills dieses Spielers mit Krit-, Rückenangriffs- und Doppeltreffer-Quote.')}</li>
+      <li>${L("<em>Details</em> opens a window with every skill, the hit rates (the same numbers as the game's damage analyzer) and a chart of DPS or healing over the fight, with your party and the boss's HP.",
+        '<em>Details</em> öffnet ein Fenster mit jedem Skill, den Trefferquoten (dieselben Zahlen wie im Schadensanalysator des Spiels) und einem Verlauf von DPS oder Heilung über den Kampf, mit deiner Gruppe und den LP des Bosses.')}</li>
+      <li>${L('Skill names in German or English.', 'Skill-Namen auf Deutsch oder Englisch.')}</li>
+      <li>${L('Overall sums only the boss fights, the numbers to compare.', 'Gesamt zählt nur die Bosskämpfe, die Zahlen zum Vergleichen.')}</li>
+      <li>${L('Fixed: Russian names show in full.', 'Behoben: Russische Namen erscheinen vollständig.')}</li>
+      <li>${L("Fixed: hits are no longer lost now and then while capturing with Npcap. Checked against the game's damage analyzer: every boss matches.",
+        'Behoben: Mit Npcap gehen keine Treffer mehr verloren. Geprüft gegen den Schadensanalysator des Spiels: Jeder Boss stimmt.')}</li></ul></details>
+    <details><summary>${L("What's new in FFXIV 1.0.3", 'Neu in FFXIV 1.0.3')}</summary><ul>
+      <li>${L("Job tags with a glass look. The border and text follow each job's colour so they stay readable.", 'Job-Schilder im Glas-Look. Rand und Schrift folgen der Farbe des Jobs, damit sie lesbar bleiben.')}</li>
+      <li>${L('Fixed: the bar gradient now reaches the rounded ends.', 'Behoben: Der Verlauf der Balken reicht jetzt bis an die runden Enden.')}</li></ul></details>
+    <details><summary>${L("Why isn't the FFXIV version in the official Dalamud repository?", 'Warum ist die Version für FFXIV nicht im offiziellen Dalamud-Repository?')}</summary>
+      <p>${L('Damage meters are not eligible for the official repository, so it comes from its own plugin repository.', 'Damage Meter sind dort nicht zugelassen, darum kommt es aus einem eigenen Plugin-Repository.')}</p></details>
+    <details><summary>${L('Does the Aion 2 version touch the game?', 'Greift die Version für Aion 2 ins Spiel ein?')}</summary>
+      <p>${L("No. It only reads the network packets of Aion2.exe's own connections: no game memory, no code injection, nothing sent to the game.", 'Nein. Sie liest nur die Netzwerkpakete der eigenen Verbindungen von Aion2.exe: kein Spielspeicher, kein eingeschleuster Code, nichts geht ans Spiel.')}</p></details>
+    <details><summary>${L('Questions, ideas or a bug?', 'Fragen, Ideen oder ein Fehler?')}</summary>
+      <p>${L(`Write me on Discord: <code>nennmichschinken</code>, or open an issue on GitHub (<a href="${GH_F}/issues">FFXIV</a>, <a href="${GH_A}/issues">Aion 2</a>).`,
+        `Schreib mir auf Discord: <code>nennmichschinken</code>, oder leg ein Issue auf GitHub an (<a href="${GH_F}/issues">FFXIV</a>, <a href="${GH_A}/issues">Aion 2</a>).`)}</p></details>` },
+  ende: { klasse: 'feier', html: () => `${halt(L('Last stop · Arcade', 'Endstation · Spielhalle'))}<h2>${L('Lights on', 'Licht an')}</h2>
+    <p class="vor">${L("That's the whole arcade. The code for both versions is on GitHub. FFXIV version under the MIT license, Aion 2 version under GPL-3.0.",
+      'Das ist die ganze Spielhalle. Der Code beider Versionen liegt auf GitHub. Version für FFXIV unter MIT-Lizenz, Version für Aion 2 unter GPL-3.0.')}</p>
+    <div class="knoepfe"><a class="knopf voll" href="${GH_F}">HamMeter · FFXIV</a>
+      <a class="knopf leer" href="${GH_A}">HamMeter · Aion 2</a></div>
+    <p class="vor recht">${L('<a href="impressum.html" data-seite="impressum">Legal notice</a> · <a href="datenschutz.html" data-seite="datenschutz">Privacy</a>',
+      '<a href="impressum.html" data-seite="impressum">Impressum</a> · <a href="datenschutz.html" data-seite="datenschutz">Datenschutz</a>')}</p>` },
+};
+
+// ---------------------------------------------------------------- Ohne WebGL (Livegang H, Florians Wahl)
+// Titel und alle Halte als Karten untereinander in Fahrtreihenfolge, am Stellwerk die Spielwahl (danach stehen die Halte
+// dieses Spiels da), die Installationsschritte lassen sich weiter abhaken; kein Zug, kein Fahrplan, ohne Bild.
+// Zum Testen: ?ohne3d (in der Gasse: ?seite=null-meter&ohne3d geht nicht, die Karte trägt die Adresse nicht weiter;
+// direkt mit ?allein&ohne3d).
+const HALTE_OHNE = { F: ['depot', 'stellwerk', 'werbung_F', 'install_F', 'kiosk_F', 'info', 'ende'],
+                     A: ['depot', 'stellwerk', 'werbung_A', 'install_A', 'sicher_A', 'info', 'ende'] };
+function ohne3d() {
+  OHNE3D = true;
+  root.classList.add('ohne-3d');
+  root.dataset.ast = ast;
+  const box = $('karten');
+  const zeige = () => {
+    root.dataset.ast = ast;
+    box.innerHTML = HALTE_OHNE[ast].map(n => `<div class="karte an${KARTEN[n].klasse ? ' ' + KARTEN[n].klasse : ''}"
+      id="k-${n}">${KARTEN[n].html()}</div>`).join('');
+    box.querySelectorAll('[data-ast]').forEach(b => b.classList.toggle('gewaehlt', b.dataset.ast === ast));
+  };
+  const hin = id => { const el = $(id); if (el) el.scrollIntoView({ behavior: RUHIG ? 'auto' : 'smooth', block: 'start' }); };
+  zeige();
+  document.addEventListener('click', async e => {
+    const z = e.target.closest('button, a');
+    if (!z) return;
+    if (z.matches('[data-ast]')) {                             // Weiche: die Halte dieses Spiels, dorthin scrollen
+      ast = z.dataset.ast;
+      merke();
+      zeige();
+      hin(`k-werbung_${ast}`);
+    } else if (z.matches('[data-erledigt], [data-zurueck], [data-neu]')) {
+      const a = z.dataset.erledigt || z.dataset.zurueck || z.dataset.neu, n = SCHRITTE[a].length;
+      erledigt[a] = z.dataset.neu ? 0 : clamp(erledigt[a] + (z.dataset.erledigt ? 1 : -1), 0, n);
+      merke();
+      $(`k-install_${a}`).innerHTML = KARTEN[`install_${a}`].html();
+    } else if (z.matches('[data-zu]')) {
+      hin(`k-${z.dataset.zu}`);
+    } else if (z.matches('.kopieren')) {
+      try {
+        await navigator.clipboard.writeText(z.parentElement.querySelector('.repo').textContent.trim());
+        const alt = z.innerHTML;
+        z.textContent = de() ? 'Kopiert' : 'Copied';
+        setTimeout(() => { z.innerHTML = alt; }, 1500);
+      } catch (err) { /* Adresse steht da */ }
+    }
+  });
+  KARTE.setzeSprache(de() ? 'de' : 'en');
+  melde('bereit');
+  melde('ruhig');
+}
+const webgl = (() => {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
+  catch (e) { return false; }
+})();
+if (!webgl || new URLSearchParams(location.search).has('ohne3d')) { ohne3d(); await new Promise(() => {}); }
+
+// ---------------------------------------------------------------- Laden
+const loader = glbLader();
+const bildLader = new THREE.ImageLoader();
+const BILDER_A = ['bilder/null-meter/aion_meter_details.png', 'bilder/null-meter/aion_meter_expanded.png'];
+let welt, raumG, info, bilderA, renderer;
+const canvas = $('welt');
+try {                                                         // lädt etwas nicht oder gibt es keinen Kontext: ohne 3D
+  [welt, raumG, info, ...bilderA] = await Promise.all([
+    loader.loadAsync('modelle/strecke.glb'), loader.loadAsync('modelle/raum_spielhalle.glb'),
+    fetch('modelle/strecke.json').then(r => r.json()), ...BILDER_A.map(u => bildLader.loadAsync(u))]);
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) {
+  console.warn(e);
+  ohne3d();
+  await new Promise(() => {});
+}
+const M = info.strecke;
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.setClearColor(info.hintergrund);
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(24, 1, 0.5, 900);
+const G = gemeinsam();
+const NEBEL = { uNebel: { value: new THREE.Vector4(0, 0, 20, 44) }, uNebelFarbe: { value: new THREE.Color(info.hintergrund) } };
+bereite(THREE, welt, G, { nebel: NEBEL });
+const motive = bereite(THREE, raumG, G, { nebel: NEBEL });
+scene.add(welt.scene);
+const raum = raumG.scene;
+raum.position.set(...M.raum_versatz);
+scene.add(raum);
+scene.updateMatrixWorld(true);
+
+// ---------------------------------------------------------------- Linien der beiden Wege
+const LINIEN = {};
+for (const a of ['F', 'A']) {
+  const P = M.linien[a].p.map(p => new V3(...p)), S = M.linien[a].s;
+  LINIEN[a] = { P, S, ende: S[S.length - 1] };
+}
+function punkt(s, a = ast) {
+  const { P, S, ende } = LINIEN[a];
+  s = clamp(s, 0, ende);
+  let lo = 0, hi = S.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (S[m] <= s) lo = m; else hi = m; }
+  return P[lo].clone().lerp(P[hi], (s - S[lo]) / (S[hi] - S[lo] || 1));
+}
+const gier = d => Math.atan2(-d.z, d.x);
+
+// ---------------------------------------------------------------- Zug
+function eigen(o) {                                           // bewegte Teile: Licht für sich, Sonne dreht mit
+  const mats = new Map();
+  o.traverse(m => {
+    if (!m.isMesh || !m.material.isShaderMaterial) return;
+    if (!mats.has(m.material)) mats.set(m.material, voxelMaterial(THREE, G, { nebel: NEBEL, zug: true,
+      alpha: m.material.uniforms.uAlpha.value, eigen: { uSchatten: { value: 0 } } }));
+    m.material = mats.get(m.material);
+  });
+  return [...mats.values()];
+}
+const wagen = M.wagen.map(w => {
+  const o = welt.scene.getObjectByName(w.name), vorn = new V3(...w.vorn), hinten = new V3(...w.hinten);
+  const mitte0 = vorn.clone().add(hinten).multiplyScalar(0.5);
+  return { o, d: [w.d_vorn, w.d_hinten], gier0: gier(vorn.clone().sub(hinten)), mats: eigen(o),
+           arm: o.parent.worldToLocal(mitte0.clone()).sub(o.position).negate(), lage: null };
+});
+const WAGEN = { Lok: wagen[0], W1: wagen[1], W2: wagen[2], W3: wagen[3] }, WAGEN_NAMEN = Object.keys(WAGEN);
+function posen(s, a = ast) {                                 // Lage aller Wagen, wenn das vordere Lok-Drehgestell bei s ist
+  return wagen.map(w => {
+    const v = punkt(s + w.d[0], a), h = punkt(s + w.d[1], a), achse = v.clone().sub(h).normalize();
+    return { mitte: v.add(h).multiplyScalar(0.5), achse, rechts: achse.clone().cross(Y).normalize(), gier: gier(achse), dreh: gier(achse) - w.gier0 };
+  });
+}
+function setzeZug(s) {
+  posen(s).forEach((p, i) => {
+    const w = wagen[i];
+    w.o.rotation.y = p.dreh;
+    w.o.position.copy(w.o.parent.worldToLocal(p.mitte.clone())).add(w.arm.clone().applyAxisAngle(Y, p.dreh));
+    for (const m of w.mats) m.uniforms.uGier.value = p.dreh;
+    w.lage = p;
+  });
+}
+
+// ---------------------------------------------------------------- Fracht: wer wo einsteigt, wo er auf dem Wagen steht
+// gruppe je Weg: Halt, an dem sie lädt (install_X#n = Schritt n der Installation, #0 = bei der Ankunft);
+// entlang/quer in Voxeln um die Wagenmitte (quer + = links), hoehe über der Ladefläche, Drehung wie in der Halle
+// gegenüber der Fahrtrichtung (die Halle zeigt mit x in Fahrtrichtung)
+const beide = g => ({ F: g, A: g });
+const FRACHT = [
+  ...[1, 2, 3, 4, 5, 6].map((k, i) => ({ name: `Spielhalle_Automat_${k}`, gruppe: beide('depot'), wagen: 'W1', entlang: (2.5 - i) * 12, quer: 0 })),
+  { name: 'Spielhalle_Tanzautomat', gruppe: beide('stellwerk'), wagen: 'W2', entlang: 11, quer: 1 },
+  { name: 'Spielhalle_Rennspiel', gruppe: beide('stellwerk'), wagen: 'W2', entlang: -14, quer: 1 },
+  { name: 'Spielhalle_Meterschirm', gruppe: { F: 'werbung_F', A: 'werbung_A' }, wagen: 'W2', entlang: 0, quer: -12.5 },
+  { name: 'Spielhalle_Greifautomat_1', gruppe: { F: 'install_F#1', A: 'install_A#1' }, wagen: 'W3', entlang: 29, quer: 0 },
+  { name: 'Spielhalle_Greifautomat_2', gruppe: { F: 'install_F#2', A: 'install_A#1' }, wagen: 'W3', entlang: 11, quer: 0 },
+  { name: 'Spielhalle_Airhockey', gruppe: { F: 'install_F#3', A: 'install_A#2' }, wagen: 'W3', entlang: -11, quer: 7 },
+  { name: 'Spielhalle_Preistheke', gruppe: { F: 'install_F#4', A: 'install_A#3' }, wagen: 'W3', entlang: -11, quer: -7 },
+  { name: 'Spielhalle_Getraenkeautomat', gruppe: { F: 'install_F#5', A: 'install_A#3' }, wagen: 'W3', entlang: -32, quer: 0 },
+  { name: 'Spielhalle_Airhockey_Puck', gruppe: { F: 'install_F#6', A: 'install_A#2' }, wagen: 'W3', entlang: -6, quer: 7, hoehe: 12 },
+  { name: 'Spielhalle_Airhockey_Schlaeger_1', gruppe: { F: 'install_F#6', A: 'install_A#2' }, wagen: 'W3', entlang: -17.5, quer: 6.5, hoehe: 12 },
+  { name: 'Spielhalle_Airhockey_Schlaeger_2', gruppe: { F: 'install_F#6', A: 'install_A#2' }, wagen: 'W3', entlang: -2.5, quer: 7.5, hoehe: 12 },
+];
+// Reihenfolge in der Warteschlange (Runde 90): Wer die Arme hebt (Tänzerin winkt, Airhockey jubelt), steht zwischen
+// zwei Stehenden, sonst berühren sich bei 13 Voxeln Abstand die Arme der breiteren Figuren
+const LEUTE = ['Spielhalle_Spieler_1', 'Spielhalle_Taenzerin', 'Spielhalle_Spieler_2', 'Spielhalle_Fahrer',
+               'Spielhalle_Spielerin', 'Spielhalle_Airhockey_Spieler_2', 'Spielhalle_Airhockey_Spieler_1'];
+const ladung = [];
+FRACHT.forEach((f, j) => {
+  const o = raum.getObjectByName(f.name);
+  if (o) ladung.push({ ...f, o, heimP: o.getWorldPosition(new V3()), heimQ: o.getWorldQuaternion(new THREE.Quaternion()),
+                       art: 'modell', idx: j % 6 });
+});
+LEUTE.forEach((name, i) => {
+  const o = raum.getObjectByName(name);
+  if (o) ladung.push({ name, o, heimP: o.getWorldPosition(new V3()), heimQ: o.getWorldQuaternion(new THREE.Quaternion()),
+    art: 'gast', idx: i, gruppe: { F: 'kiosk_F', A: 'sicher_A' }, wagen: 'Lok', entlang: (i - 3) * 13, quer: 0 });
+});
+for (const a of ['F', 'A']) for (let k = 1; k <= 2; k++) {        // Kisten der Installation („Du brauchst“, Teil der Strecke)
+  const o = welt.scene.getObjectByName(`Fracht_${a}_${k}`);
+  if (!o) continue;
+  const p = o.getWorldPosition(new V3()), q = o.getWorldQuaternion(new THREE.Quaternion());
+  ladung.push({ name: o.name, o, art: 'kiste', rampeP: p, rampeQ: q, mats: eigen(o), idx: k,
+    gruppe: { [a]: `install_${a}#0` }, wagen: 'W2', entlang: 32, quer: k === 1 ? 7 : -7 });
+}
+for (const l of ladung) {
+  l.o.updateMatrixWorld(true);
+  l.groesse = new THREE.Box3().setFromObject(l.o).getSize(new V3()).y;
+  scene.attach(l.o);
+  l.sc = l.o.scale.clone();
+}
+const GRUPPEN = {}, NR_MAX = {};                              // je Weg: Gruppen und Reihenfolge darin
+for (const a of ['F', 'A']) {
+  const zaehler = {};
+  for (const l of ladung) {
+    const g = l.gruppe[a];
+    if (!g) continue;
+    (l.nr ||= {})[a] = zaehler[g] = (zaehler[g] ?? -1) + 1;
+    NR_MAX[g] = zaehler[g];
+  }
+  GRUPPEN[a] = Object.keys(zaehler);
+}
+const qGier = w => new THREE.Quaternion().setFromAxisAngle(Y, w);
+
+// Was sonst in der Halle ist, ploppt an der Endstation auf
+const GRUND = ['Raum_Sockel', 'Raum_Gehweg', 'Spielhalle'];
+const assoc = raumG.parser.associations, geladen = new Set(ladung.map(l => l.o)), rest = [];
+raum.traverse(o => {
+  const a = assoc.get(o);
+  if (!a || a.nodes === undefined || GRUND.includes(o.name) || geladen.has(o)) return;
+  let p = o.parent, drunter = false;
+  for (; p && p !== raum; p = p.parent) if (assoc.get(p) && assoc.get(p).nodes !== undefined && !GRUND.includes(p.name)) drunter = true;
+  if (drunter) return;
+  const b = new THREE.Box3().setFromObject(o), m = b.getCenter(new V3());
+  rest.push({ o, pos: o.position.clone(), sc: o.scale.clone(), anker: o.parent.worldToLocal(new V3(m.x, b.min.y, m.z)), z: b.min.z });
+});
+rest.sort((a, b) => a.z - b.z);
+const hallenBox = new THREE.Box3();
+raum.traverse(o => { if (GRUND.includes(o.name)) hallenBox.expandByObject(o); });
+const hallenMitte = hallenBox.getCenter(new V3());
+
+// ---------------------------------------------------------------- Werbetafel: Bilder des gewählten Spiels, Klick vergrößert
+function tafelBild(img, nr) {
+  const c = document.createElement('canvas');
+  c.width = 1500; c.height = 1000;                            // Fläche 90 × 60 Voxel
+  const g = c.getContext('2d');
+  g.fillStyle = '#1d1a2c';
+  g.fillRect(0, 0, c.width, c.height);
+  if (img) {
+    const k = Math.min((c.width - 110) / img.width, (c.height - 110) / img.height);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(img, (c.width - img.width * k) / 2, (c.height - img.height * k) / 2, img.width * k, img.height * k);
+  } else {                                                    // FFXIV: Bilder reicht Florian nach
+    g.strokeStyle = 'rgba(255, 143, 208, .55)'; g.lineWidth = 8; g.setLineDash([28, 22]);
+    g.beginPath(); g.roundRect(70, 70, c.width - 140, c.height - 140, 48); g.stroke();
+    g.fillStyle = '#ff8fd0'; g.font = '800 120px "Hanken Grotesk", system-ui, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(`[BILD ${nr}]`, c.width / 2, c.height / 2);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const TAFEL = { F: [tafelBild(null, 1), tafelBild(null, 2)], A: bilderA.map(b => tafelBild(b)) };
+const TAFEL_URL = { F: [null, null], A: BILDER_A };
+const tafeln = [];
+(M.halte.find(h => h.tafeln) || { tafeln: [] }).tafeln.forEach((t, i) => {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(t.breite, t.hoehe), new THREE.MeshBasicMaterial({ color: 0xf2f2f2, transparent: true }));
+  const n = new V3(...t.zur_kamera).normalize();
+  m.position.set(...t.mitte).addScaledVector(n, 0.02);
+  m.lookAt(m.position.clone().add(n));
+  scene.add(m);
+  tafeln.push(m);
+});
+// Bild 1 auf die linke Fläche: Die Kamera schaut von Südwesten, rechts auf dem Bildschirm ist +x +z
+tafeln.sort((a, b) => (a.position.x + a.position.z) - (b.position.x + b.position.z)).forEach((m, i) => { m.userData.i = i; });
+function tafelnZeigen() {
+  for (const t of tafeln) { t.material.map = TAFEL[ast][t.userData.i]; t.material.needsUpdate = true; }
+}
+const strahl = new THREE.Raycaster(), zeiger = new THREE.Vector2();
+const aufTafel = e => {
+  zeiger.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1);
+  strahl.setFromCamera(zeiger, camera);
+  const t = strahl.intersectObjects(tafeln)[0];
+  return t && TAFEL_URL[ast][t.object.userData.i];
+};
+canvas.addEventListener('pointermove', e => { canvas.style.cursor = aufTafel(e) ? 'zoom-in' : ''; });
+canvas.addEventListener('click', e => { const u = aufTafel(e); if (u) open(u, '_blank', 'noopener'); });
+
+// ---------------------------------------------------------------- Rasten: einmal scrollen = nächster Halt (Runde 58)
+// Florian: nicht dauerhaft scrollen müssen, um den Halt zu treffen. Je Halt eine Raste (CSS scroll-snap, mandatory,
+// scroll-snap-stop: always): Mausrad, Touchpad, Wischen und Tastatur bringen den Zug genau eine Station weiter, ohne
+// eine zu überspringen; der Scrollbalken bleibt. Ziel ist immer der Halt der nächstgelegenen Raste.
+let HALTE = [], HALT = {}, LADEPOSE = {};
+function weg() {                                              // Halte für den gewählten Ast
+  // gemeinsame Halte hinter der Weiche liegen auf dem Aion-2-Weg bei anderem s (der Ast ist kürzer)
+  HALT = Object.fromEntries(M.halte.map(h => [h.name, { ...h, s_lok: ast === 'A' && h.s_lok_A != null ? h.s_lok_A : h.s_lok }]));
+  HALTE = Object.values(HALT).filter(h => !h.ast || h.ast === ast).sort((a, b) => a.s_lok - b.s_lok);
+  LADEPOSE = Object.fromEntries(HALTE.map(h => [h.name, posen(h.s_lok)]));
+  root.dataset.ast = ast;                                     // Texte, die vom Weg abhängen (data-nur)
+  for (const k of Object.values(KARTEN_EL)) k.komp = null;   // Platz der Karten neu rechnen
+  hoehe();
+  tafelnZeigen();
+  markenBauen();
+}
+const STUFE = () => Math.max(240, Math.round(innerHeight * 0.5));   // Scrollweg von Halt zu Halt
+function hoehe() {
+  const bahn = $('bahn');
+  bahn.style.height = `${(HALTE.length - 1) * STUFE() + innerHeight}px`;
+  bahn.innerHTML = HALTE.map((h, i) => `<i class="raste" style="top: ${i * STUFE()}px"></i>`).join('');
+  balkenZeigen();
+}
+// Scrollbalken in der Karte (Runde 67): Griff so hoch wie der sichtbare Anteil, Lage nach dem Scrollen; Ziehen oder
+// Klicken wählt den Halt unter der Griffmitte und fährt hin (geheZuNr, wie das Mausrad)
+function balkenZeigen() {
+  const b = $('balken');
+  if (!EINGEBETTET || !b) return;
+  const h = b.clientHeight, weg = (HALTE.length - 1) * STUFE(), g = Math.max(36, h * innerHeight / (weg + innerHeight));
+  const griff = b.firstElementChild;
+  griff.style.height = `${g}px`;
+  griff.style.top = `${weg > 0 ? (h - g) * clamp(scrollY / weg, 0, 1) : 0}px`;
+}
+if (EINGEBETTET) {
+  const b = $('balken');
+  let zieht = false;
+  const haltBei = y => {
+    const r = b.getBoundingClientRect(), g = b.firstElementChild.offsetHeight;
+    return Math.round(clamp((y - r.top - g / 2) / Math.max(1, r.height - g), 0, 1) * (HALTE.length - 1));
+  };
+  const waehleBei = y => { const i = haltBei(y); if (i !== zielNr()) { clearTimeout(auswahlUhr); auswahl = null; geheZuNr(i); } };
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    b.setPointerCapture(e.pointerId);
+    zieht = true; b.classList.add('zieht');
+    waehleBei(e.clientY);
+  });
+  b.addEventListener('pointermove', e => { if (zieht) waehleBei(e.clientY); });
+  const los = () => { zieht = false; b.classList.remove('zieht'); };
+  b.addEventListener('pointerup', los);
+  b.addEventListener('pointercancel', los);
+  addEventListener('scroll', balkenZeigen, { passive: true });
+  addEventListener('resize', balkenZeigen);
+}
+const station = () => clamp(Math.round(scrollY / STUFE()), 0, HALTE.length - 1);
+const ziel = () => HALTE[station()].s_lok;                    // wohin der Zug soll (s der Lok)
+const nummer = name => HALTE.findIndex(h => h.name === name);
+let gewollt = null;                                           // Halt, zu dem gerade gescrollt wird
+function geheZuNr(i) {
+  gewollt = clamp(i, 0, HALTE.length - 1);
+  scrollTo({ top: gewollt * STUFE(), behavior: RUHIG ? 'auto' : 'smooth' });
+}
+function geheZu(name) { const i = nummer(name); if (i >= 0) geheZuNr(i); }
+// Halt, den der Fahrplan zeigt (Runde 60, Florian): die Auswahl über Pfeile und Punkte, sonst das Ziel des Zugs, auch
+// während die Seite noch zum Halt scrollt. So springt die Anzeige sofort, nicht erst, wenn der Zug da ist.
+let auswahl = null, auswahlUhr = 0;
+const AUSWAHL_PAUSE = 800;                                    // ms ohne weiteren Klick, dann fährt der Zug
+function zielNr() {
+  if (auswahl !== null) return auswahl;
+  return gewollt !== null && Math.abs(scrollY - gewollt * STUFE()) > 2 ? gewollt : station();
+}
+function weiter(d) {                                          // Mausrad: sofort einen Halt vor oder zurück
+  clearTimeout(auswahlUhr);
+  const von = zielNr();
+  auswahl = null;
+  geheZuNr(von + d);
+}
+// Pfeile und Punkte im Fahrplan wählen erst nur aus; der Zug fährt, wenn 0,8 s nichts mehr gedrückt wurde (3 × vor und
+// 1 × zurück fährt ihn also gleich 2 Halte weiter statt vor und wieder zurück)
+function waehle(i) {
+  auswahl = clamp(i, 0, HALTE.length - 1);
+  clearTimeout(auswahlUhr);
+  wartetNeu = true;
+  auswahlUhr = setTimeout(() => { const z = auswahl; auswahl = null; if (z !== null) geheZuNr(z); }, AUSWAHL_PAUSE);
+}
+let wartetNeu = false;                                        // Ring am Punkt neu starten
+window.NACHOBEN = () => waehle(0);                            // Knopf „nach oben“ (nachoben.js, Runde 95): wie Punkt 1
+// Mausrad und Touchpad: eine Bewegung = ein Halt, unabhängig davon, wie der Browser das Einrasten nach dem Rad macht.
+// Was aus einer Geste kommt (Touchpad-Schwung, schnell gedrehtes Rad), zählt einmal: weiter erst nach 180 ms Ruhe.
+// Über einer Karte, die selbst noch scrollen kann, scrollt die Karte. Wischen, Tasten und Scrollbalken rasten nativ.
+let radRuhe = 0, radFrei = true;
+addEventListener('wheel', e => {
+  if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  const karte = e.target.closest && e.target.closest('.karte');
+  if (karte && (e.deltaY > 0 ? karte.scrollTop + karte.clientHeight < karte.scrollHeight - 1 : karte.scrollTop > 0)) return;
+  e.preventDefault();
+  clearTimeout(radRuhe);
+  radRuhe = setTimeout(() => { radFrei = true; }, 180);
+  if (!radFrei || Math.abs(e.deltaY) < 4) return;
+  radFrei = false;
+  weiter(Math.sign(e.deltaY));
+}, { passive: false });
+
+// ---------------------------------------------------------------- Fahren (Runden 57–58: sofort los, weich an und weich halten)
+// Ziel ist immer ein Halt. Zwei Stufen: erst Fahrphysik wie beim Zug der Gasse (Bremsweg aus √(2·a·Rest)), darüber
+// eine kritisch gedämpfte Feder, die auch die Beschleunigung weich macht: Er rollt sofort, aber sanft an, hält ohne Ruck
+// und schießt nicht über den Halt hinaus. Die Beschleunigung gilt je Fahrt: mindestens 3,5 m/s² (Florian, Runde 57:
+// „Anfahren und Halten sehr gut“), bei weiten Fahrten so viel, dass sie gut 7 s dauern (Dreieck: t = 2·√(Weg/a));
+// fährt er schon aufs Ziel zu, mindestens so viel, dass er rechtzeitig bremst.
+const BESCHL = 3.5, T_FAHRT = 7, FEDER = 3, FEDER_KAMERA = 4;
+const Z = { s: 0, v: 0, y: 0, w: 0, a: BESCHL, ziel: null, kam: 0, kamV: 0, versatz: 0, versatzV: 0, zielVersatz: 0 };
+function feder(x, v, z, w, dt) {                              // kritisch gedämpft, genaue Lösung über dt (jede Bildrate)
+  const d = x - z, c = v + w * d, E = Math.exp(-w * dt);
+  return [z + (d + c * dt) * E, (v - w * c * dt) * E];
+}
+function fahre(dt, sZiel) {
+  if (RUHIG) { Z.s = Z.y = Z.kam = Z.ziel = sZiel; Z.v = Z.w = Z.kamV = 0; return; }
+  const e = sZiel - Z.y;
+  if (sZiel !== Z.ziel) {                                     // neue Fahrt
+    const d = Math.max(Math.abs(e), 0.01), bremsen = Math.sign(Z.w) === Math.sign(e) ? Z.w * Z.w / (2 * d) * 1.05 : 0;
+    Z.a = Math.max(BESCHL, 4 * d / T_FAHRT ** 2, bremsen);
+    Z.ziel = sZiel;
+  }
+  // anfahren mit a, bremsen darf bis 1,5 · a (damit er der Bremskurve sicher folgt)
+  const a = Z.a, soll = Math.sign(e) * Math.sqrt(2 * a * Math.abs(e));
+  const schneller = Math.abs(soll) > Math.abs(Z.w) && Math.sign(soll) === Math.sign(Z.w || soll);
+  const grenze = (schneller ? 1 : 1.5) * a * dt;
+  Z.w += clamp(soll - Z.w, -grenze, grenze);
+  if (Math.abs(e) < 0.002 && Math.abs(Z.w) < 0.05) { Z.y = sZiel; Z.w = 0; } else Z.y += Z.w * dt;
+  [Z.s, Z.v] = feder(Z.s, Z.v, Z.y, FEDER, dt);
+  [Z.kam, Z.kamV] = feder(Z.kam, Z.kamV, Z.s, FEDER_KAMERA, dt);
+}
+
+// ---------------------------------------------------------------- Laden an den Halten (nach Zeit, sobald der Zug steht)
+// LADEN[gruppe] = Sekunden; jedes Teil springt nach seiner Nummer (0,16 s Abstand) in 0,7 s auf. Steht der Zug am Halt,
+// wird geladen (Installation: nur erledigte Schritte), ist er vorbei, springt der Rest schnell auf, fährt er zurück,
+// wird ausgeladen. Die Endstation spielt in T_ENDE Sekunden ab: einfliegen, aufploppen, Neon.
+const LADEN = {}, T_ENDE = 5.5;
+let tEnde = 0;
+const dauer = g => (NR_MAX[g] || 0) * 0.16 + 0.7;
+function laden(dt, alles = false) {
+  const steht = Math.abs(Z.v) < 0.6;
+  for (const g of GRUPPEN[ast]) {
+    const [hn, nr] = g.split('#'), sh = HALT[hn].s_lok, T = dauer(g);
+    const vorbei = Z.s > sh + 0.3, vor = Z.s < sh - 0.3, darf = !nr || +nr === 0 || erledigt[ast] >= +nr;
+    let t = LADEN[g] || 0;
+    if (alles || RUHIG) t = vor ? 0 : vorbei || darf ? T : 0;
+    else if (vor) t -= dt * 2.5;
+    else if (vorbei) t += dt * 2.5;
+    else if (!darf) t -= dt * 1.5;
+    else if (steht) t += dt;
+    LADEN[g] = clamp(t, 0, T);
+  }
+  const se = HALT.ende.s_lok, angekommen = Z.s > se - 0.3;
+  if (alles || RUHIG) tEnde = angekommen ? T_ENDE : 0;
+  else tEnde = clamp(tEnde + (angekommen ? (steht ? dt : 0) : -dt * 2.5), 0, T_ENDE);
+}
+
+// ---------------------------------------------------------------- Karten und Nummern der Schritte
+const KARTEN_EL = {};
+function karten() {
+  const box = $('karten');
+  box.innerHTML = '';
+  const linien = [];
+  for (const h of M.halte) {
+    const k = KARTEN[h.name];
+    if (!k) continue;
+    const el = document.createElement('div');
+    el.className = 'karte' + (k.klasse ? ' ' + k.klasse : '');
+    el.innerHTML = k.html();
+    box.append(el);
+    const anker = ankerVon(h), entlang = new V3(Math.cos(h.richtung), 0, -Math.sin(h.richtung));
+    // Punkte des eigenen Hauses (um und unter dem Anker, halbe Breite je Art): Die Karte soll es nicht verdecken
+    const b = { start: 6, depot: 5, install: 5.5 }[h.art] || 2.5;
+    const haus = [[0, 0], [-b, 0], [b, 0], [0, -2], [-b, -2], [b, -2]].map(([e, y]) => anker.clone().addScaledVector(entlang, e).add(new V3(0, y, 0)));
+    KARTEN_EL[h.name] = { el, name: h.name, ast: h.ast, anker, haus, nah: 0 };
+    linien.push('<line /><circle r="7" />');
+  }
+  $('linien').innerHTML = linien.join('');
+}
+function ankerVon(h) {                                        // Punkt auf dem Haus (Runde 58, aus strecke.py)
+  if (h.art === 'ende') return new V3(hallenBox.max.x, hallenBox.max.y, hallenMitte.z);   // Oberkante der Rückwand
+  return h.anker ? new V3(...h.anker) : new V3(...h.punkt).setY(4);
+}
+function zeigeGuide(a) { const k = KARTEN_EL[`install_${a}`]; if (k) k.el.innerHTML = KARTEN[`install_${a}`].html(); }
+let marken = [];
+function markenBauen() {                                      // runde Nummern über der wartenden Fracht der Schritte
+  const n = SCHRITTE[ast].length;
+  $('marken').innerHTML = Array.from({ length: n }, (_, i) => `<span class="marke">${i + 1}</span>`).join('');
+  marken = [...$('marken').children].map((el, i) => ({ el, schritt: i + 1, g: `install_${ast}#${i + 1}`,
+    teile: ladung.filter(l => l.gruppe[ast] === `install_${ast}#${i + 1}`) }));
+}
+function markenZeigen() {
+  const nah = (KARTEN_EL[`install_${ast}`] || {}).nah || 0;
+  for (const m of marken) {
+    const sicht = nah > 0.3 && (LADEN[m.g] || 0) < 0.05 && m.teile.every(l => l.warteP);
+    m.el.style.opacity = sicht ? String(Math.min(1, (nah - 0.3) * 2)) : '0';
+    if (!sicht) continue;
+    const p = new V3();
+    for (const l of m.teile) p.add(l.warteP);
+    p.multiplyScalar(1 / m.teile.length).setY(M.rampe_hoehe + Math.max(...m.teile.map(l => l.groesse)) + 0.45 + (m.schritt % 2) * 0.35);
+    const q = p.project(camera);
+    m.el.style.transform = `translate(${(q.x + 1) / 2 * innerWidth}px, ${(1 - q.y) / 2 * innerHeight}px)`;
+    m.el.classList.toggle('jetzt', m.schritt === erledigt[ast] + 1);
+  }
+}
+document.addEventListener('click', async e => {
+  const z = e.target.closest('button, a');
+  if (!z) return;
+  if (z.matches('[data-ast]')) {                                 // (Sprache und ✕ Home: karte.js)                          // Weiche stellen und gleich weiterfahren (Runde 59)
+    ast = z.dataset.ast;
+    merke();
+    const i = nummer('stellwerk');
+    weg();
+    scrollTo(0, i * STUFE());
+    geheZuNr(i + 1);
+  } else if (z.matches('[data-weiter]')) {
+    waehle(zielNr() + +z.dataset.weiter);
+  } else if (z.matches('[data-halt-nr]')) {
+    waehle(+z.dataset.haltNr);
+  } else if (z.matches('[data-erledigt], [data-zurueck], [data-neu]')) {
+    const a = z.dataset.erledigt || z.dataset.zurueck || z.dataset.neu, n = SCHRITTE[a].length;
+    erledigt[a] = z.dataset.neu ? 0 : clamp(erledigt[a] + (z.dataset.erledigt ? 1 : -1), 0, n);
+    merke();
+    zeigeGuide(a);
+  } else if (z.matches('[data-zu]')) {
+    geheZu(z.dataset.zu);
+  } else if (z.matches('.kopieren')) {
+    try {
+      await navigator.clipboard.writeText(z.parentElement.querySelector('.repo').textContent.trim());
+      const alt = z.innerHTML;
+      z.textContent = de() ? 'Kopiert' : 'Copied';
+      setTimeout(() => { z.innerHTML = alt; }, 1500);
+    } catch (err) { /* Adresse steht da */ }
+  }
+});
+KARTE.setzeSprache(de() ? 'de' : 'en');
+
+// ---------------------------------------------------------------- Kamera
+const AZ = -Math.PI / 4, EL = 0.56, blickpunkt = new V3();
+let mx = 0, zx = 0, BREITE = 46;                              // sichtbare Breite am Blickpunkt (m)
+addEventListener('pointermove', e => { if (e.pointerType === 'mouse') mx = (e.clientX / innerWidth) * 2 - 1; });
+function groesse() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  hoehe();
+}
+addEventListener('resize', groesse);
+function blick(dt, hE) {
+  const breite = BREITE = clamp(24 + (camera.aspect - 0.5) * 16, 24, 46);
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
+  const dist = breite / 2 / Math.tan(hfov / 2);
+  // Die Kamera hängt dem Zug weich nach (beim Anfahren rollt er ein Stück voraus), höchstens gut ein Zehntel der Breite
+  const grenze = 0.12 * breite, kam = Z.s - grenze * Math.tanh((Z.s - Z.kam) / grenze);
+  const zugMitte = punkt(kam - 156 / 16);
+  const e = glatt(clamp(hE * 1.6, 0, 1));
+  blickpunkt.copy(zugMitte).lerp(new V3(hallenMitte.x, 0.5, hallenMitte.z), e * 0.6);
+  zx += (mx - zx) * (1 - Math.exp(-dt * 3));
+  const az = AZ - (RUHIG ? 0 : zx * 0.06);
+  if (innerWidth < 700) {                                     // Handy: Karte unten, also Zug ins obere Drittel
+    const boden = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) / Math.sin(EL);
+    blickpunkt.add(new V3(Math.sin(az), 0, Math.cos(az)).multiplyScalar(boden * 0.2));
+  }
+  const nebelMitte = blickpunkt.clone();                      // Nebel bleibt um die Station, auch wenn die Kamera rückt
+  // Platz für die Karte (Runde 58): seitlich rücken, Ziel setzt ueberlagerung(); weich wie der Zug
+  if (RUHIG) Z.versatz = Z.zielVersatz;
+  else [Z.versatz, Z.versatzV] = feder(Z.versatz, Z.versatzV, Z.zielVersatz, 2.5, dt);
+  blickpunkt.add(new V3(Math.cos(az), 0, -Math.sin(az)).multiplyScalar(Z.versatz));
+  camera.position.set(blickpunkt.x + dist * Math.cos(EL) * Math.sin(az), blickpunkt.y + dist * Math.sin(EL),
+                      blickpunkt.z + dist * Math.cos(EL) * Math.cos(az));
+  camera.lookAt(blickpunkt);
+  NEBEL.uNebel.value.set(nebelMitte.x, nebelMitte.z, breite * 0.62, breite * 1.35);
+  for (const t of tafeln) {                                   // Bilder der Werbetafel verschwinden im Nebel wie die Tafel
+    const d = Math.hypot(t.position.x - nebelMitte.x, t.position.z - nebelMitte.z);
+    t.material.opacity = 1 - glatt(clamp((d - breite * 0.62) / (breite * 0.73), 0, 1));
+    t.visible = t.material.opacity > 0.01;
+  }
+}
+
+// ---------------------------------------------------------------- Fracht bewegen
+function platz(p, l) {                                        // Platz auf dem Wagen (Lage p) bzw. auf der Rampe daneben
+  return p.mitte.clone().addScaledVector(p.achse, l.entlang / 16).addScaledVector(p.rechts, -l.quer / 16);
+}
+function fracht(hE) {
+  const jetzt = Object.fromEntries(Object.entries(WAGEN).map(([k, w]) => [k, w.lage]));
+  for (const l of ladung) {
+    const g = l.gruppe[ast];
+    if (!g) {                                                 // Kisten des anderen Asts bleiben auf ihrer Rampe
+      l.o.position.copy(l.rampeP); l.o.quaternion.copy(l.rampeQ); l.o.scale.copy(l.sc); l.o.visible = true;
+      continue;
+    }
+    const hn = g.split('#')[0], hs = HALT[hn], stop = LADEPOSE[hn][WAGEN_NAMEN.indexOf(l.wagen)];
+    const auf = jetzt[l.wagen];
+    const aufP = platz(auf, l).setY(M.schiene + M.deck + (l.hoehe || 0) / 16), aufQ = qGier(auf.gier);
+    let rampeP, rampeQ;
+    if (l.art === 'kiste') { rampeP = l.rampeP; rampeQ = l.rampeQ; }
+    else {
+      rampeP = platz(stop, l).addScaledVector(stop.rechts, -hs.seite * hs.rampe).setY(M.rampe_hoehe);
+      rampeQ = qGier(stop.gier + (l.art === 'gast' ? (hs.seite > 0 ? 0 : Math.PI) : 0));
+    }
+    l.warteP = rampeP;
+    const k = glatt(clamp(((LADEN[g] || 0) - l.nr[ast] * 0.16) / 0.7, 0, 1));
+    let pos, q, sc = 1;
+    if (l.art === 'gast') {                                   // steigen in die Lok: hüpfen zur Tür und sind drin
+      const tuer = platz(auf, { entlang: 0, quer: hs.seite * 15 }).setY(0.8);
+      pos = rampeP.clone().lerp(tuer, k).addScaledVector(Y, Math.sin(Math.PI * k) * 0.6);
+      q = rampeQ; sc = 1 - glatt(clamp((k - 0.6) / 0.4, 0, 1));
+    } else {
+      // weiter als die Rampe neben dem Gleis (Werbetafel für FFXIV, jenseits des Aion-2-Asts): höherer Bogen
+      const bogen = 0.9 + Math.max(0, rampeP.distanceTo(aufP) - 3) * 0.2;
+      pos = rampeP.clone().lerp(aufP, k).addScaledVector(Y, Math.sin(Math.PI * k) * bogen);
+      q = k >= 1 ? aufQ : rampeQ.clone().slerp(aufQ, k);
+    }
+    const e = clamp((hE - 0.06 - l.idx * 0.04 - (l.art === 'kiste' ? 0.3 : l.art === 'gast' ? 0.45 : 0)) / 0.24, 0, 1);
+    if (e > 0) {
+      // Gäste steigen auf der Seite der Halle aus der Lok, Kisten fliegen in die Hallenmitte
+      const von = l.art === 'gast' ? platz(auf, { entlang: 0, quer: HALT.ende.seite * 15 }).setY(0.8) : aufP;
+      const heim = l.art === 'kiste' ? hallenMitte.clone().add(new V3((l.idx - 1.5) * 1.2, 0, 0)).setY(0.6) : l.heimP;
+      pos = von.clone().lerp(heim, glatt(e)).addScaledVector(Y, Math.sin(Math.PI * e) * 1.6);
+      if (l.art !== 'kiste') q = aufQ.clone().slerp(l.heimQ, glatt(e));
+      sc = l.art === 'kiste' ? 1 - glatt(clamp((e - 0.7) / 0.3, 0, 1)) : l.art === 'gast' ? glatt(clamp(e / 0.3, 0, 1)) : 1;
+    }
+    l.o.position.copy(pos);
+    l.o.quaternion.copy(q);
+    l.o.scale.copy(l.sc).multiplyScalar(Math.max(sc, 0.0001));
+    l.o.visible = sc > 0.001;
+    if (l.mats) for (const m of l.mats) m.uniforms.uGier.value = k > 0.5 ? auf.gier : 0;   // Kiste: gebacken unverdreht
+  }
+}
+
+// ---------------------------------------------------------------- Platz der Karte am Halt (Runden 58–59)
+// Der Punkt sitzt auf dem Haus. Die Karte steht rechts oder links neben der Szene, mit Luft zum Rand; die Kamera rückt
+// Szene und Karte gemeinsam mittig. Passt beides nicht in die Breite, steht die Karte am Rand und die Szene rückt so weit
+// wie nötig. Gerechnet einmal je Halt für die Kamera, wie sie dort steht, wenn der Zug hält, und dann fest (Runde 59,
+// Florian: die Karte sprang bei der Einfahrt von einer Seite auf die andere). Seite: die, auf der die Karte am wenigsten
+// verdeckt (Haus, ladender Wagen, Bilder der Tafel und Halle zählen mehr als der übrige Zug), dann die mit weniger Rücken.
+const RAND_KARTE = () => Math.max(48, innerWidth * 0.04), ABST_KARTE = 64;
+const LADEWAGEN = { Lok: [0, 1], W1: [0, 1, 2], W2: [1, 2, 3], W3: [2, 3], Mitte: [1, 2] };
+const kamHalt = new THREE.PerspectiveCamera();
+function komposition(k) {
+  const w = k.el.offsetWidth, hh = k.el.offsetHeight, schluessel = `${innerWidth}x${innerHeight}|${w}`;
+  if (k.komp && k.komp.schluessel === schluessel) return k.komp;
+  const h = HALT[k.name], RAND = RAND_KARTE(), ABST = ABST_KARTE;
+  kamHalt.copy(camera, false);                                // Kamera am Halt: ohne Rücken, ohne Maus
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
+  const dist = BREITE / 2 / Math.tan(hfov / 2), p = punkt(h.s_lok - 156 / 16);
+  if (h.art === 'ende') p.lerp(new V3(hallenMitte.x, 0.5, hallenMitte.z), 0.6);
+  kamHalt.position.set(p.x + dist * Math.cos(EL) * Math.sin(AZ), p.y + dist * Math.sin(EL), p.z + dist * Math.cos(EL) * Math.cos(AZ));
+  kamHalt.lookAt(p);
+  kamHalt.updateMatrixWorld();
+  const proj = v => { const q = v.clone().project(kamHalt); return [(q.x + 1) / 2 * innerWidth, (1 - q.y) / 2 * innerHeight]; };
+  const punkte = [], lade = LADEWAGEN[h.wagen] || [0, 1, 2, 3];   // [x, y, Gewicht]
+  LADEPOSE[h.name].forEach((q, i) => { for (const d of [-2.7, 0, 2.7]) punkte.push([...proj(q.mitte.clone().addScaledVector(q.achse, d).setY(1)), lade.includes(i) ? 3 : 2]); });
+  for (const v of k.haus) punkte.push([...proj(v), 3]);
+  if (h.art === 'werbung') for (const tf of tafeln) {
+    const { width: bw, height: bh } = tf.geometry.parameters;
+    for (const fx of [-0.5, 0, 0.5]) for (const fy of [-0.5, 0.5]) punkte.push([...proj(tf.localToWorld(new V3(fx * bw, fy * bh, 0))), 3]);
+  }
+  if (h.art === 'ende') for (const fx of [-0.5, 0, 0.5]) for (const fz of [-0.5, 0.5])
+    punkte.push([...proj(hallenMitte.clone().add(new V3(fx * (hallenBox.max.x - hallenBox.min.x), 1.5, fz * (hallenBox.max.z - hallenBox.min.z)))), 3]);
+  const xs = punkte.map(q => q[0]), minX = Math.min(...xs), maxX = Math.max(...xs), ay = proj(k.anker)[1];
+  const y = clamp(ay - hh * 0.4, 88, innerHeight - hh - 80);
+  const varianten = [1, -1].map(seite => {
+    const gL = seite > 0 ? minX : minX - ABST - w, gR = seite > 0 ? maxX + ABST + w : maxX;
+    const px = gR - gL <= innerWidth - 2 * RAND ? clamp(innerWidth / 2 - (gL + gR) / 2, RAND - gL, innerWidth - RAND - gR)
+      : seite > 0 ? Math.max(innerWidth - RAND - gR, Math.min(0, RAND - minX)) : Math.min(RAND - gL, Math.max(0, innerWidth - RAND - maxX));
+    const x = clamp(seite > 0 ? maxX + px + ABST : minX + px - ABST - w, RAND, innerWidth - RAND - w);
+    const verdeckt = punkte.reduce((s, [qx, qy, g]) => s + (qx + px > x - 20 && qx + px < x + w + 20 && qy > y - 20 && qy < y + hh + 20 ? g : 0), 0);
+    return { seite, px, x, verdeckt };
+  });
+  const [a, b] = varianten, best = a.verdeckt !== b.verdeckt ? (a.verdeckt < b.verdeckt ? a : b) : Math.abs(a.px) <= Math.abs(b.px) ? a : b;
+  k.komp = { schluessel, ...best, ay };
+  return k.komp;
+}
+
+// ---------------------------------------------------------------- Bild für Bild
+let t = 0, vorher = performance.now(), neonAn = false, neonT = 0;
+const WEG = new V3();
+const FLACKERN = [[0, 1], [0.07, 0.3], [0.14, 1], [0.22, 0.45], [0.3, 0.9], [0.36, 0.55], [0.46, 1]];
+const titel = $('titel');
+function bild(now, fest) {
+  const dt = fest || clamp((now - vorher) / 1000, 0, 0.1);
+  vorher = now;
+  t += dt;
+  fahre(dt, ziel());
+  setzeZug(Z.s);
+  laden(dt);
+  const hE = tEnde / T_ENDE;
+  fracht(hE);
+  rest.forEach((r, j) => {
+    const k = clamp((hE - 0.6 - j / rest.length * 0.28) / 0.08, 0, 1), sc = k <= 0 ? 0.0001 : backOut(k);
+    r.o.visible = k > 0;
+    r.o.scale.copy(r.sc).multiplyScalar(sc);
+    r.o.position.copy(r.anker).addScaledVector(WEG.copy(r.pos).sub(r.anker), sc);   // Livegang D: ohne neue Vektoren
+  });
+  const an = hE > 0.93;
+  if (an !== neonAn) { neonAn = an; neonT = t; }
+  let l = 0.12;
+  if (neonAn) { l = 1; if (!RUHIG) for (const [s0, v] of FLACKERN) if (t - neonT >= s0) l = v; }
+  G.uLeuchten.value = l;
+  for (const m of motive) m.color.setScalar(Math.max(0.12, l));
+  G.uZeit.value = RUHIG ? 0 : t;
+  blick(dt, hE);
+  renderer.render(scene, camera);
+  ueberlagerung(Z.s, dt);
+  markenZeigen();
+}
+function ueberlagerung(s, dtUe = 0.016) {
+  const fort = glatt(clamp((s - HALTE[0].s_lok) / 9, 0, 1));
+  titel.style.opacity = String(1 - fort);
+  titel.style.translate = `${-fort * 60}px 0`;
+  titel.style.visibility = fort > 0.99 ? 'hidden' : 'visible';
+  const schmal = innerWidth < 700, ls = $('linien').children;
+  // Nur die Karte des Halts, zu dem der Zug fährt: Fährt er durch (Fahrplan-Punkt, Runde 59), blitzen die anderen
+  // nicht auf. Am Halt rückt die Kamera Szene und Karte gemeinsam mittig (siehe komposition)
+  const zielName = HALTE[station()].name;
+  let aktiv = null;
+  for (const k of Object.values(KARTEN_EL)) {
+    const aufWeg = !k.ast || k.ast === ast;
+    k.sicht = RUHIG ? +(k.name === zielName) : clamp((k.sicht || 0) + (k.name === zielName ? 1 : -1) * dtUe * 5, 0, 1);
+    k.nah = (aufWeg ? 1 - glatt(clamp((Math.abs(s - HALT[k.name].s_lok) - 2) / 5, 0, 1)) : 0) * glatt(k.sicht);
+    if (k.nah > 0.05 && (!aktiv || k.nah > aktiv.nah)) aktiv = k;
+  }
+  Z.zielVersatz = aktiv && !schmal ? -komposition(aktiv).px * BREITE / innerWidth * aktiv.nah : 0;
+  Object.values(KARTEN_EL).forEach((k, i) => {
+    const nah = k.nah;
+    const a = k.anker.clone().project(camera), ax = (a.x + 1) / 2 * innerWidth, ay = (1 - a.y) / 2 * innerHeight;
+    const w = k.el.offsetWidth, hh = k.el.offsetHeight;
+    let x, y;
+    if (schmal) { x = 16; y = innerHeight - hh - 70; }
+    else {
+      const kp = !k.ast || k.ast === ast ? komposition(k) : null;   // vorab, damit sie nicht vom Standardplatz gleitet
+      const zx_ = kp ? kp.x : innerWidth - RAND_KARTE() - w;
+      const zy_ = clamp((kp ? kp.ay : ay) - hh * 0.4, 88, innerHeight - hh - 80);
+      if (!k.pos || nah <= 0.05) k.pos = [zx_, zy_];
+      const f = 1 - Math.exp(-dtUe * 7);
+      k.pos[0] += (zx_ - k.pos[0]) * f; k.pos[1] += (zy_ - k.pos[1]) * f;
+      [x, y] = k.pos;
+    }
+    k.el.style.opacity = String(nah);
+    k.el.style.transform = `translate(${x}px, ${y + (1 - nah) * 24}px)`;
+    k.el.classList.toggle('an', nah > 0.6);
+    const linie = ls[i * 2], kreis = ls[i * 2 + 1];
+    // Linie zum nächsten Rand der Karte, nicht in die runden Ecken
+    const seitlich = ax < x || ax > x + w;
+    const ex = seitlich ? (ax < x ? x : x + w) : clamp(ax, x + 28, x + w - 28);
+    const ey = seitlich ? clamp(ay, y + 28, y + hh - 28) : (ay < y ? y : y + hh);
+    linie.style.opacity = nah > 0.05 && !schmal ? String(nah) : '0';
+    kreis.style.opacity = nah > 0.05 ? String(nah) : '0';
+    linie.setAttribute('x1', ax); linie.setAttribute('y1', ay); linie.setAttribute('x2', ex); linie.setAttribute('y2', ey);
+    kreis.setAttribute('cx', ax); kreis.setAttribute('cy', ay);
+  });
+  const n = zielNr();                                         // gewählter Halt bzw. Ziel des Zugs (Runde 60)
+  const namen = { start: ['Departure', 'Abfahrt'], depot: ['Depot', 'Depot'], werbung: ['Billboard', 'Werbetafel'],
+    stellwerk: ['Signal box', 'Stellwerk'], install: ['Installation', 'Installation'], kiosk: ['Kiosk', 'Kiosk'],
+    wachhaus: ['Gatehouse', 'Wachhaus'], info: ['Info', 'Info'], ende: ['Arcade', 'Spielhalle'] };
+  // Livegang D: nur bei Änderung (der Text neu gesetzt hieß jedes Bild neues Layout, gelesen wird es gleich danach)
+  const fText = `${n + 1}/${HALTE.length} · ${namen[HALTE[n].art][de() ? 1 : 0]}`;
+  if ($('fahrplan-text').textContent !== fText) $('fahrplan-text').textContent = fText;
+  const pu = $('fahrplan-punkte'), sprache = de() ? 1 : 0;
+  if (pu.children.length !== HALTE.length || pu.dataset.weg !== ast + sprache) {
+    pu.dataset.weg = ast + sprache;
+    pu.innerHTML = HALTE.map((h, i) => `<button type="button" data-halt-nr="${i}" title="${i + 1} · ${namen[h.art][sprache]}" aria-label="${i + 1} · ${namen[h.art][sprache]}"></button>`).join('');
+    // Text so breit wie der längste Halt (Runde 61, Florian: die Pille sprang in der Breite, beim schnellen Klicken
+    // rutschte der Pfeil weg und der Text wurde markiert)
+    const text = $('fahrplan-text'), mess = document.createElement('span');
+    mess.style.cssText = 'position: absolute; visibility: hidden; white-space: nowrap';
+    text.parentElement.append(mess);
+    text.style.minWidth = `${Math.ceil(Math.max(...HALTE.map((h, i) => {
+      mess.textContent = `${i + 1}/${HALTE.length} · ${namen[h.art][sprache]}`;
+      return mess.getBoundingClientRect().width;
+    })))}px`;
+    mess.remove();
+  }
+  const wartet = auswahl !== null;
+  [...pu.children].forEach((el, i) => {
+    el.classList.toggle('da', i <= n);
+    el.classList.toggle('hier', i === n);
+    const ring = wartet && i === n;
+    if (ring && wartetNeu) { el.classList.remove('wartet'); void el.offsetWidth; }   // Ring bei jedem Klick neu füllen
+    el.classList.toggle('wartet', ring);
+  });
+  wartetNeu = false;
+  $('fahrplan').querySelector('[data-weiter="-1"]').disabled = n === 0;
+  $('fahrplan').querySelector('[data-weiter="1"]').disabled = n === HALTE.length - 1;
+}
+
+function einrasten() {                                        // Zug und Fracht ohne Fahrt an den Stand des Scrollens setzen
+  Z.s = Z.y = Z.kam = Z.ziel = ziel();
+  Z.v = Z.w = Z.kamV = 0;
+  setzeZug(Z.s);
+  laden(0, true);
+}
+// ?halt=install_F (Runde 70, Verweis von WispUI): Weg nach der Endung, gleich an diesem Halt stehen (ohne Fahrt)
+const sprung = new URLSearchParams(location.search).get('halt');
+if (sprung && /_[FA]$/.test(sprung)) { ast = sprung.slice(-1); merke(); }
+weg();
+karten();
+if (document.fonts) document.fonts.ready.then(() => { $('fahrplan-punkte').dataset.weg = ''; });   // Breite nach der Schrift neu
+groesse();
+if (sprung && nummer(sprung) > 0) scrollTo({ top: nummer(sprung) * STUFE(), behavior: 'instant' });
+einrasten();
+renderer.compile(scene, camera);
+$('laden').classList.add('weg');
+const schleife = now => {                                     // als Karte zu (pausiert): nichts zeichnen
+  if (pausiert) vorher = now; else bild(now);
+  requestAnimationFrame(schleife);
+};
+requestAnimationFrame(now => { schleife(now); melde('bereit'); });
+window.__reise = { scene, camera, M, wagen, ladung, rest, Z, LADEN, ziel, station, nummer, erledigt, KARTEN_EL,   // nur zum Testen
+  weg: () => weg(), setzeAst: a => { ast = a; weg(); }, geheZu: n => { scrollTo(0, nummer(n) * STUFE()); einrasten(); },
+  schritt: n => { for (let i = 0; i < n; i++) bild(performance.now(), 0.05); } };
+</script>
+</body>
+</html>

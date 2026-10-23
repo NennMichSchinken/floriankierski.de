@@ -1,0 +1,345 @@
+{
+ "kameras": {
+  "Cam_Atelier": {
+   "pos": [
+    6.4317,
+    14.3211,
+    2.6302
+   ],
+   "ziel": [
+    13.875,
+    10.6,
+    -8.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Bahnhof": {
+   "pos": [
+    0.7119,
+    11.2345,
+    28.2761
+   ],
+   "ziel": [
+    15.625,
+    2.0,
+    7.75
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Baum": {
+   "pos": [
+    -18.529,
+    27.7662,
+    40.8778
+   ],
+   "ziel": [
+    12.0,
+    17.0,
+    -12.0
+   ],
+   "hfov": 48.455
+  },
+  "Cam_Ecke": {
+   "pos": [
+    -18.1332,
+    23.2319,
+    27.984
+   ],
+   "ziel": [
+    8.125,
+    6.0,
+    -5.625
+   ],
+   "hfov": 39.598
+  },
+  "Cam_Elektronik": {
+   "pos": [
+    -8.0281,
+    4.6352,
+    -10.9477
+   ],
+   "ziel": [
+    4.0,
+    1.4,
+    -12.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Figuren": {
+   "pos": [
+    63.875,
+    2.4701,
+    51.8832
+   ],
+   "ziel": [
+    63.875,
+    0.8,
+    40.0
+   ],
+   "hfov": 39.598
+  },
+  "Cam_Gesamt": {
+   "pos": [
+    -59.762,
+    49.4382,
+    59.762
+   ],
+   "ziel": [
+    12.0,
+    12.5,
+    -12.0
+   ],
+   "hfov": 39.598
+  },
+  "Cam_HireMe": {
+   "pos": [
+    1.4853,
+    4.545,
+    8.184
+   ],
+   "ziel": [
+    4.75,
+    1.4,
+    -4.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Kiosk": {
+   "pos": [
+    13.882,
+    5.0235,
+    -33.3914
+   ],
+   "ziel": [
+    12.0,
+    1.4,
+    -20.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Rueck": {
+   "pos": [
+    78.1362,
+    66.5,
+    -78.1362
+   ],
+   "ziel": [
+    12.0,
+    12.5,
+    -12.0
+   ],
+   "hfov": 39.598
+  },
+  "Cam_Spielhalle": {
+   "pos": [
+    15.8964,
+    8.3145,
+    10.4712
+   ],
+   "ziel": [
+    17.25,
+    1.4,
+    -5.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Stamm": {
+   "pos": [
+    -10.865,
+    22.5066,
+    10.865
+   ],
+   "ziel": [
+    12.0,
+    12.0,
+    -12.0
+   ],
+   "hfov": 39.598
+  },
+  "Cam_Uhrmacher": {
+   "pos": [
+    33.0608,
+    4.2108,
+    -10.0942
+   ],
+   "ziel": [
+    19.5,
+    1.3,
+    -12.0
+   ],
+   "hfov": 54.432
+  },
+  "Cam_Wohnung": {
+   "pos": [
+    -6.1378,
+    7.4031,
+    0.2785
+   ],
+   "ziel": [
+    3.4,
+    4.5,
+    -6.4
+   ],
+   "hfov": 54.432
+  }
+ },
+ "stationen": [
+  {
+   "text": "Atelier · About",
+   "pos": [
+    14.125,
+    10.9375,
+    -6.75
+   ]
+  },
+  {
+   "text": "Wohnung · privates About",
+   "pos": [
+    2.0,
+    5.0,
+    -4.75
+   ]
+  },
+  {
+   "text": "HIRE ME · Kontakt",
+   "pos": [
+    4.75,
+    1.875,
+    -1.875
+   ]
+  },
+  {
+   "text": "Spielhalle · HamMeter",
+   "pos": [
+    17.25,
+    1.875,
+    -1.875
+   ]
+  },
+  {
+   "text": "Elektronikladen · WispUI",
+   "pos": [
+    2.0,
+    1.875,
+    -12.0
+   ]
+  },
+  {
+   "text": "Uhrmacher · Timer",
+   "pos": [
+    22.125,
+    1.875,
+    -12.0
+   ]
+  },
+  {
+   "text": "Kiosk · Devlog",
+   "pos": [
+    12.0,
+    1.875,
+    -22.125
+   ]
+  },
+  {
+   "text": "Riesenrad",
+   "pos": [
+    3.875,
+    12.5,
+    -12.0
+   ]
+  },
+  {
+   "text": "Katze (Easter Egg)",
+   "pos": [
+    0.625,
+    4.5,
+    -12.5
+   ]
+  },
+  {
+   "text": "FLORIAN KIERSKI",
+   "pos": [
+    20.25,
+    18.75,
+    -0.375
+   ]
+  },
+  {
+   "text": "Kirschbaum",
+   "pos": [
+    10.5,
+    9.375,
+    -10.5
+   ]
+  }
+ ],
+ "klickpunkte": [
+  {
+   "name": "Wohnung",
+   "symbol": "birne",
+   "pos": [
+    5.0,
+    7.25,
+    -0.625
+   ]
+  },
+  {
+   "name": "Baum",
+   "symbol": "birne",
+   "pos": [
+    14.5,
+    28.875,
+    -13.875
+   ]
+  },
+  {
+   "name": "Katze",
+   "symbol": "ei",
+   "pos": [
+    0.625,
+    5.5,
+    -12.5
+   ]
+  }
+ ],
+ "raeume": {
+  "Atelier": "Cam_Atelier",
+  "HireMe": "Cam_HireMe",
+  "Wohnung": "Cam_Wohnung",
+  "Spielhalle": "Cam_Spielhalle",
+  "Elektronik": "Cam_Elektronik",
+  "Kiosk": "Cam_Kiosk",
+  "Uhrmacher": "Cam_Uhrmacher"
+ },
+ "laubraster": {
+  "Baum_Krone": [
+   8,
+   4,
+   0,
+   4
+  ]
+ },
+ "hintergrund": "#FFC8A4",
+ "nebel": [
+  12.0,
+  -12.0,
+  30.0,
+  90.0
+ ],
+ "stats": {
+  "zelle": 4,
+  "samples": 128,
+  "glaetten": 3,
+  "raum": "Elektronik",
+  "geraet": "OPTIX",
+  "backen_s": 28.6,
+  "backen2_s": 22.2,
+  "gruppen": 33,
+  "samples_allein": 32,
+  "ecken": 55572,
+  "glb_kb": 132,
+  "gesamt_s": 56.1,
+  "qpos": 14,
+  "qfarbe": 16
+ }
+}

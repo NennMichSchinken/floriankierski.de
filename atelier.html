@@ -1,0 +1,2329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>About · Florian Kierski</title>
+<script>   // Messen (?messen in der Adresse der Gasse, siehe messen.js): lädt nur dann, sonst nichts
+  try { if (/[?&]messen\b/.test(location.search + top.location.search)) document.write('<script src="js/messen.js"><\/script>'); } catch (e) { /* ohne */ }
+</script>
+<meta name="description" content="Florian Kierski: media designer and UX/UI designer on his way into IT.">
+<!-- About-Seite als Karte über der Gasse (Runde 79, mit Florian abgestimmt): ein Rundgang durch sein Atelier, das
+     Baumhaus aus der Gasse (Raum-Vignette 3d/web/diorama.py --raum Atelier). Beim Scrollen fährt die Kamera von Ding
+     zu Ding, eine Raste je Station (wie die Reise), jedes Ding steht für eine Station seines Wegs. Roter Faden aus
+     seinem Anschreiben: Der Weg in die IT begann nicht am Server, sondern am Bildschirm eines Nutzers. Die Kamera
+     schaut immer aus derselben Richtung und dreht nie, sie schiebt und zoomt nur.
+     Runde 80 (Florian: man verliert im Raum den Fokus): Das Ding der Station kommt heraus (schwebt größer nach vorn,
+     dreht sich zum Betrachter, der Raum wird blasser), ein Punkt mit der Nummer zeigt per Linie auf die Karte; die
+     Monitore haben einen Rahmen, die Bilder sitzen darin; Daily-UI-Arbeiten als angepinnte Blätter mit Lupe.
+     Runde 81 (Florian: die Dinge selbst waren zu grob): Detailmodelle wie die Fernseher der WispUI-Seite
+     (3d/web/atelier_dinge.py); das kleine Ding geht beim Herausholen ins große Bild über. Erst zwei Muster: das
+     Tablett (geht an, Diashow seiner freiberuflichen Arbeiten) und das Teleskop (mit Stern).
+     Runde 82 (Florians Idee): Scrollen ist der Rundgang, die Dinge bleiben im Raum (Kamera weniger nah, Raum farbig),
+     jedes trägt seine Nummer, die Karte zeigt erst eine Kurzfassung. Ein Klick aufs Ding, die Nummer oder „Genauer
+     ansehen“ holt es heran, dieselbe Karte geht auf. Das Teleskop wächst dabei als echte Voxel aus dem Raum-Teleskop
+     heraus („Verfeinern“: 1 → 8 → 64, Licht live), das kleine ist aus dem großen Modell verkleinert (3d/diorama/dinge.py).
+     Runde 83: auch das Tablett (Faktor 8, drei Schritte; Stift an der Oberkante); fertig gewachsen geht sein
+     Bildschirm unter Glas an und zeigt die Diashow (das große Blender-Bild aus Runde 81 ist weg).
+     Runde 84: die Monitore (links quer mit der Gasse, rechts hochkant mit Code), bleiben beim Heranwachsen an, dann
+     kommt das Glas und der Code tippt weiter.
+     Runde 85: Pinnwand (der rote Faden zieht sich von Florians Foto über seinen Weg bis zum Stern) und Staffelei
+     (90 Kästchen haken sich ab, ein Klick auf einen der fünf Ausdrucke öffnet die Lupe), Foto und Tafel als Bild.
+     Runde 86: Farbfächer auf einem Druckbogen (fächert sich herangeholt weit auf, glatt) und Server-Rack (Lämpchen
+     laufen einmal an und gehen wieder aus, Stromkabel liegt ausgesteckt daneben).
+     Runde 87: Whiteboard (Entwurf eines Verwaltungssystems zeichnet sich Strich für Strich, eine Notiz wandert nach
+     „Done“) und Poster der Tools (Bilder aus ihren Seiten, Klick öffnet HamMeter bzw. WispUI, im Timer rieselt Sand).
+     Runde 88: Lebenslauf als PDF (EN/DE je nach Sprache, öffnet in neuem Tab) als Pille oben, im Kopf und an Station 9
+     (Florian: soll sofort zu sehen sein), dazu eine Zeile bei HIRE ME in der Gasse; Vorlage und Skript in lebenslauf/
+     (außerhalb von prototypes/). Station 2: Ausbildung auf zwei Jahre verkürzt, Station 7: Tools seit 2026.
+     Fakten nur aus Florians Lebenslauf (references/privat/, lokal) und seinen Angaben im Chat (STAND.md, 16.10.):
+     Umstieg in die IT seit 12/2025, der Server läuft nicht mehr, kein Boot.dev. EN/DE. Vorschau-Server (lädt GLB). -->
+<script>
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    const de = q ? q === 'de' : localStorage.getItem('nullAlleySprache') === 'de';
+    if (de) { document.documentElement.dataset.sprache = 'de'; document.documentElement.lang = 'de'; }
+  } catch (e) { /* Englisch */ }
+  if (window.parent !== window && new URLSearchParams(location.search).has('eingebettet')) {
+    document.documentElement.classList.add('eingebettet');
+  }
+  // Unterseiten erscheinen immer als Karte über der Gasse (Runde 75); mit ?allein bleibt die Seite allein, zum Testen
+  else if (window.parent === window && !new URLSearchParams(location.search).has('allein')) {
+    location.replace('./?seite=atelier' + location.hash);
+  }
+</script>
+<link rel="stylesheet" href="css/seitennav.css">
+<script src="js/seitennav.js" defer></script>
+<link rel="stylesheet" href="css/nachoben.css">
+<script src="js/nachoben.js" defer></script>
+<script src="js/karte.js" defer></script>
+<link rel="stylesheet" href="schriften/schriften.css">
+<style>
+  :root {
+    --hg: #FFC8A4; --papier: #fff9f2;
+    --k: #ec5f4b; --k-text: #c43a26;                     /* Atelier (FARBEN im Web-Test) */
+    --k-hell: color-mix(in srgb, var(--k) 13%, #fff); --k-rand: color-mix(in srgb, var(--k) 26%, #fff);
+    --k-flaeche: color-mix(in srgb, var(--k) 7%, var(--papier));
+    --tinte: #2d2b45; --tinte2: #5d5770;
+    --schatten: 0 14px 36px rgba(107, 51, 49, .18);
+  }
+  :root[data-sprache="de"] [lang="en"]:not(html), :root:not([data-sprache="de"]) [lang="de"]:not(html) { display: none !important; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--hg); }
+  :root:not(.ohne-3d) { scroll-snap-type: y mandatory; }     /* eine Raste je Station (wie die Reise, Runde 58) */
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  html.eingebettet { scrollbar-width: none; }
+  html.eingebettet::-webkit-scrollbar { display: none; }
+  body { color: var(--tinte); font: 18px/1.55 'Hanken Grotesk', system-ui, sans-serif; overflow-x: clip; }
+  a { color: var(--k-text); }
+  button { font-family: inherit; }
+  svg.sym { width: 1.1em; height: 1.1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round; }
+  #welt { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+  .bahn { position: relative; pointer-events: none; }
+  .raste { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; scroll-snap-stop: always; }
+  .laden { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: var(--hg);
+    font-weight: 800; color: var(--k-text); transition: opacity .6s; }
+  .laden.weg { opacity: 0; pointer-events: none; }
+
+  /* Kopfleiste oben rechts wie auf den anderen Unterseiten */
+  .leiste { position: fixed; top: 0; left: 0; right: 0; z-index: 42; display: flex; justify-content: flex-end;
+    align-items: center; gap: 10px; padding: 18px clamp(16px, 3vw, 32px); pointer-events: none; }
+  .leiste > * { pointer-events: auto; }
+  .eingebettet .leiste { padding-top: 24px; }
+  .pille { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 0;
+    background: rgba(255, 249, 242, .92); color: var(--tinte); font: 700 15px/1.2 'Hanken Grotesk', system-ui, sans-serif;
+    text-decoration: none; box-shadow: 0 3px 12px rgba(45, 43, 69, .12); cursor: pointer; white-space: nowrap; }
+  .pille:hover { background: #fff; }
+  .pille.voll { background: var(--k); color: #fff; }
+  .pille.voll:hover { background: color-mix(in srgb, var(--k) 88%, #000); }
+  .sprache { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255, 249, 242, .92);
+    box-shadow: 0 3px 12px rgba(45, 43, 69, .12); }
+  .sprache button { border: 0; background: none; font: 700 14px/1 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--tinte); padding: 8px 12px; border-radius: 999px; cursor: pointer; opacity: .65; }
+  .sprache button[aria-pressed="true"] { background: var(--k-hell); color: var(--k-text); opacity: 1; }
+
+  /* Kopf: Name und Einstieg links, das Atelier rechts daneben */
+  .kopf { position: fixed; z-index: 5; left: calc(var(--sn) + clamp(24px, 4vw, 64px)); top: 50%; width: min(460px, 38vw);
+    translate: 0 -50%; transition: opacity .45s, translate .45s; }
+  .kopf.weg { opacity: 0; translate: -24px -50%; pointer-events: none; }
+  .ort { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, .7); color: var(--k-text); font-weight: 700; font-size: 15px; }
+  .kicker { margin: 22px 0 4px; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--k-text); }
+  h1 { margin: 0; font-size: clamp(52px, 6.4vw, 88px); line-height: .95; font-weight: 800; letter-spacing: -.02em; }
+  .unter { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .unter li { padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--k-rand); background: rgba(255, 255, 255, .6);
+    font-weight: 700; font-size: 14px; }
+  .kopf p { margin: 20px 0 0; font-size: 19px; }
+  .knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .knopf { display: inline-flex; align-items: center; gap: 9px; padding: 14px 22px; border-radius: 999px; border: 0;
+    font: 800 17px/1.1 'Hanken Grotesk', system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .15s; }
+  .knopf:hover { transform: translateY(-2px); }
+  .knopf.voll { background: var(--k); color: #fff; box-shadow: 0 8px 22px color-mix(in srgb, var(--k) 35%, transparent); }
+  .knopf.leer { background: var(--papier); color: var(--tinte); box-shadow: 0 6px 16px rgba(107, 51, 49, .12); }
+  .knopf.klein { padding: 10px 16px; font-size: 15px; }
+  .los .sym { animation: wippen 1.8s ease-in-out infinite; }
+  @keyframes wippen { 50% { transform: translateY(4px); } }
+
+  /* Karten der Stationen: eine Notiz je Ding, rechts neben dem Raum, oben ein Streifen Klebeband */
+  .karte { position: fixed; z-index: 6; right: calc(clamp(16px, 3vw, 32px) + 18px); top: 50%; width: min(430px, 34vw);
+    max-height: calc(100vh - 150px); display: flex; border-radius: 28px; background: var(--papier); box-shadow: var(--schatten);
+    opacity: 0; translate: 0 calc(-50% + 18px); pointer-events: none; transition: opacity .3s, translate .45s cubic-bezier(.2, .8, .3, 1); }
+  .karte.an { opacity: 1; translate: 0 -50%; pointer-events: auto; }
+  .karte::before { content: ''; position: absolute; top: -9px; left: 50%; width: 96px; height: 22px; translate: -50% 0;
+    rotate: -3deg; border-radius: 3px; background: color-mix(in srgb, var(--k) 45%, #fff); opacity: .85;
+    box-shadow: 0 2px 4px rgba(107, 51, 49, .08); }
+  .karte-innen { overflow: auto; padding: 26px 26px 22px; scrollbar-width: thin; min-height: 0; }
+  .stueck { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 10px; font-size: 14px;
+    font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--k-text); }
+  .stueck i { font-style: normal; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--k); color: #fff; letter-spacing: 0; font-size: 14px; }
+  .jahr { margin-left: auto; padding: 4px 10px; border-radius: 999px; background: var(--k-hell); letter-spacing: .02em; }
+  .karte h2 { margin: 0 0 12px; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.08; font-weight: 800; letter-spacing: -.01em; }
+  .karte p { margin: 0 0 12px; font-size: 17px; }
+  .punkte { list-style: none; margin: 14px 0 0; padding: 0; color: var(--tinte2); font-size: 16px; }
+  .punkte li { position: relative; padding-left: 22px; }
+  .punkte li + li { margin-top: 6px; }
+  .punkte li::before { content: ''; position: absolute; left: 2px; top: .62em; width: 8px; height: 8px;
+    background: var(--k); box-shadow: 2px 2px 0 var(--tinte); }                  /* kleiner Voxel statt Punkt */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .chips li { padding: 4px 11px; border-radius: 999px; background: #fff; border: 1.5px solid var(--k-rand); font-size: 14px; font-weight: 700; }
+  .karte .knoepfe { margin-top: 18px; }
+  .leise { color: var(--tinte2); font-size: 15px !important; }
+  /* Runde 82 (Florians Idee): erst die Kurzfassung, die allein reicht; „Genauer ansehen“ holt das Ding heran, und
+     dieselbe Karte geht auf (der ausführliche Teil klappt auf, die Kurzfassung zu) */
+  .kurz, .mehr { display: grid; transition: grid-template-rows .45s cubic-bezier(.2, .8, .3, 1), opacity .3s; }
+  .kurz > div, .mehr > div { min-height: 0; overflow: hidden; padding: 6px 8px; margin: -6px -8px; }
+  .kurz { grid-template-rows: 1fr; }
+  .mehr { grid-template-rows: 0fr; opacity: 0; }
+  .karte.offen .kurz { grid-template-rows: 0fr; opacity: 0; }
+  .karte.offen .mehr { grid-template-rows: 1fr; opacity: 1; }
+  .kurz .knoepfe { margin-top: 14px; }
+  .karte .genau { margin-top: 14px; }
+  .genauer .auf, .genauer .zu { display: inline-flex; align-items: center; gap: 8px; }
+  .genauer .zu, .karte.offen .genauer .auf { display: none; }
+  .karte.offen .genauer .zu { display: inline-flex; }
+  .ohne-3d .kurz, .ohne-3d .genau { display: none; }
+  .ohne-3d .mehr { grid-template-rows: 1fr; opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .kurz, .mehr { transition: opacity .2s; } }
+  /* Station 1: das Polaroid in der Karte nur ohne 3D (mit 3D kommt es aus dem Raum heraus) */
+  .foto { float: right; width: 112px; height: auto; margin: 0 0 10px 16px; rotate: 3deg; border-radius: 3px;
+    box-shadow: 0 6px 14px rgba(107, 51, 49, .18); }
+  :root:not(.ohne-3d) .foto { display: none; }
+  /* Station 5: Florians Daily-UI-Arbeiten als angepinnte Blätter; ein Klick holt eins groß (Runde 80) */
+  .blaetter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px; margin: 18px 0 6px; }
+  .blatt { position: relative; aspect-ratio: 3 / 4; padding: 5px; border: 0; border-radius: 4px; background: #fff;
+    box-shadow: 0 4px 10px rgba(107, 51, 49, .14); cursor: zoom-in; transition: translate .15s, rotate .15s, box-shadow .15s; }
+  .blatt img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
+  .blatt .titel { display: none; }
+  .blatt:nth-child(3n + 1) { rotate: -2deg; } .blatt:nth-child(3n + 2) { rotate: 1.5deg; } .blatt:nth-child(3n) { rotate: -.5deg; }
+  .blatt:hover, .blatt:focus-visible { translate: 0 -3px; rotate: 0deg; box-shadow: 0 10px 18px rgba(107, 51, 49, .2); outline: none; }
+  .blatt::before { content: ''; position: absolute; z-index: 1; top: -5px; left: 50%; width: 11px; height: 11px; margin-left: -5.5px;
+    border-radius: 50%; background: var(--k); box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .18); }
+  /* Lupe: ein Blatt groß, mit Papierrand; Pfeile blättern, Klick daneben oder Esc schließt */
+  .lupe { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 72px 64px 48px;
+    background: rgba(45, 43, 69, .5); backdrop-filter: blur(4px); cursor: zoom-out; }
+  .lupe[hidden] { display: none; }
+  .lupe figure { margin: 0; display: grid; justify-items: center; gap: 12px; max-width: 100%; max-height: 100%; }
+  .lupe img { display: block; max-width: min(100%, 900px); max-height: calc(100vh - 190px); padding: 10px; border-radius: 8px;
+    background: #fff; box-shadow: 0 24px 60px rgba(29, 26, 44, .35); cursor: default; }
+  .lupe figcaption { padding: 6px 14px; border-radius: 999px; background: var(--papier); font-weight: 800; font-size: 15px; }
+  .lupe .pille { position: absolute; top: 18px; right: 18px; }
+  .lupe .blaettern { position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; display: grid; place-items: center;
+    padding: 0; border: 0; border-radius: 50%; background: var(--papier); color: var(--tinte); cursor: pointer;
+    box-shadow: 0 6px 16px rgba(29, 26, 44, .25); }
+  .lupe .blaettern.zurueck { left: 14px; } .lupe .blaettern.vor { right: 14px; }
+  .lupe .blaettern:hover { background: #fff; }
+
+  /* Markierung (Runde 80): runder Punkt mit der Nummer am Ding, gepunktete Linie zur Karte (wie die Reise). Runde 82:
+     am Desktop tragen alle Dinge ihre Nummer (klein und hell, ein Klick fährt hin), die der Station groß in Koralle;
+     bei der Ankunft pulsiert sie einmal (man kann draufklicken). Am Handy nur die aktuelle. */
+  #linien { position: fixed; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity .3s; }
+  #linien.an { opacity: 1; }
+  #linien line { stroke: var(--k); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 0.1 9; }
+  .marke { position: fixed; left: 0; top: 0; z-index: 4; display: grid; place-items: center; width: 34px; height: 34px;
+    margin: -17px 0 0 -17px; padding: 0; border: 0; border-radius: 50%; background: var(--k); color: #fff;
+    font: 800 15px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(255, 249, 242, .92), 0 6px 14px rgba(107, 51, 49, .25); opacity: 0; pointer-events: none;
+    transition: opacity .3s, background-color .2s, color .2s, box-shadow .2s, scale .25s;
+    will-change: translate; }      /* Platz per translate, Größe nur per scale: so verschiebt sich der Punkt nie */
+  .marke.an { opacity: 1; pointer-events: auto; }
+  .marke.neben { scale: .74; background: rgba(255, 249, 242, .96); color: var(--k-text);
+    box-shadow: 0 0 0 2.5px var(--k-rand), 0 3px 8px rgba(107, 51, 49, .16); }
+  .marke:hover, .marke.drueber { scale: 1.12; }
+  .marke.neben:hover, .marke.neben.drueber { scale: .86; background: var(--k); color: #fff;   /* gefüllt beim Zeigen */
+    box-shadow: 0 0 0 4px rgba(255, 249, 242, .92), 0 4px 10px rgba(107, 51, 49, .25); }
+  .marke.puls::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 3px solid var(--k);
+    animation: puls 1.2s ease-out 1 forwards; pointer-events: none; }
+  @keyframes puls { from { scale: .85; opacity: .9; } to { scale: 2.2; opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .marke.puls::after { display: none; } }
+  #welt.zeigt { cursor: pointer; }
+  .ohne-3d #linien, .ohne-3d .marke { display: none; }
+
+  /* Stern (Runde 81) in Verlängerung des Teleskops; Runde 82: über dem Teleskop aus Voxeln, im Bild gehalten */
+  .stern { position: fixed; left: 0; top: 0; z-index: 4; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+    pointer-events: none; opacity: 0; transition: opacity .5s; will-change: transform; }
+  .stern.an { opacity: 1; }
+  .stern span { display: block; width: 100%; height: 100%; animation: funkeln 2.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 225, 79, .9)); }
+  .stern svg { width: 100%; height: 100%; display: block; }
+  .ohne-3d .stern { display: none; }
+  @keyframes funkeln { 0%, 100% { scale: .55; opacity: .55; rotate: 0deg; } 50% { scale: 1.1; opacity: 1; rotate: 20deg; } }
+  @media (prefers-reduced-motion: reduce) { .stern span { animation: none; } }
+
+  /* Eigener Scrollbalken in der Karte (wie die Reise): Ziehen oder Klicken wählt die Station */
+  .balken { display: none; }
+  .eingebettet:not(.ohne-3d) .balken { display: block; position: fixed; right: 8px; top: 96px; bottom: 28px; width: 16px;
+    z-index: 41; cursor: pointer; touch-action: none; }
+  .balken::before, .balken i { position: absolute; left: 50%; width: 6px; translate: -50% 0; border-radius: 999px; }
+  .balken::before { content: ''; top: 0; bottom: 0; background: rgba(255, 249, 242, .7);
+    box-shadow: inset 0 0 0 1px rgba(107, 51, 49, .07); transition: width .15s; }
+  .balken i { top: 0; height: 40px; background: var(--k); box-shadow: 0 2px 6px rgba(107, 51, 49, .18); transition: width .15s; }
+  .balken:hover::before, .balken.zieht::before, .balken:hover i, .balken.zieht i { width: 10px; }
+
+  /* Schmal (Seitennavigation unten als Pille): Raum oben, Karte unten darüber */
+  @media (max-width: 860px), (max-aspect-ratio: 1/1) {
+    .kopf, .karte { left: 12px; right: 12px; width: auto; top: auto; bottom: calc(80px + env(safe-area-inset-bottom)); }
+    .kopf { translate: 0 0; padding: 20px 22px; border-radius: 26px; background: rgba(255, 249, 242, .94); box-shadow: var(--schatten); }
+    .kopf.weg { translate: 0 16px; }
+    .kopf .ort { display: none; }
+    .kicker { margin-top: 0; }
+    h1 { font-size: 46px; }
+    .unter { margin-top: 12px; }
+    .unter li { font-size: 13px; padding: 4px 10px; }
+    .kopf p { margin-top: 12px; font-size: 16px; }
+    .knoepfe { margin-top: 16px; }
+    .kopf .knopf { padding: 11px 18px; font-size: 15px; }
+    .karte { max-height: 44vh; translate: 0 16px; }
+    .karte.an { translate: 0 0; }
+    .karte-innen { padding: 22px 20px 18px; }
+    .karte p { font-size: 16px; }
+    .foto { width: 88px; }
+    .eingebettet:not(.ohne-3d) .balken { right: 3px; top: 84px; bottom: 50vh; width: 12px; }
+    .balken::before, .balken i { width: 4px; }
+  }
+  @media (max-width: 480px) { .leiste .pille.voll span { display: none; } }
+  .pille.cv .cv-kurz { display: none; }                       /* Runde 88: schmal heißt der Lebenslauf „CV“ */
+  @media (max-width: 480px) { .pille.cv .cv-lang { display: none; } .pille.cv .cv-kurz { display: inline; } }
+
+  /* Ohne WebGL: alles als ruhige Liste untereinander */
+  .ohne-3d #welt, .ohne-3d .bahn, .ohne-3d .karte::before { display: none; }
+  .ohne-3d .kopf, .ohne-3d .karte { position: relative; left: auto; right: auto; top: auto; bottom: auto; translate: none;
+    opacity: 1; pointer-events: auto; width: auto; height: auto; max-height: none; max-width: 640px;
+    margin: 0 auto 24px; }
+  .ohne-3d main { padding: 96px 16px 100px calc(var(--sn) + 16px); }
+  .ohne-3d .kopf { background: none; box-shadow: none; padding: 0 0 24px; }
+  @media (prefers-reduced-motion: reduce) {
+    .los .sym { animation: none; }
+    .kopf, .karte { transition: opacity .2s; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./lib/three/build/three.module.min.js",
+  "three/addons/": "./lib/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="welt" aria-label="Florian's workshop: a treehouse room with a desk, pinboard, posters, a server and a telescope"></canvas>
+<div class="laden" id="laden"><span lang="en">Opening the workshop …</span><span lang="de">Atelier öffnet …</span></div>
+
+<nav class="leiste" aria-label="Navigation">
+  <a class="pille cv" lang="en" href="lebenslauf/Florian-Kierski-CV.pdf" target="_blank" rel="noopener">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>CV</a>
+  <a class="pille cv" lang="de" href="lebenslauf/Florian-Kierski-Lebenslauf.pdf" target="_blank" rel="noopener">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg><span class="cv-lang">Lebenslauf</span><span class="cv-kurz">CV</span></a>
+  <a class="pille voll" href="#s-weiter">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+    <span><span lang="en">Contact</span><span lang="de">Kontakt</span></span></a>
+  <div class="sprache" role="group" aria-label="Language / Sprache">
+    <button type="button" data-sprache="en">EN</button><button type="button" data-sprache="de">DE</button>
+  </div>
+  <a class="pille heim" href="./" title="Florian Kierski">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>Home</a>
+</nav>
+
+<nav class="seitennav" aria-label="Florian">
+  <a class="sn-name" href="#oben">Florian</a>
+  <ul class="sn-liste">
+    <li><a href="#s-hallo"><span lang="en">Hello</span><span lang="de">Hallo</span></a></li>
+    <li><a href="#s-ausbildung"><span lang="en">Training</span><span lang="de">Ausbildung</span></a></li>
+    <li><a href="#s-odav">UX/UI · ODAV</a></li>
+    <li><a href="#s-frei"><span lang="en">Freelance</span><span lang="de">Freiberuflich</span></a></li>
+    <li><a href="#s-dailyui">Daily UI</a></li>
+    <li><a href="#s-server">Server</a></li>
+    <li><a href="#s-tools">Tools</a></li>
+    <li><a href="#s-seite"><span lang="en">This site</span><span lang="de">Diese Seite</span></a></li>
+    <li><a href="#s-weiter"><span lang="en">Next step</span><span lang="de">Nächster Schritt</span></a></li>
+  </ul>
+  <button class="sn-knopf" type="button" aria-expanded="false"><span class="sn-jetzt"></span>
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6" /></svg></button>
+</nav>
+
+<main>
+<header class="kopf weg" id="kopf">
+  <span class="ort">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></svg>
+    <span lang="en">Workshop</span><span lang="de">Atelier</span>
+  </span>
+  <p class="kicker"><span lang="en">Hey, I'm</span><span lang="de">Hey, ich bin</span></p>
+  <h1>Florian</h1>
+  <ul class="unter">
+    <li><span lang="en">UX/UI designer</span><span lang="de">UX/UI-Designer</span></li>
+    <li><span lang="en">Media designer</span><span lang="de">Mediengestalter</span></li>
+    <li><span lang="en">Aspiring IT specialist</span><span lang="de">Angehender Fachinformatiker</span></li>
+  </ul>
+  <p><span lang="en">This is my workshop. Everything in here stands for a step on my way from design into IT.</span>
+    <span lang="de">Das ist mein Atelier. Jedes Ding hier drin steht für einen Schritt auf meinem Weg von der Gestaltung in die IT.</span></p>
+  <div class="knoepfe">
+    <a class="knopf voll los" href="#s-hallo"><span lang="en">Take the tour</span><span lang="de">Rundgang starten</span>
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></svg></a>
+    <a class="knopf leer" href="#s-weiter"><span lang="en">Contact</span><span lang="de">Kontakt</span></a>
+    <a class="knopf leer" lang="en" href="lebenslauf/Florian-Kierski-CV.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>CV (PDF)</a>
+    <a class="knopf leer" lang="de" href="lebenslauf/Florian-Kierski-Lebenslauf.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>Lebenslauf (PDF)</a>
+  </div>
+</header>
+
+<article class="karte" id="k-hallo" aria-labelledby="h-hallo"><div class="karte-innen">
+  <p class="stueck"><i>1</i><span lang="en">Pinboard</span><span lang="de">Pinnwand</span></p>
+  <h2 id="h-hallo"><span lang="en">From the screen into IT</span><span lang="de">Vom Bildschirm in die IT</span></h2>
+  <div class="kurz"><div><p><span lang="en">My way into IT didn't start at the server, but at a user's screen. Now I'm looking
+    for an apprenticeship as an IT specialist.</span>
+    <span lang="de">Mein Weg in die IT begann nicht am Server, sondern am Bildschirm eines Nutzers. Jetzt suche ich einen
+    Ausbildungsplatz als Fachinformatiker.</span></p></div></div>
+  <div class="mehr"><div>
+  <img class="foto" src="bilder/atelier/polaroid.jpg" width="600" height="682" alt="">
+  <p><span lang="en">My way into IT didn't start at the server, but at a user's screen. As a UX/UI designer I learned how
+    people work with software and what they need from it.</span>
+    <span lang="de">Mein Weg in die IT begann nicht am Server, sondern am Bildschirm eines Nutzers. Als UX/UI-Designer habe
+    ich gelernt, wie Menschen mit Software arbeiten und was sie dafür brauchen.</span></p>
+  <p><span lang="en">Since December 2025 I've been taking the step into IT, and I'm looking for an apprenticeship as an IT
+    specialist.</span>
+    <span lang="de">Seit Dezember 2025 gehe ich den Schritt in die IT und suche einen Ausbildungsplatz als Fachinformatiker.</span></p>
+  <p class="leise"><span lang="en">The photo from the pinboard: that's me.</span><span lang="de">Das Foto von der Pinnwand: das bin ich.</span></p>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-ausbildung" aria-labelledby="h-ausbildung"><div class="karte-innen">
+  <p class="stueck"><i>2</i><span lang="en">Colour fan</span><span lang="de">Farbfächer</span><span class="jahr">2016–2020</span></p>
+  <h2 id="h-ausbildung"><span lang="en">Learning design</span><span lang="de">Gestalten gelernt</span></h2>
+  <div class="kurz"><div><p><span lang="en">It started with colour, type and layout: first as a design technical assistant, then
+    an apprenticeship as a media designer for digital and print.</span>
+    <span lang="de">Angefangen hat es mit Farbe, Schrift und Layout: erst als gestaltungstechnischer Assistent, dann die
+    Ausbildung zum Mediengestalter Digital und Print.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">It started with colour, type and layout: first as a design technical assistant together with my
+    advanced technical college entrance qualification, then an apprenticeship as a media designer for digital and print.</span>
+    <span lang="de">Angefangen hat es mit Farbe, Schrift und Layout: erst als gestaltungstechnischer Assistent zusammen mit
+    der Fachhochschulreife, dann die Ausbildung zum Mediengestalter Digital und Print.</span></p>
+  <p><strong><span lang="en">Completed a year early:</span><span lang="de">Ein Jahr früher abgeschlossen:</span></strong>
+    <span lang="en">thanks to my training as a design technical assistant, I was allowed to shorten the apprenticeship to
+    two years.</span>
+    <span lang="de">Dank meiner Ausbildung zum gestaltungstechnischen Assistenten durfte ich die Ausbildung auf zwei Jahre
+    verkürzen.</span></p>
+  <ul class="punkte">
+    <li><span lang="en">2016–2018 · Design technical assistant and advanced technical college entrance qualification, BSA Angermünde</span>
+      <span lang="de">2016–2018 · Gestaltungstechnischer Assistent und Fachhochschulreife, BSA Angermünde</span></li>
+    <li><span lang="en">2019–2020 · Apprenticeship as a media designer, digital and print, ODAV AG: graphic and corporate design, concepts for print and digital</span>
+      <span lang="de">2019–2020 · Ausbildung zum Mediengestalter Digital und Print, ODAV AG: Grafik- und Corporate Design, Konzepte für Print und Digital</span></li>
+  </ul>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-odav" aria-labelledby="h-odav"><div class="karte-innen">
+  <p class="stueck"><i>3</i>Whiteboard<span class="jahr">2021–2023</span></p>
+  <h2 id="h-odav"><span lang="en">Turning needs into requirements</span><span lang="de">Aus Bedürfnissen Anforderungen machen</span></h2>
+  <div class="kurz"><div><p><span lang="en">As a UX/UI designer at ODAV AG I gathered what the users of the administration
+    system myODAV needed and turned it into clear requirements.</span>
+    <span lang="de">Als UX/UI-Designer bei der ODAV AG habe ich aufgenommen, was die Nutzer des Verwaltungssystems myODAV
+    brauchen, und es in klare Anforderungen übersetzt.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">As a UX/UI designer at ODAV AG I worked on the software concept for the administration system myODAV:
+    I gathered what its users needed, documented it and turned it into clear requirements.</span>
+    <span lang="de">Als UX/UI-Designer bei der ODAV AG habe ich am Software-Konzept für das Verwaltungssystem myODAV gearbeitet:
+    aufgenommen, was seine Nutzer brauchen, dokumentiert und in klare Anforderungen übersetzt.</span></p>
+  <ul class="punkte">
+    <li><span lang="en">Requirements analysis and documentation</span><span lang="de">Anforderungsanalyse und Dokumentation</span></li>
+    <li><span lang="en">Regular agile sprints, close to the development team</span><span lang="de">Regelmäßige agile Sprints, eng mit der Entwicklung</span></li>
+    <li><span lang="en">Tasks and bugs tracked in Jira and Visual Studio</span><span lang="de">Aufgaben und Bugs in Jira und Visual Studio</span></li>
+  </ul>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-frei" aria-labelledby="h-frei"><div class="karte-innen">
+  <p class="stueck"><i>4</i><span lang="en">Drawing tablet</span><span lang="de">Zeichentablett</span><span class="jahr">2023–2024</span></p>
+  <h2 id="h-frei"><span lang="en">On my own</span><span lang="de">Auf eigene Rechnung</span></h2>
+  <div class="kurz"><div><p><span lang="en">As a freelance media designer I planned and delivered digital media projects for
+    clients, from the first request to the final delivery.</span>
+    <span lang="de">Als freiberuflicher Mediendesigner habe ich digitale Medienprojekte für Kunden geplant und umgesetzt, von
+    der ersten Anfrage bis zur Abgabe.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">As a freelance media designer I planned and delivered digital media projects for clients online, and
+    handled the communication myself, from the first request to the final delivery.</span>
+    <span lang="de">Als freiberuflicher Mediendesigner habe ich digitale Medienprojekte für Kunden online geplant und
+    umgesetzt und die Kommunikation selbst übernommen, von der ersten Anfrage bis zur Abgabe.</span></p>
+  <ul class="chips"><li>Figma</li><li>Adobe XD</li><li>Photoshop</li><li>Illustrator</li><li>InDesign</li></ul>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-dailyui" aria-labelledby="h-dailyui"><div class="karte-innen">
+  <p class="stueck"><i>5</i><span lang="en">Easel</span><span lang="de">Staffelei</span><span class="jahr">2024</span></p>
+  <h2 id="h-dailyui"><span lang="en">90 days of Daily UI</span><span lang="de">90 Tage Daily UI</span></h2>
+  <div class="kurz"><div><p><span lang="en">In the Senior UX/UI Design training at Hype 4 Academy I designed one screen a day
+    for 90 days.</span>
+    <span lang="de">In der Weiterbildung Senior UX/UI Design der Hype 4 Academy habe ich 90 Tage lang jeden Tag einen
+    Screen gestaltet.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">In the Senior UX/UI Design training at Hype 4 Academy I worked on structured design thinking and
+    efficient workflows, and designed one screen a day for 90 days.</span>
+    <span lang="de">In der Weiterbildung Senior UX/UI Design der Hype 4 Academy ging es um strukturiertes Design Thinking
+    und effiziente Abläufe, dazu 90 Tage lang jeden Tag ein Screen.</span></p>
+  <div class="blaetter">
+    <button type="button" class="blatt" data-gross="bilder/atelier/dailyui/aktien.jpg"><img src="bilder/atelier/dailyui/aktien_klein.jpg" width="320" height="240" alt="Daily UI: stock app"><span class="titel"><span lang="en">Stock app</span><span lang="de">Aktien-App</span></span></button>
+    <button type="button" class="blatt" data-gross="bilder/atelier/dailyui/restaurants.jpg"><img src="bilder/atelier/dailyui/restaurants_klein.jpg" width="320" height="240" alt="Daily UI: restaurant feed"><span class="titel"><span lang="en">Restaurant feed</span><span lang="de">Restaurant-Feed</span></span></button>
+    <button type="button" class="blatt" data-gross="bilder/atelier/dailyui/sneaker.jpg"><img src="bilder/atelier/dailyui/sneaker_klein.jpg" width="320" height="610" alt="Daily UI: sneaker shop"><span class="titel"><span lang="en">Sneaker shop</span><span lang="de">Sneaker-Shop</span></span></button>
+    <button type="button" class="blatt" data-gross="bilder/atelier/dailyui/fehler.jpg"><img src="bilder/atelier/dailyui/fehler_klein.jpg" width="320" height="561" alt="Daily UI: error state"><span class="titel"><span lang="en">Error state</span><span lang="de">Fehlerzustand</span></span></button>
+    <button type="button" class="blatt" data-gross="bilder/atelier/dailyui/feedback.jpg"><img src="bilder/atelier/dailyui/feedback_klein.jpg" width="320" height="206" alt="Daily UI: feedback form"><span class="titel"><span lang="en">Feedback form</span><span lang="de">Feedback-Formular</span></span></button>
+  </div>
+  <div class="knoepfe">
+    <a class="knopf leer klein" href="https://hype4.academy/profile/fkierski" target="_blank" rel="noopener">
+      <span lang="en">All 90 on my Hype 4 profile</span><span lang="de">Alle 90 auf meinem Hype-4-Profil</span>
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg></a>
+  </div>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-server" aria-labelledby="h-server"><div class="karte-innen">
+  <p class="stueck"><i>6</i>Server<span class="jahr">2024–2026</span></p>
+  <h2 id="h-server"><span lang="en">My own Linux server</span><span lang="de">Mein eigener Linux-Server</span></h2>
+  <div class="kurz"><div><p><span lang="en">To learn the system side, I set up and ran a Linux server myself. Today it's
+    switched off, hence the dark lights.</span>
+    <span lang="de">Um die Systemseite zu lernen, habe ich selbst einen Linux-Server aufgesetzt und betrieben. Heute ist er aus,
+    darum die dunklen Lämpchen.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">To learn the system side, I set up and ran a Linux server myself, following the official
+    documentation: a game server panel on my own domain, connected via DNS and secured with HTTPS. When an expired
+    certificate took it down, I found the cause in the logs, with help from the community.</span>
+    <span lang="de">Um die Systemseite zu lernen, habe ich selbst einen Linux-Server aufgesetzt und betrieben, nach der
+    offiziellen Dokumentation: ein Gameserver-Panel auf meiner eigenen Domain, per DNS angebunden und mit HTTPS
+    abgesichert. Als ein abgelaufenes Zertifikat ihn lahmlegte, habe ich die Ursache in den Logs gefunden, mit Hilfe der
+    Community.</span></p>
+  <p class="leise"><span lang="en">Today it's switched off, hence the dark lights. What I learned stays.</span>
+    <span lang="de">Heute ist er aus, darum die dunklen Lämpchen. Was ich gelernt habe, bleibt.</span></p>
+  <ul class="chips"><li>Ubuntu</li><li>Hetzner VPS</li><li>Pterodactyl</li><li>DNS</li><li>HTTPS · Certbot</li></ul>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-tools" aria-labelledby="h-tools"><div class="karte-innen">
+  <p class="stueck"><i>7</i>Poster<span class="jahr"><span lang="en">since 2026</span><span lang="de">seit 2026</span></span></p>
+  <h2 id="h-tools"><span lang="en">My tools for games</span><span lang="de">Meine Tools für Spiele</span></h2>
+  <div class="kurz"><div><p><span lang="en">In my free time I build add-ons for games, like HamMeter and WispUI. The concept is
+    mine, the code is written with AI.</span>
+    <span lang="de">In meiner Freizeit baue ich Add-ons für Spiele, etwa HamMeter und WispUI. Das Konzept kommt von mir, den
+    Code schreibt KI.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">In my free time I build add-ons for games. The concept, the requirements and the project management
+    are mine, the code is written with AI (Claude Code), and I manage the versions with Git and GitHub.</span>
+    <span lang="de">In meiner Freizeit baue ich Add-ons für Spiele. Konzept, Anforderungen und Projektleitung kommen von
+    mir, den Code schreibt KI (Claude Code), die Versionen verwalte ich mit Git und GitHub.</span></p>
+  <ul class="punkte">
+    <li><strong>HamMeter</strong> · <span lang="en">damage meter for FFXIV and Aion 2</span><span lang="de">Damage Meter für FFXIV und Aion 2</span></li>
+    <li><strong>WispUI</strong> · <span lang="en">UI suite for FFXIV</span><span lang="de">UI-Suite für FFXIV</span></li>
+    <li><strong>LumenUI</strong> · <span lang="en">UI suite for World of Warcraft, no longer developed</span><span lang="de">UI-Suite für World of Warcraft, wird nicht weiterentwickelt</span></li>
+    <li><strong>Timer</strong> · <span lang="en">the hourglass, still in planning</span><span lang="de">die Sanduhr, noch in Planung</span></li>
+  </ul>
+  <div class="knoepfe">
+    <a class="knopf voll klein" href="null-meter-reise.html" data-seite="null-meter">HamMeter
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+    <a class="knopf voll klein" href="wispui.html" data-seite="wispui">WispUI
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+  </div>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-seite" aria-labelledby="h-seite"><div class="karte-innen">
+  <p class="stueck"><i>8</i><span lang="en">Monitors</span><span lang="de">Monitore</span><span class="jahr">2026</span></p>
+  <h2 id="h-seite"><span lang="en">This website</span><span lang="de">Diese Website</span></h2>
+  <div class="kurz"><div><p><span lang="en">The site you're looking at is my biggest project so far, built voxel by voxel in
+    Blender and running in your browser.</span>
+    <span lang="de">Die Seite, die du gerade siehst, ist mein bisher größtes Projekt, Voxel für Voxel in Blender gebaut, und
+    läuft in deinem Browser.</span></p></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">The site you're looking at is my biggest project so far. The whole alley is built voxel by voxel in
+    Blender, only from Python scripts, and runs in your browser with Three.js.</span>
+    <span lang="de">Die Seite, die du gerade siehst, ist mein bisher größtes Projekt. Die ganze Gasse ist Voxel für Voxel
+    in Blender gebaut, nur aus Python-Skripten, und läuft in deinem Browser mit Three.js.</span></p>
+  <p><span lang="en">As with my tools, the concept, the design and the decisions are mine and the code is written by AI
+    (Claude Code). After every round I test and give feedback.</span>
+    <span lang="de">Wie bei den Tools kommen Konzept, Gestaltung und Entscheidungen von mir, den Code schreibt KI (Claude
+    Code). Nach jeder Runde teste ich und gebe Feedback.</span></p>
+  <ul class="chips"><li>Blender</li><li>Python</li><li>Three.js</li><li>Git · GitHub</li><li>Claude Code</li></ul>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+
+<article class="karte" id="k-weiter" aria-labelledby="h-weiter"><div class="karte-innen">
+  <p class="stueck"><i>9</i><span lang="en">Telescope</span><span lang="de">Teleskop</span></p>
+  <h2 id="h-weiter"><span lang="en">Looking ahead</span><span lang="de">Der Blick nach vorn</span></h2>
+  <div class="kurz"><div><p><span lang="en">Next I want to learn it properly: an apprenticeship as an IT specialist.</span>
+    <span lang="de">Als Nächstes will ich es richtig lernen: eine Ausbildung zum Fachinformatiker.</span></p>
+    <div class="knoepfe"><a class="knopf voll klein" href="mailto:florian@floriankierski.de">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+      <span lang="en">Write to me</span><span lang="de">Schreib mir</span></a>
+    <a class="knopf leer klein" lang="en" href="lebenslauf/Florian-Kierski-CV.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>CV (PDF)</a>
+    <a class="knopf leer klein" lang="de" href="lebenslauf/Florian-Kierski-Lebenslauf.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>Lebenslauf (PDF)</a></div></div></div>
+  <div class="mehr"><div>
+  <p><span lang="en">Next I want to learn it properly: an apprenticeship as an IT specialist, in application development
+    or system integration. I bring what I know about users, requirements and clear documentation, and I want to learn
+    the technology from the ground up.</span>
+    <span lang="de">Als Nächstes will ich es richtig lernen: eine Ausbildung zum Fachinformatiker, in
+    Anwendungsentwicklung oder Systemintegration. Ich bringe mit, was ich über Nutzer, Anforderungen und klare
+    Dokumentation weiß, und will die Technik von Grund auf lernen.</span></p>
+  <ul class="chips"><li><span lang="en">German · native</span><span lang="de">Deutsch · Muttersprache</span></li>
+    <li><span lang="en">English · good</span><span lang="de">Englisch · gut</span></li></ul>
+  <div class="knoepfe">
+    <a class="knopf voll" href="mailto:florian@floriankierski.de">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+      <span lang="en">Write to me</span><span lang="de">Schreib mir</span></a>
+    <a class="knopf leer" href="https://github.com/NennMichSchinken" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6" /><path d="m8 6-6 6 6 6" /></svg>GitHub</a>
+    <a class="knopf leer" lang="en" href="lebenslauf/Florian-Kierski-CV.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>CV (PDF)</a>
+    <a class="knopf leer" lang="de" href="lebenslauf/Florian-Kierski-Lebenslauf.pdf" target="_blank" rel="noopener">
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>Lebenslauf (PDF)</a>
+  </div>
+  <p class="leise" style="margin-top: 14px"><span lang="en">Or on Discord:</span><span lang="de">Oder auf Discord:</span> nennmichschinken</p>
+  <p class="leise recht"><a href="impressum.html" data-seite="impressum"><span lang="en">Legal notice</span><span lang="de">Impressum</span></a>
+    · <a href="datenschutz.html" data-seite="datenschutz"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a></p>
+  </div></div>
+  <div class="knoepfe genau"><button type="button" class="knopf leer klein genauer" data-genauer><span class="auf"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg><span lang="en">Take a closer look</span><span lang="de">Genauer ansehen</span></span><span class="zu"><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg><span lang="en">Back</span><span lang="de">Zurück</span></span></button></div>
+</div></article>
+</main>
+
+<div class="bahn" id="bahn">
+  <i class="raste" id="oben"></i><i class="raste" id="s-hallo"></i><i class="raste" id="s-ausbildung"></i>
+  <i class="raste" id="s-odav"></i><i class="raste" id="s-frei"></i><i class="raste" id="s-dailyui"></i>
+  <i class="raste" id="s-server"></i><i class="raste" id="s-tools"></i><i class="raste" id="s-seite"></i>
+  <i class="raste" id="s-weiter"></i>
+</div>
+<div class="balken" id="balken" aria-hidden="true"><i></i></div>
+<svg id="linien" aria-hidden="true"><line /></svg>
+<div id="marken"></div>
+<span class="stern" id="stern" aria-hidden="true"><span><svg viewBox="0 0 40 40"><path d="M20 0 C21.5 13 27 18.5 40 20 C27 21.5 21.5 27 20 40 C18.5 27 13 21.5 0 20 C13 18.5 18.5 13 20 0Z" fill="#FFF3B0" /></svg></span></span>
+<div class="lupe" id="lupe" role="dialog" aria-modal="true" aria-label="Daily UI" hidden>
+  <figure><img id="lupe-bild" alt=""><figcaption id="lupe-text"></figcaption></figure>
+  <button type="button" class="blaettern zurueck" data-lupe="-1" aria-label="Previous / Zurück">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+  <button type="button" class="blaettern vor" data-lupe="1" aria-label="Next / Weiter">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button>
+  <button type="button" class="pille" id="lupe-zu">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+    <span lang="en">Close</span><span lang="de">Schließen</span></button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { gemeinsam, voxelMaterial, bereite } from './js/voxel.js';
+import { glbLader, pause } from './js/laden.js';
+
+performance.mark('atelier:modul');                         // Phasen fürs Messen (?messen in der Adresse, messen.js)
+const root = document.documentElement, $ = id => document.getElementById(id);
+const RUHIG = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('ruhig');   // ?ruhig: zum Testen
+const V3 = THREE.Vector3, clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const glatt = k => k * k * (3 - 2 * k);
+const backOut = k => { const c = 1.70158; return 1 + (c + 1) * (k - 1) ** 3 + c * (k - 1) ** 2; };
+const EINGEBETTET = KARTE.eingebettet, melde = KARTE.melde;
+let pausiert = false;
+
+// ---------------------------------------------------------------- Sprache, Karte über der Gasse, Links (karte.js)
+KARTE.verbinde({
+  pause: an => { pausiert = an; },
+  sprache: () => {
+    if (window.__rahmenNeu) window.__rahmenNeu();
+    if (window.__spracheNeu) window.__spracheNeu();           // Runde 87: Schrift auf den Postern
+  },
+});
+KARTE.setzeSprache(root.dataset.sprache === 'de' ? 'de' : 'en');
+
+// ---------------------------------------------------------------- Rasten: einmal scrollen = nächste Station
+const RASTEN = [...document.querySelectorAll('.raste')], N = RASTEN.length;
+const KARTEN = RASTEN.map(r => r.id.startsWith('s-') ? $('k-' + r.id.slice(2)) : null);   // Station 0: der Kopf
+const STUFE = () => Math.max(240, Math.round(innerHeight * 0.5));
+function hoehe() {
+  $('bahn').style.height = `${(N - 1) * STUFE() + innerHeight}px`;
+  RASTEN.forEach((r, i) => { r.style.top = `${i * STUFE()}px`; });
+  balkenZeigen();
+  dispatchEvent(new Event('scroll'));                         // Seitennavigation: aktive Station neu bestimmen
+}
+const station = () => clamp(Math.round(scrollY / STUFE()), 0, N - 1);
+let gewollt = null;
+function geheZuNr(i) {
+  gewollt = clamp(i, 0, N - 1);
+  scrollTo({ top: gewollt * STUFE(), behavior: RUHIG ? 'auto' : 'smooth' });
+}
+const zielNr = () => gewollt !== null && Math.abs(scrollY - gewollt * STUFE()) > 2 ? gewollt : station();
+window.NACHOBEN = () => geheZuNr(0);                          // Knopf „nach oben“ (nachoben.js, Runde 95)
+// Mausrad und Touchpad: eine Bewegung = eine Station (weiter erst nach 180 ms Ruhe). Über einer Karte, die selbst noch
+// scrollen kann, scrollt die Karte. Wischen, Tasten und Balken rasten nativ.
+let radRuhe = 0, radFrei = true;
+addEventListener('wheel', e => {
+  if (!$('lupe').hidden) { e.preventDefault(); return; }      // Blatt groß offen: die Seite steht
+  if (root.classList.contains('ohne-3d') || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  const k = e.target.closest && e.target.closest('.karte-innen');
+  if (k && (e.deltaY > 0 ? k.scrollTop + k.clientHeight < k.scrollHeight - 1 : k.scrollTop > 0)) return;
+  e.preventDefault();
+  clearTimeout(radRuhe);
+  radRuhe = setTimeout(() => { radFrei = true; }, 180);
+  if (!radFrei || Math.abs(e.deltaY) < 4 || pausiert) return;
+  radFrei = false;
+  geheZuNr(zielNr() + Math.sign(e.deltaY));
+}, { passive: false });
+// Sprungmarken (Seitennavigation, Knöpfe): zur Raste fahren statt springen
+document.addEventListener('click', e => {
+  const a = e.target.closest('a, button');
+  if (!a) return;                                             // Sprache, ✕ Home, andere Seiten: karte.js
+  if (a.matches('[data-genauer]')) { if (window.__genauer) window.__genauer(); return; }   // Runde 82: Ding heranholen
+  const h = a.getAttribute('href');
+  if (h && h.startsWith('#') && !root.classList.contains('ohne-3d')) {
+    const i = RASTEN.findIndex(r => r.id === h.slice(1));
+    if (i >= 0) { e.preventDefault(); geheZuNr(i); }
+  }
+});
+
+// Scrollbalken in der Karte (wie die Reise): Ziehen oder Klicken wählt die Station unter der Griffmitte
+function balkenZeigen() {
+  const b = $('balken');
+  if (!EINGEBETTET || !b) return;
+  const h = b.clientHeight, weg = (N - 1) * STUFE(), g = Math.max(36, h * innerHeight / (weg + innerHeight));
+  const griff = b.firstElementChild;
+  griff.style.height = `${g}px`;
+  griff.style.top = `${weg > 0 ? (h - g) * clamp(scrollY / weg, 0, 1) : 0}px`;
+}
+if (EINGEBETTET) {
+  const b = $('balken');
+  let zieht = false;
+  const waehleBei = y => {
+    const r = b.getBoundingClientRect(), g = b.firstElementChild.offsetHeight;
+    const i = Math.round(clamp((y - r.top - g / 2) / Math.max(1, r.height - g), 0, 1) * (N - 1));
+    if (i !== zielNr()) geheZuNr(i);
+  };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); zieht = true; b.classList.add('zieht'); waehleBei(e.clientY); });
+  b.addEventListener('pointermove', e => { if (zieht) waehleBei(e.clientY); });
+  const los = () => { zieht = false; b.classList.remove('zieht'); };
+  b.addEventListener('pointerup', los);
+  b.addEventListener('pointercancel', los);
+  addEventListener('scroll', balkenZeigen, { passive: true });
+}
+addEventListener('resize', hoehe);
+hoehe();
+
+// ---------------------------------------------------------------- Daily UI: ein Blatt groß ansehen (geht auch ohne 3D)
+const lupe = $('lupe'), BLAETTER = [...document.querySelectorAll('.blatt')];
+let lupeNr = -1;
+function lupeZeigen(i) {
+  lupeNr = (i + BLAETTER.length) % BLAETTER.length;
+  const b = BLAETTER[lupeNr];
+  $('lupe-bild').src = b.dataset.gross;
+  $('lupe-bild').alt = b.querySelector('img').alt;
+  $('lupe-text').innerHTML = b.querySelector('.titel').innerHTML;
+  lupe.hidden = false;
+  $('lupe-zu').focus({ preventScroll: true });
+}
+function lupeZu() {
+  if (lupe.hidden) return;
+  lupe.hidden = true;
+  if (BLAETTER[lupeNr]) BLAETTER[lupeNr].focus({ preventScroll: true });
+}
+BLAETTER.forEach((b, i) => b.addEventListener('click', () => lupeZeigen(i)));
+lupe.addEventListener('click', e => {
+  const n = e.target.closest('[data-lupe]');
+  if (n) lupeZeigen(lupeNr + Number(n.dataset.lupe));
+  else if (!e.target.closest('img')) lupeZu();
+});
+document.addEventListener('keydown', e => {                  // Esc schließt erst die Lupe (vor „Karte schließen“)
+  if (lupe.hidden) return;
+  if (e.key === 'Escape') { lupeZu(); e.stopImmediatePropagation(); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') lupeZeigen(lupeNr + 1);
+  else if (e.key === 'ArrowLeft') lupeZeigen(lupeNr - 1);
+  else if ([' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'].includes(e.key)) e.preventDefault();
+}, true);
+
+// ---------------------------------------------------------------- Laden
+function ohne3d() {                                           // ohne WebGL: alles als Liste untereinander
+  root.classList.add('ohne-3d');
+  $('kopf').classList.remove('weg');
+  KARTEN.forEach(k => k && k.classList.add('an'));
+  $('laden').classList.add('weg');
+  melde('bereit');
+  melde('ruhig');
+}
+let renderer, gltf;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('welt'), antialias: true, alpha: true });
+  gltf = await glbLader().loadAsync('modelle/raum_atelier.glb');
+  performance.mark('atelier:glb');
+} catch (e) {
+  console.warn(e);
+  if (renderer) renderer.dispose();
+  ohne3d();
+}
+// Runde 93 (Florian: beim Hochfliegen der Karte ruckelte es): Die Dateien laden sofort, die teure Vorbereitung beginnt
+// erst, wenn die Karte gelandet ist; bis dahin steht „Atelier öffnet …“. ?atelier=sofort in der Adresse der Gasse:
+// wie vorher gleich beginnen (zum Vergleichen).
+let sofort = false;
+try { sofort = /[?&]atelier=sofort\b/.test(location.search + top.location.search); } catch (e) { /* allein */ }
+if (gltf) { if (!sofort) await KARTE.gelandet(); performance.mark('atelier:gelandet'); start(); }
+
+// Livegang D: in Stücken (pause), damit das erste Bild nicht 65 ms auf sich warten lässt (Rest aus Runde 92); in der
+// Karte über der Gasse teilt sich das iframe den Hauptthread mit der Gasse, die beim Hochfliegen der Karte noch zeichnet
+async function start() {
+  performance.mark('atelier:start');
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.setClearColor(0x000000, 0);
+  renderer.autoClear = false;                                 // zwei Durchgänge: der Raum, dann das herausgeholte Ding
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(24, 1, 0.3, 200);
+  const G = gemeinsam();
+  bereite(THREE, gltf, G);
+  scene.add(gltf.scene);
+  gltf.scene.updateMatrixWorld(true);
+  const assoc = gltf.parser.associations, knoten = [];
+  gltf.scene.traverse(o => { const a = assoc.get(o); if (a && a.nodes !== undefined) knoten.push(o); });
+  const teil = name => knoten.find(k => k.name === name) || null;
+  const VOX = 1 / 16, vox = (x, y, z) => new V3(x * VOX, z * VOX, -y * VOX);   // Blender-Voxel → Three.js (m)
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+
+  // ---------------------------------------------------------------- Materialien
+  // Jedes Teil hat sein eigenes „Blass“ (Runde 80): Bei einer Station tritt der Raum zurück (zur Grundfarbe hin), das
+  // Ding der Station nicht. Bilder (Poster, Polaroid, Bildschirme) bekommen ein kleines eigenes Material mit demselben
+  // Blass und dem Licht des Aufbaus. Runde 82: dazu ein eigenes „Hell“, zeigt man aufs Ding, wird es leicht heller.
+  const BG = { value: new THREE.Color('#FFC8A4') }, LICHT = { value: 1 };
+  const istKnoten = new Set(knoten), TRAEGER = [];
+  const eigenes = (o, f) => { f(o); for (const c of o.children) if (!istKnoten.has(c)) eigenes(c, f); };
+  function bildMaterial(map, blass, faktor = 1, hell = { value: 0 }) {
+    return new THREE.ShaderMaterial({
+      uniforms: { map: { value: map }, uLicht: LICHT, uFaktor: { value: faktor }, uBlass: blass, uBlassFarbe: BG, uHell: hell },
+      vertexShader: 'varying vec2 vUv;\nvoid main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform sampler2D map; uniform float uLicht; uniform float uFaktor; uniform float uBlass; uniform float uHell;\n' +
+        'uniform vec3 uBlassFarbe; varying vec2 vUv;\nvoid main() {\n  vec3 c = texture2D(map, vUv).rgb * uLicht * uFaktor;\n' +
+        '  c = mix(c, c * 1.18 + 0.04, uHell);\n' +
+        '  gl_FragColor = vec4(mix(c, uBlassFarbe, uBlass), 1.0);\n  #include <colorspace_fragment>\n}' });
+  }
+  const GRUND = ['Raum_Sockel', 'Atelier'], VORN = ['Atelier_Lichterkette', 'Atelier_Laternen'];
+  const schnitt = { value: RUHIG ? 1e9 : box.min.y }, vornAlpha = { value: 1 };
+  for (const o of knoten) {
+    const blass = o.userData.blass = { value: 0 }, hell = o.userData.hell = { value: 0 };
+    TRAEGER.push(o);
+    const opts = GRUND.includes(o.name) ? { schnitt }                          // das Gebäude wächst Lage für Lage
+      : o.name === 'Atelier_Server' ? { eigen: { uLeuchten: { value: 0.1 } } }  // läuft nicht mehr: Lämpchen aus
+      : VORN.includes(o.name) ? { alpha: 0.999, eigen: { uAlpha: vornAlpha } } : {};   // Lichterketten blenden aus
+    const mat = {};
+    eigenes(o, m => {
+      if (!m.isMesh) return;
+      if (m.material.isShaderMaterial) {
+        const glas = m.material.uniforms.uAlpha.value < 0.9;
+        mat[glas] = mat[glas] || voxelMaterial(THREE, G, { ...opts, ...(glas ? { alpha: 0.4 } : {}), blass, blassFarbe: BG, hell });
+        m.material = mat[glas];
+      } else if (m.material.map) m.material = bildMaterial(m.material.map, blass, 1, hell);
+    });
+  }
+  const VORN_TEILE = VORN.map(teil).filter(Boolean);
+  performance.mark('atelier:material');
+
+  // Monitore (Runde 84: aus dem Detailmodell dinge.monitore, Florians Wahl): Bildschirme bündig in der Front bei y 146,
+  // links quer x 211–221, z 168–174 (die Gasse), rechts hochkant x 224–230, z 168–178 (Code). Die Bildfläche liegt
+  // knapp davor; ihre Leinwand teilt sie mit dem Glas-Bildschirm des herangeholten Modells, so geht es dort weiter, wo
+  // es im Raum war (und umgekehrt). 64 Pixel je Raum-Voxel (16 je Voxel des Modells, wie die Glas-Bildschirme).
+  const MONITOR = { links: { x: 216, z: 171, w: 10, h: 6 }, rechts: { x: 227, z: 173, w: 6, h: 10 } };
+  const monitore = teil('Atelier_Monitore'), LEINWAND = {};
+  for (const [n, M] of Object.entries(MONITOR)) {
+    const cv = document.createElement('canvas');
+    cv.width = M.w * 64; cv.height = M.h * 64;
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    LEINWAND['monitore.' + n] = { cv, c: cv.getContext('2d'), tex };
+    if (!monitore) continue;
+    const ebene = new THREE.Mesh(new THREE.PlaneGeometry(M.w * VOX, M.h * VOX), bildMaterial(tex, monitore.userData.blass, 0.96, monitore.userData.hell));
+    ebene.position.copy(vox(M.x, 145.97, M.z));
+    scene.add(ebene);
+    monitore.attach(ebene);
+  }
+  {                                                           // links: die Gasse von oben, ganz im Bild
+    const { c, cv, tex } = LEINWAND['monitore.links'];
+    const verlauf = c.createLinearGradient(0, 0, 0, cv.height);
+    verlauf.addColorStop(0, '#FFD9BF'); verlauf.addColorStop(1, '#FFC8A4');
+    c.fillStyle = verlauf; c.fillRect(0, 0, cv.width, cv.height);
+    tex.needsUpdate = true;
+    const bild = new Image();
+    bild.onload = () => {
+      const s = Math.min(cv.width / bild.width, cv.height / bild.height) * 0.98;
+      c.drawImage(bild, (cv.width - bild.width * s) / 2, (cv.height - bild.height * s) / 2, bild.width * s, bild.height * s);
+      tex.needsUpdate = true;
+    };
+    bild.src = 'bilder/gasse/standbild_klein.webp';
+  }
+  // Rechts Code als farbige Striche (keine Schrift im Bild) mit Zeilennummern als graue Striche. Im Raum stehen die
+  // ersten Zeilen und der Cursor blinkt; herangeholt tippt er weiter (Florians Wahl), Strich für Strich, und rollt
+  // nach oben, wenn der Bildschirm voll ist. CODE.zeit zählt nur, solange die Monitore draußen und fertig sind.
+  let zufall = 11;
+  const rnd = () => { zufall = (zufall * 16807) % 2147483647; return zufall / 2147483647; };
+  const FARBEN_CODE = ['#ff8fd0', '#85f3ff', '#ffd97a', '#b8f28a', '#c9c4e0'];
+  let tiefe = 0;
+  const ZEILEN = Array.from({ length: 400 }, (_, i) => {
+    if (i % 9 === 8 || rnd() < 0.06) { tiefe = Math.max(0, tiefe - 1); return []; }   // Leerzeile
+    tiefe = clamp(tiefe + (rnd() < 0.3 ? 1 : rnd() < 0.35 ? -1 : 0), 0, 4);
+    let x = 46 + 20 * tiefe;
+    const stuecke = [];
+    for (let j = 0, n = 1 + Math.floor(rnd() * 3); j < n && x < 330; j++) {
+      const w = Math.min(330 - x, 16 + rnd() * 84);
+      stuecke.push([x, w, FARBEN_CODE[Math.floor(rnd() * 5)]]);
+      x += w + 9;
+    }
+    return stuecke;
+  });
+  const TIPP = 260, CODE = { start: 22, zeit: 0, aktiv: false, gezeichnet: '' };          // Pixel je Sekunde; Zeilen, die im Raum schon stehen
+  const zeilenDauer = z => z.reduce((s, [, w]) => s + w / TIPP + 0.05, 0) + 0.18;
+  function code(cursor) {
+    const schluessel = `${CODE.zeit} ${cursor}`;             // Livegang D: nur neu zeichnen, wenn sich etwas ändert
+    if (schluessel === CODE.gezeichnet) return;               // (im Raum blinkt der Cursor 2×/s, gefragt wird 4×/s)
+    CODE.gezeichnet = schluessel;
+    const { c, cv, tex } = LEINWAND['monitore.rechts'], W = cv.width, H = cv.height, LH = 18, Y0 = 36;
+    let i = CODE.start, rest = CODE.zeit;
+    for (let d = zeilenDauer(ZEILEN[i % ZEILEN.length]); rest >= d; d = zeilenDauer(ZEILEN[i % ZEILEN.length])) { rest -= d; i++; }
+    const sichtbar = Math.floor((H - Y0 - 8) / LH), oben = Math.max(0, i - sichtbar + 1);
+    c.fillStyle = '#1d1a2c'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#2a2540'; c.fillRect(0, 0, W, 24);
+    ['#ff6a5a', '#ffd97a', '#5bd98a'].forEach((f, k) => { c.fillStyle = f; c.fillRect(12 + k * 16, 8, 8, 8); });
+    let cx = 46, cy = Y0;
+    for (let k = oben; k <= i; k++) {
+      const y = Y0 + (k - oben) * LH, z = ZEILEN[k % ZEILEN.length];
+      c.globalAlpha = k === i ? 0.75 : 0.4;                    // Zeilennummer
+      c.fillStyle = '#8f88b0'; c.fillRect(12, y, 8 + (k % 3) * 5, 7);
+      c.globalAlpha = 0.88;
+      let r = k === i ? rest : Infinity;
+      cx = 46; cy = y;
+      for (const [x, w, f] of z) {
+        if (r <= 0) break;
+        const ww = Math.min(w, r * TIPP);
+        c.fillStyle = f; c.fillRect(x, y, ww, 7);
+        r -= w / TIPP + 0.05;
+        cx = x + ww + (ww >= w ? 6 : 1);
+      }
+    }
+    c.globalAlpha = 1;
+    if (cursor) { c.fillStyle = '#fff'; c.fillRect(cx, cy - 3, 3, 13); }
+    tex.needsUpdate = true;
+  }
+  code(true);
+
+  // Papier (Runde 85, Florians Wahl): Florians Foto auf dem Polaroid der Pinnwand und die Tafel der Staffelei liegen
+  // als Bild auf dem Modell, im Raum wie herangeholt (dieselbe Leinwand). Polaroid x 200,75–204,75, z 168,75–173,25,
+  // Tafel x 228,5–241,5, z 162,5–183,5, beide bündig auf der Front (y 155 bzw. 105; aus dinge.pinnwand/staffelei).
+  // Runde 87: die Fläche des Whiteboards (Front nach Westen bei x 251, y 133–153, z 170–181) und die drei Poster
+  // (Front bei y 155, z 183–194: Timer x 201–211, HamMeter 214–230, WispUI 234–250; aus dinge.whiteboard/poster).
+  const PAPIER = { 'pinnwand.foto': { teil: 'Atelier_Pinnwand', x: 202.75, y: 154.97, z: 171, w: 4, h: 4.5 },
+    staffelei: { teil: 'Atelier_Staffelei', x: 235, y: 104.97, z: 173, w: 13, h: 21 },
+    whiteboard: { teil: 'Atelier_Whiteboard', x: 250.97, y: 143, z: 175.5, w: 20, h: 11, west: true },
+    'poster.timer': { teil: 'Atelier_Poster', x: 206, y: 154.97, z: 188.5, w: 10, h: 11 },
+    'poster.meter': { teil: 'Atelier_Poster', x: 222, y: 154.97, z: 188.5, w: 16, h: 11 },
+    'poster.ui': { teil: 'Atelier_Poster', x: 242, y: 154.97, z: 188.5, w: 16, h: 11 } };
+  function leinwand(n, w, h) {                                // Leinwand in Voxeln des Modells, 16 Pixel je Voxel
+    const cv = document.createElement('canvas');
+    cv.width = w * 16; cv.height = h * 16;
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    LEINWAND[n] = { cv, c: cv.getContext('2d'), tex };
+  }
+  {
+    const tex = new THREE.TextureLoader().load('bilder/atelier/polaroid.jpg');
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    LEINWAND['pinnwand.foto'] = { tex };
+    leinwand('staffelei', 52, 84);
+    leinwand('whiteboard', 80, 44);
+    leinwand('poster.timer', 40, 44);
+    leinwand('poster.meter', 64, 44);
+    leinwand('poster.ui', 64, 44);
+  }
+  for (const [n, M] of Object.entries(PAPIER)) {
+    const t = teil(M.teil);
+    if (!t) continue;
+    const geo = new THREE.PlaneGeometry(M.w * VOX, M.h * VOX);
+    if (M.west) geo.rotateY(-Math.PI / 2);                    // Front nach Westen (Whiteboard), links = Norden
+    const ebene = new THREE.Mesh(geo, bildMaterial(LEINWAND[n].tex, t.userData.blass, 0.94, t.userData.hell));
+    ebene.position.copy(vox(M.x, M.y, M.z));
+    scene.add(ebene);
+    t.attach(ebene);
+  }
+  // Tafel der Staffelei: oben „Daily UI“ und der Zähler, darunter 90 Kästchen (10 × 9), unten die fünf Ausdrucke mit
+  // Klebeband (Reihenfolge wie die Blätter in der Karte, ein Klick öffnet dort die Lupe). Maße in Voxeln des Modells.
+  const DRUCKE = [['aktien', 5.5, 51.5, 15, 11.25], ['restaurants', 5.5, 64.5, 15, 11.25], ['sneaker', 23, 51.5, 9.6, 18.3],
+    ['fehler', 35, 52.5, 10, 17.5], ['feedback', 24, 71.5, 18, 11.6]].map(([n, x, y, w, h]) => {
+    const im = new Image();
+    im.onload = () => tafel(KALENDER.n, 1, true);
+    im.src = `bilder/atelier/dailyui/${n}_klein.jpg`;
+    return { im, x, y, w, h };
+  });
+  const KALENDER = { n: 90, t: 0, gezeichnet: '' };
+  function tafel(n, alpha = 1, neu = false) {                // n Kästchen abgehakt; alpha: Haken blenden aus
+    const schluessel = `${n} ${alpha.toFixed(2)}`;
+    if (!neu && schluessel === KALENDER.gezeichnet) return;
+    KALENDER.gezeichnet = schluessel;
+    const { c, cv, tex } = LEINWAND.staffelei, s = 16;
+    const akzent = getComputedStyle(root).getPropertyValue('--k').trim() || '#ec5f4b';
+    c.fillStyle = '#FFFBF2'; c.fillRect(0, 0, cv.width, cv.height);
+    c.fillStyle = '#2d2b45';
+    c.font = `800 ${3.2 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    c.textBaseline = 'alphabetic';
+    c.textAlign = 'left'; c.fillText('Daily UI', 3.4 * s, 5 * s);
+    c.textAlign = 'right'; c.fillStyle = akzent; c.fillText(`${n}/90`, 48.6 * s, 5 * s);
+    for (let k = 0; k < 90; k++) {
+      const x = (3.4 + (k % 10) * 4.6) * s, y = (7 + Math.floor(k / 10) * 4.6) * s, b = 3.8 * s;
+      c.beginPath(); c.roundRect(x, y, b, b, 0.7 * s);
+      c.lineWidth = 3; c.strokeStyle = '#ddd2c4'; c.stroke();
+      if (k >= n) continue;
+      c.globalAlpha = alpha;
+      c.fillStyle = akzent; c.fill();
+      c.strokeStyle = '#fff'; c.lineWidth = 0.55 * s; c.lineCap = c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(x + 0.9 * s, y + 1.95 * s); c.lineTo(x + 1.6 * s, y + 2.7 * s); c.lineTo(x + 2.9 * s, y + 1.1 * s); c.stroke();
+      c.globalAlpha = 1;
+    }
+    DRUCKE.forEach(({ im, x, y, w, h }, k) => {
+      c.save();
+      c.shadowColor = 'rgba(70, 40, 30, .22)'; c.shadowBlur = 0.8 * s; c.shadowOffsetY = 0.25 * s;
+      c.fillStyle = '#fff'; c.fillRect((x - 0.45) * s, (y - 0.45) * s, (w + 0.9) * s, (h + 0.9) * s);
+      c.restore();
+      if (im.complete && im.naturalWidth) c.drawImage(im, x * s, y * s, w * s, h * s);
+      c.save();                                               // Klebeband oben
+      c.translate((x + w / 2) * s, (y - 0.3) * s); c.rotate((k % 2 ? 1 : -1) * 0.1);
+      c.fillStyle = k % 2 ? 'rgba(127, 220, 197, .8)' : 'rgba(255, 211, 90, .8)';
+      c.fillRect(-2.6 * s, -0.75 * s, 5.2 * s, 1.5 * s);
+      c.restore();
+    });
+    tex.needsUpdate = true;
+  }
+  tafel(90, 1, true);
+  document.fonts && document.fonts.ready.then(() => tafel(KALENDER.n, 1, true));
+  // Herangeholt und fertig gewachsen: die Haken blenden kurz aus, dann hakt sich Tag für Tag ab (Florians Wahl),
+  // 90 in 2,5 s; zurückgelegt steht wieder alles abgehakt da. Bei „Bewegung reduzieren“ bleibt es stehen.
+  function kalenderStellen(dt, will) {
+    if (!will || RUHIG) { KALENDER.t = 0; KALENDER.n = 90; tafel(90); return; }
+    KALENDER.t += dt;
+    const t = KALENDER.t;
+    if (t < 0.3) { tafel(90, 1 - t / 0.3); return; }
+    KALENDER.n = Math.min(90, Math.floor(90 * glatt(clamp((t - 0.3) / 2.5, 0, 1)) + 1e-6));
+    tafel(KALENDER.n);
+  }
+  function druckBei(u, v) {                                   // Stelle auf der Tafel (0…1) → Nummer des Ausdrucks
+    const x = u * 52, y = (1 - v) * 84;
+    return DRUCKE.findIndex(d => x >= d.x - 0.5 && x <= d.x + d.w + 0.5 && y >= d.y - 0.8 && y <= d.y + d.h + 0.5);
+  }
+
+  // Whiteboard (Runde 87, Florians Wahl „Entwurf + Done“): Spalten „To do“ und „Done“, Haftnotizen mit Nutzerwünschen
+  // als Symbole (Suche, Glocke, Filter, Export), Pfeile zu einem Bildschirm-Entwurf wie ein Verwaltungssystem (myODAV:
+  // Seitenleiste, Suchfeld, Tabelle). Im Raum steht das fertige Board. Herangeholt und fertig gewachsen blendet der
+  // Entwurf kurz aus, zeichnet sich Strich für Strich neu, dann je Wunsch ein Pfeil und sein Teil im Entwurf; zuletzt
+  // wandert die Notiz „Suche“ nach „Done“ und bekommt einen Haken. Maße in Voxeln des Modells (Fläche 80 × 44).
+  const wackel = (x, y) => [x + (streu0(x * 7.1, y * 3.3) - 0.5) * 0.12, y + (streu0(y * 5.7, x * 2.9) - 0.5) * 0.12];
+  function streu0(a, b) { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); }
+  const strich = pkte => {                                    // Linienzug (leicht von Hand) mit Längen
+    const p = pkte.map(([x, y]) => wackel(x, y)), l = [0];
+    for (let i = 1; i < p.length; i++) l.push(l[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+    return { p, l, L: l[l.length - 1] };
+  };
+  const zug = (...pkte) => strich(pkte);
+  const bogen = (a, k, b, n = 28) => strich(Array.from({ length: n + 1 }, (_, i) => {
+    const t = i / n, u = 1 - t;
+    return [u * u * a[0] + 2 * u * t * k[0] + t * t * b[0], u * u * a[1] + 2 * u * t * k[1] + t * t * b[1]];
+  }));
+  const kreis = (x, y, r, n = 20) => strich(Array.from({ length: n + 2 }, (_, i) => [x + r * Math.cos(i / n * 2 * Math.PI - 2), y + r * Math.sin(i / n * 2 * Math.PI - 2)]));
+  function kasten(x0, y0, x1, y1, r) {                        // Rechteck mit runden Ecken, oben links im Uhrzeigersinn
+    const p = [], ecke = (cx, cy, a0) => { for (let i = 0; i <= 6; i++) { const a = a0 + i / 6 * Math.PI / 2; p.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } };
+    ecke(x0 + r, y0 + r, Math.PI); ecke(x1 - r, y0 + r, -Math.PI / 2); ecke(x1 - r, y1 - r, 0); ecke(x0 + r, y1 - r, Math.PI / 2);
+    p.push(p[0]);
+    return strich(p);
+  }
+  function pfeil(a, k, b) {                                   // Bogen mit Spitze am Ende
+    const s = bogen(a, k, b), q = s.p, [ex, ey] = q[q.length - 1], [vx, vy] = q[q.length - 4];
+    const w = Math.atan2(ey - vy, ex - vx), sp = (d) => [ex - 1.3 * Math.cos(w + d), ey - 1.3 * Math.sin(w + d)];
+    return [s, zug(sp(0.5), [ex, ey], sp(-0.5))];
+  }
+  const WB_BASIS = [kasten(27, 7, 61, 38, 1.2), zug([27, 10.5], [61, 10.5]),
+    kreis(28.8, 8.75, 0.45, 10), kreis(30.4, 8.75, 0.45, 10), kreis(32, 8.75, 0.45, 10),
+    zug([34, 10.5], [34, 38]), kasten(28.6, 12.3, 32.4, 14.8, 0.5),
+    ...[17.5, 20, 22.5, 25].map(y => zug([28.8, y], [32.2 - (y % 5) * 0.3, y])),
+    kreis(58.3, 13.5, 1, 16),                                 // Avatar oben rechts
+    kasten(36, 21, 59.5, 32.8, 0.6), zug([36, 24], [59.5, 24]), zug([36, 27], [59.5, 27]), zug([36, 30], [59.5, 30]),
+    ...[25.5, 28.5, 31.4].flatMap((y, i) => [zug([37.4, y], [41 + i * 0.6, y]), zug([43.2, y], [48.5 - i, y]), zug([51, y], [54.4 + i * 0.5, y])])];
+  // je Wunsch: Notiz (Platz, Farbe, Drehung, Symbol), Pfeil zum Teil im Entwurf, das Teil
+  // Notizen untereinander, die Pfeile laufen so nie hinter einer Notiz durch und kreuzen sich nicht
+  const WB_WUENSCHE = [
+    { x: 4, y: 8, farbe: '#FFB8C8', dreh: 2, sym: 'glocke', pfeil: pfeil([11.6, 10.5], [34, -3.5], [53.6, 11.6]),
+      teil: [strich([[53.1, 14.5], [53.2, 12.9], [53.6, 12.2], [54.2, 12.0], [54.8, 12.2], [55.2, 12.9], [55.3, 14.5]]),
+        zug([52.6, 14.5], [55.8, 14.5]), zug([54, 15.1], [54.4, 15.1])] },
+    { x: 4, y: 16.5, farbe: '#FFE36E', dreh: -3, sym: 'suche', done: true, pfeil: pfeil([11.6, 20], [24, 18], [35.4, 13.6]),
+      teil: [kasten(36, 12, 47.5, 15, 1.4), kreis(37.9, 13.4, 0.7, 12), zug([38.4, 13.9], [39.1, 14.5]), zug([40.2, 13.5], [44.5, 13.5])] },
+    { x: 4, y: 25, farbe: '#A6EBD3', dreh: 1.5, sym: 'filter', pfeil: pfeil([11.6, 28.5], [26, 26], [35.4, 18.6]),
+      teil: [kasten(36, 17, 42.4, 19.6, 0.8), zug([36.8, 17.6], [39, 17.6], [38.2, 18.5], [38.2, 19.1], [37.6, 18.8], [37.6, 18.5], [36.8, 17.6]),
+        zug([39.7, 18.3], [41.6, 18.3])] },
+    { x: 4, y: 33.5, farbe: '#AEDCFF', dreh: -2, sym: 'export', pfeil: pfeil([11.6, 37], [32, 43], [52.2, 36.2]),
+      teil: [kasten(52.5, 34.4, 59.5, 37, 0.8), zug([54.1, 34.9], [54.1, 36.3]), zug([53.5, 35.7], [54.1, 36.3], [54.7, 35.7]),
+        zug([55.6, 35.7], [58.5, 35.7])] }];
+  const WB_DONE = { x: 69.5, y: 8, dreh: 2 }, WB_HAKEN = zug([-1.6, 0.1], [-0.45, 1.35], [1.8, -1.5]), NOTIZ = 7;
+  const WB_T = { aus: 0.3, basis: 1.3, je: 0.5, wandern: 0.8, haken: 0.5 };
+  WB_T.ende = WB_T.aus + WB_T.basis + WB_T.je * WB_WUENSCHE.length + WB_T.wandern + WB_T.haken;
+  const WB = { t: 0, gezeichnet: '' };
+  function zieh(c, S, anteil) {                               // Linienzug bis zum Anteil 0…1 seiner Länge
+    if (anteil <= 0) return;
+    const bis = S.L * Math.min(1, anteil);
+    c.beginPath(); c.moveTo(...S.p[0]);
+    for (let i = 1; i < S.p.length; i++) {
+      if (S.l[i] <= bis) { c.lineTo(...S.p[i]); continue; }
+      const k = (bis - S.l[i - 1]) / (S.l[i] - S.l[i - 1]);
+      c.lineTo(S.p[i - 1][0] + (S.p[i][0] - S.p[i - 1][0]) * k, S.p[i - 1][1] + (S.p[i][1] - S.p[i - 1][1]) * k);
+      break;
+    }
+    c.stroke();
+  }
+  function ziehAlle(c, liste, anteil) {                       // mehrere Züge nacheinander, nach Länge verteilt
+    const L = liste.reduce((s, S) => s + S.L, 0);
+    let rest = anteil * L;
+    for (const S of liste) { zieh(c, S, rest / S.L); rest -= S.L; if (rest <= 0) break; }
+  }
+  function notiz(c, x, y, farbe, dreh, sym, alpha = 1, heben = 0) {   // Haftnotiz NOTIZ × NOTIZ mit Symbol
+    if (alpha <= 0) return;
+    const g = NOTIZ / 2;
+    c.save();
+    c.globalAlpha = alpha;
+    c.translate(x + g, y + g); c.rotate(dreh * Math.PI / 180); c.scale(1 + 0.08 * heben, 1 + 0.08 * heben);
+    c.shadowColor = `rgba(70, 45, 35, ${0.2 + 0.15 * heben})`;   // Schatten in Pixeln (gilt nicht mit der Skalierung)
+    c.shadowBlur = (0.5 + 0.9 * heben) * 16; c.shadowOffsetY = (0.15 + 0.4 * heben) * 16;
+    c.fillStyle = farbe; c.fillRect(-g, -g, 2 * g, 2 * g);
+    c.shadowColor = 'transparent';
+    c.fillStyle = 'rgba(0, 0, 0, .05)'; c.fillRect(-g, -g, 2 * g, 1.4);   // Klebestreifen oben, etwas dunkler
+    c.scale(NOTIZ / 8, NOTIZ / 8);                            // Symbole für 8 × 8 gezeichnet
+    c.strokeStyle = '#2d2b45'; c.lineWidth = 0.46; c.lineCap = c.lineJoin = 'round';
+    c.beginPath();
+    if (sym === 'suche') { c.arc(-0.5, -0.3, 1.6, 0, Math.PI * 2); c.moveTo(0.7, 0.9); c.lineTo(2, 2.2); }
+    else if (sym === 'glocke') {
+      c.moveTo(-1.8, 1.3); c.quadraticCurveTo(-1.6, -2.3, 0, -2.3); c.quadraticCurveTo(1.6, -2.3, 1.8, 1.3); c.closePath();
+      c.moveTo(-2.3, 1.3); c.lineTo(2.3, 1.3); c.moveTo(-0.4, 2.1); c.lineTo(0.4, 2.1);
+    } else if (sym === 'filter') { c.moveTo(-2.2, -1.8); c.lineTo(2.2, -1.8); c.lineTo(0.6, 0.3); c.lineTo(0.6, 2); c.lineTo(-0.6, 1.4); c.lineTo(-0.6, 0.3); c.closePath(); }
+    else { c.moveTo(0, -2.2); c.lineTo(0, 0.9); c.moveTo(-1.2, -0.3); c.lineTo(0, 0.9); c.lineTo(1.2, -0.3); c.moveTo(-2, 1); c.lineTo(-2, 2.1); c.lineTo(2, 2.1); c.lineTo(2, 1); }
+    c.stroke();
+    c.restore();
+  }
+  function whiteboard(t) {                                    // t: Sekunden seit Beginn (≥ ende: fertig, wie im Raum)
+    t = Math.min(t, WB_T.ende);
+    const schluessel = t >= WB_T.ende ? 'fertig' : t.toFixed(3);
+    if (schluessel === WB.gezeichnet) return;
+    WB.gezeichnet = schluessel;
+    const { c, cv, tex } = LEINWAND.whiteboard, s = 16, T = WB_T;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    const g = c.createLinearGradient(0, 0, cv.width, cv.height);
+    g.addColorStop(0, '#FDFEFE'); g.addColorStop(0.55, '#F4F6F8'); g.addColorStop(1, '#FBFCFD');
+    c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
+    c.setTransform(s, 0, 0, s, 0, 0);
+    c.fillStyle = 'rgba(120, 130, 160, .03)';                 // Reste von früher, weggewischt
+    for (const [x, y, w, h] of [[30, 3.5, 14, 2.2], [63, 30, 12, 4], [6, 33, 13, 3]]) { c.beginPath(); c.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, -0.1, 0, Math.PI * 2); c.fill(); }
+    c.lineCap = c.lineJoin = 'round';
+    c.strokeStyle = 'rgba(64, 76, 120, .45)'; c.lineWidth = 0.22;   // Trennlinie zu „Done“
+    zieh(c, zug([65, 2.2], [65.1, 41.8]), 1);
+    c.fillStyle = '#2b3a7a';
+    c.font = `800 2.3px "Hanken Grotesk", system-ui, sans-serif`;
+    if ('letterSpacing' in c) c.letterSpacing = '0.25px';
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+    c.fillText('TO DO', 3, 5.3); c.fillText('DONE', 69, 5.3);
+    if ('letterSpacing' in c) c.letterSpacing = '0px';
+    // Fortschritt: erst ausblenden (wie der Kalender), dann Entwurf, Pfeile mit ihren Teilen, Wandern, Haken
+    const aus = t < T.aus ? 1 - t / T.aus : 0;
+    const tb = t - T.aus, basis = aus ? 1 : clamp(tb / T.basis, 0, 1);
+    const tw = t - T.aus - T.basis - T.je * WB_WUENSCHE.length, k = aus ? 1 : glatt(clamp(tw / T.wandern, 0, 1));
+    const haken = aus ? 1 : clamp((tw - T.wandern) / T.haken, 0, 1);
+    const a = aus || 1;                                       // Deckkraft der Striche
+    c.globalAlpha = a;
+    c.strokeStyle = '#2b3a7a'; c.lineWidth = 0.4;
+    ziehAlle(c, WB_BASIS, basis);
+    WB_WUENSCHE.forEach((W, i) => {
+      const q = aus ? 1 : clamp((tb - T.basis - i * T.je) / T.je, 0, 1);
+      const pa = clamp(q / 0.6, 0, 1), pt = clamp((q - 0.6) / 0.4, 0, 1);
+      c.globalAlpha = a * (W.done ? 1 - k : 1);               // der Pfeil der Notiz, die nach „Done“ geht, verblasst
+      c.strokeStyle = '#d8473b'; c.lineWidth = 0.46;
+      ziehAlle(c, W.pfeil, pa);
+      c.globalAlpha = a;
+      c.strokeStyle = '#2b3a7a'; c.lineWidth = 0.36;
+      ziehAlle(c, W.teil, pt);
+    });
+    c.globalAlpha = 1;
+    WB_WUENSCHE.forEach(W => {
+      if (!W.done) { notiz(c, W.x, W.y, W.farbe, W.dreh, W.sym); return; }
+      if (aus) {                                              // zurück an den Anfang: Notiz kommt in „To do“, „Done“ blendet aus
+        notiz(c, W.x, W.y, W.farbe, W.dreh, W.sym, 1 - aus);
+        notiz(c, WB_DONE.x, WB_DONE.y, W.farbe, WB_DONE.dreh, W.sym, aus);
+        return;
+      }
+      const x = W.x + (WB_DONE.x - W.x) * k, y = W.y + (WB_DONE.y - W.y) * k - 2.2 * Math.sin(Math.PI * k);
+      notiz(c, x, y, W.farbe, W.dreh + (WB_DONE.dreh - W.dreh) * k, W.sym, 1, Math.sin(Math.PI * k));
+    });
+    if (haken > 0 || aus) {                                   // Haken im Kreis an der Ecke der Notiz in „Done“
+      c.save();
+      c.globalAlpha = aus || 1;
+      c.translate(WB_DONE.x + NOTIZ / 2, WB_DONE.y + NOTIZ / 2); c.rotate(WB_DONE.dreh * Math.PI / 180);
+      c.translate(NOTIZ / 2 - 0.4, -NOTIZ / 2 + 0.4);
+      const r = 1.7 * (aus ? 1 : glatt(clamp(haken / 0.35, 0, 1)));
+      c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2);
+      c.fillStyle = '#fff'; c.fill(); c.strokeStyle = '#2f9e76'; c.lineWidth = 0.3; c.stroke();
+      c.scale(0.62, 0.62);
+      c.lineWidth = 0.75;
+      zieh(c, WB_HAKEN, aus ? 1 : clamp((haken - 0.3) / 0.7, 0, 1));
+      c.restore();
+    }
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    tex.needsUpdate = true;
+  }
+  whiteboard(WB_T.ende);
+  function whiteboardStellen(dt, will) {
+    if (!will || RUHIG) { WB.t = 0; whiteboard(WB_T.ende); return; }
+    WB.t += dt;
+    whiteboard(WB.t);
+  }
+
+  // Poster der Tools (Runde 87, Florians Wahl): wie ein kleiner Kopf der Seite, Bild aus der Seite selbst (Abfahrt der
+  // Reise, Elektronikladen der WispUI-Seite; aufgenommen im Browser, nur die 3D-Ansicht), Name im Stil der Seite und
+  // eine Zeile wie ihre Chips (alles Schrift aus dem Code). Der Timer ist noch eine Bleistiftskizze mit Stempel
+  // „in Planung“; herangeholt rieselt der Sand einmal durch, am HamMeter-Schild laufen die Lämpchen wie auf der Seite.
+  // Ein Klick auf HamMeter oder WispUI öffnet die Seite (wie die Knöpfe der Karte).
+  const POSTER_BILD = { meter: new Image(), ui: new Image() };
+  POSTER_BILD.meter.src = 'bilder/atelier/poster/hammeter.webp';
+  POSTER_BILD.ui.src = 'bilder/atelier/poster/wispui.webp';
+  const POSTER_SEITE = { 'poster.meter': 'null-meter', 'poster.ui': 'wispui' };
+  const deutsch = () => root.lang === 'de';
+  function chips(c, liste, x, y, rand, s) {                   // Chips wie .unter auf den Seiten
+    c.font = `700 ${1.35 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    c.textBaseline = 'middle'; c.textAlign = 'left';
+    for (const text of liste) {
+      const w = c.measureText(text).width + 1.5 * s, h = 2.5 * s;
+      c.beginPath(); c.roundRect(x, y - h / 2, w, h, h / 2);
+      c.fillStyle = 'rgba(255, 255, 255, .78)'; c.fill();
+      c.lineWidth = 0.12 * s; c.strokeStyle = rand; c.stroke();
+      c.fillStyle = '#2d2b45'; c.fillText(text, x + 0.75 * s, y + 0.05 * s);
+      x += w + 0.6 * s;
+    }
+  }
+  function kicker(c, x, y, farbe, s) {
+    c.font = `800 ${1.15 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    if ('letterSpacing' in c) c.letterSpacing = `${0.16 * s}px`;
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = farbe;
+    c.fillText(deutsch() ? 'VON FLORIAN KIERSKI' : 'BY FLORIAN KIERSKI', x, y);
+    if ('letterSpacing' in c) c.letterSpacing = '0px';
+  }
+  const BIRNEN = { phase: -1 };
+  function posterMeter(phase = 0) {                           // phase 0–2: welche Lämpchen gerade schwächer sind (−1: alle an)
+    const { c, cv, tex } = LEINWAND['poster.meter'], W = cv.width, H = cv.height, s = 16, im = POSTER_BILD.meter;
+    c.fillStyle = '#F4BE93'; c.fillRect(0, 0, W, H);
+    if (im.complete && im.naturalWidth) c.drawImage(im, 0, 0, W, H);
+    kicker(c, 3.6 * s, 3.3 * s, '#c81f74', s);
+    c.save();                                                 // Leuchtschild wie auf der Reise, leicht schräg
+    c.font = `800 ${5.2 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    const tw = c.measureText('HamMeter').width, w = tw + 4.6 * s, h = 8.4 * s;
+    c.translate(3 * s, 4.4 * s); c.rotate(-2 * Math.PI / 180);
+    c.shadowColor = 'rgba(107, 51, 49, .28)'; c.shadowBlur = 1.6 * s; c.shadowOffsetY = 0.8 * s;
+    c.beginPath(); c.roundRect(0, 0, w, h, 1.6 * s); c.fillStyle = '#da2a84'; c.fill();
+    c.shadowColor = 'transparent';
+    c.lineWidth = 0.4 * s; c.strokeStyle = '#a5246b'; c.beginPath(); c.roundRect(0.2 * s, 0.2 * s, w - 0.4 * s, h - 0.4 * s, 1.4 * s); c.stroke();
+    c.shadowColor = 'rgba(255, 255, 255, .5)'; c.shadowBlur = 1.2 * s;
+    c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.textAlign = 'center'; c.fillText('HamMeter', w / 2, h / 2 + 0.3 * s);
+    c.shadowColor = 'transparent';
+    const r = 0.95 * s, abst = 1.75 * s, p = [];
+    const kante = (x0, y0, x1, y1) => { const n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / abst)); for (let i = 0; i < n; i++) p.push([x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n]); };
+    kante(r, r, w - r, r); kante(w - r, r, w - r, h - r); kante(w - r, h - r, r, h - r); kante(r, h - r, r, r);
+    p.forEach(([x, y], i) => {
+      const schwach = phase >= 0 && (i + phase) % 3 === 0;
+      c.globalAlpha = schwach ? 0.4 : 1;
+      c.shadowColor = schwach ? 'transparent' : 'rgba(255, 214, 120, .9)'; c.shadowBlur = 0.6 * s;
+      c.fillStyle = '#fff3c9'; c.beginPath(); c.arc(x, y, 0.36 * s, 0, Math.PI * 2); c.fill();
+    });
+    c.restore();
+    chips(c, [deutsch() ? 'Damage Meter' : 'Damage meter', 'FFXIV', 'Aion 2'], 3.6 * s, H - 3.4 * s, '#f3b4d3', s);
+    tex.needsUpdate = true;
+  }
+  function posterUi() {
+    const { c, cv, tex } = LEINWAND['poster.ui'], W = cv.width, H = cv.height, s = 16, im = POSTER_BILD.ui;
+    c.fillStyle = '#CDE9F1'; c.fillRect(0, 0, W, H);
+    if (im.complete && im.naturalWidth) {                     // der Laden rechts, wie im Kopf der Seite
+      const b = 37.5 * s, h = b * im.naturalHeight / im.naturalWidth;
+      c.drawImage(im, W - b - 1.6 * s, (H - h) / 2 + 1.2 * s, b, h);
+    }
+    kicker(c, 3.6 * s, 10.6 * s, '#0b7491', s);
+    c.font = `800 ${6.6 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    if ('letterSpacing' in c) c.letterSpacing = `${-0.13 * s}px`;
+    c.fillStyle = '#2d2b45'; c.textBaseline = 'alphabetic'; c.fillText('WispUI', 3.2 * s, 17.4 * s);
+    if ('letterSpacing' in c) c.letterSpacing = '0px';
+    chips(c, ['UI suite', 'FFXIV'], 3.6 * s, 21.4 * s, '#b4dcea', s);
+    chips(c, [deutsch() ? 'Dalamud-Plugin' : 'Dalamud plugin'], 3.6 * s, 24.6 * s, '#b4dcea', s);
+    tex.needsUpdate = true;
+  }
+  // Timer: Bleistiftskizze einer Sanduhr auf Rechenpapier, mit Klebeband an der Wand; k: wie viel Sand durch ist
+  const SAND = { t: 0, k: -1 };
+  function sanduhr(c, s) {                                    // Umriss der beiden Kolben (in Voxeln), Mitte x 20
+    c.beginPath();
+    c.moveTo(13.8 * s, 13.2 * s); c.bezierCurveTo(13.6 * s, 19.5 * s, 19 * s, 21.8 * s, 19.4 * s, 25 * s);
+    c.bezierCurveTo(19 * s, 28.2 * s, 13.6 * s, 30.5 * s, 13.8 * s, 36.8 * s); c.lineTo(26.2 * s, 36.8 * s);
+    c.bezierCurveTo(26.4 * s, 30.5 * s, 21 * s, 28.2 * s, 20.6 * s, 25 * s);
+    c.bezierCurveTo(21 * s, 21.8 * s, 26.4 * s, 19.5 * s, 26.2 * s, 13.2 * s); c.closePath();
+  }
+  function posterTimer(k = 0) {
+    const { c, cv, tex } = LEINWAND['poster.timer'], W = cv.width, H = cv.height, s = 16;
+    c.fillStyle = '#FFFDF7'; c.fillRect(0, 0, W, H);
+    c.strokeStyle = 'rgba(120, 160, 205, .22)'; c.lineWidth = 1;     // Rechenpapier
+    for (let x = s; x < W; x += s) { c.beginPath(); c.moveTo(x + 0.5, 0); c.lineTo(x + 0.5, H); c.stroke(); }
+    for (let y = s; y < H; y += s) { c.beginPath(); c.moveTo(0, y + 0.5); c.lineTo(W, y + 0.5); c.stroke(); }
+    c.fillStyle = '#4c4a5e'; c.font = `800 ${4.4 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    c.textBaseline = 'alphabetic'; c.textAlign = 'center'; c.fillText('Timer', 20 * s, 9.4 * s);
+    // Sand (gelber Stift): oben sinkt der Spiegel, unten wächst ein Hügel, dazwischen ein feiner Strahl
+    c.save(); sanduhr(c, s); c.clip();
+    const oben = 16.5 + 8.5 * Math.pow(k, 0.8), gipfel = 36.8 - 8.2 * Math.pow(k, 0.85), rand = gipfel + 2.2 * Math.min(1, k * 3);
+    c.beginPath();
+    if (k < 1) c.rect(13 * s, oben * s, 14 * s, (25.2 - oben) * s);
+    if (k > 0) {
+      c.moveTo(13 * s, 37 * s); c.lineTo(13 * s, rand * s);
+      c.quadraticCurveTo(20 * s, (2 * gipfel - rand) * s, 27 * s, rand * s); c.lineTo(27 * s, 37 * s); c.closePath();
+      if (k < 1) c.rect(19.85 * s, 25 * s, 0.3 * s, (gipfel - 25) * s);   // Strahl
+    }
+    c.clip();
+    c.fillStyle = 'rgba(242, 184, 75, .78)'; c.fillRect(0, 0, W, H);
+    c.strokeStyle = 'rgba(190, 130, 40, .45)'; c.lineWidth = 0.12 * s;  // Schraffur
+    for (let x = 4; x < 30; x += 0.9) { c.beginPath(); c.moveTo(x * s, 38 * s); c.lineTo((x + 6) * s, 13 * s); c.stroke(); }
+    c.restore();
+    c.lineCap = c.lineJoin = 'round';                         // Bleistift: zweimal leicht versetzt, Hilfslinien blass
+    c.strokeStyle = 'rgba(92, 90, 110, .22)'; c.lineWidth = 0.1 * s; c.setLineDash([0.6 * s, 0.5 * s]);
+    c.beginPath(); c.moveTo(20 * s, 11 * s); c.lineTo(20 * s, 39.2 * s); c.moveTo(11 * s, 25 * s); c.lineTo(29 * s, 25 * s); c.stroke();
+    c.setLineDash([]);
+    for (const [dx, dy, al] of [[0, 0, 0.85], [0.12, -0.08, 0.35]]) {
+      c.save(); c.translate(dx * s, dy * s);
+      c.strokeStyle = `rgba(80, 78, 98, ${al})`; c.lineWidth = 0.26 * s;
+      sanduhr(c, s); c.stroke();
+      c.beginPath(); c.roundRect(11 * s, 11.6 * s, 18 * s, 1.6 * s, 0.4 * s); c.roundRect(11 * s, 36.8 * s, 18 * s, 1.6 * s, 0.4 * s);
+      c.moveTo(12.2 * s, 13.2 * s); c.lineTo(12.2 * s, 36.8 * s); c.moveTo(27.8 * s, 13.2 * s); c.lineTo(27.8 * s, 36.8 * s); c.stroke();
+      c.restore();
+    }
+    c.save();                                                 // Stempel „in Planung“
+    c.translate(20 * s, 41.3 * s); c.rotate(-7 * Math.PI / 180);
+    c.font = `800 ${1.7 * s}px "Hanken Grotesk", system-ui, sans-serif`;
+    if ('letterSpacing' in c) c.letterSpacing = `${0.14 * s}px`;
+    const text = deutsch() ? 'IN PLANUNG' : 'IN PLANNING', w = c.measureText(text).width + 2 * s;
+    c.strokeStyle = 'rgba(236, 95, 75, .85)'; c.lineWidth = 0.28 * s;
+    c.beginPath(); c.roundRect(-w / 2, -1.5 * s, w, 3 * s, 0.6 * s); c.stroke();
+    c.fillStyle = 'rgba(236, 95, 75, .9)'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(text, 0.07 * s, 0.1 * s);
+    c.restore();
+    if ('letterSpacing' in c) c.letterSpacing = '0px';
+    for (const [x, dreh, farbe] of [[4, -0.5, 'rgba(127, 220, 197, .8)'], [36, 0.5, 'rgba(255, 211, 90, .8)']]) {
+      c.save(); c.translate(x * s, 1.4 * s); c.rotate(dreh);  // Klebeband an den oberen Ecken
+      c.fillStyle = farbe; c.fillRect(-3 * s, -0.8 * s, 6 * s, 1.6 * s);
+      c.restore();
+    }
+    tex.needsUpdate = true;
+  }
+  function posterAlle() { posterMeter(BIRNEN.phase); posterUi(); posterTimer(Math.max(0, SAND.k)); }
+  posterAlle();
+  performance.mark('atelier:leinwand');
+  for (const im of Object.values(POSTER_BILD)) im.addEventListener('load', posterAlle);
+  document.fonts && document.fonts.ready.then(() => { posterAlle(); WB.gezeichnet = ''; whiteboard(WB.t || WB_T.ende); });
+  window.__spracheNeu = posterAlle;                          // Chips und Stempel in der anderen Sprache
+  function sandStellen(dt, will) {                            // herangeholt: kurz warten, dann rieselt er in 3,2 s durch
+    SAND.t = will && !RUHIG ? SAND.t + dt : 0;
+    const k = glatt(clamp((SAND.t - 0.4) / 3.2, 0, 1));
+    if (Math.abs(k - SAND.k) > 0.002 || (k === 0 && SAND.k !== 0)) { SAND.k = k; posterTimer(k); }
+  }
+  function birnenStellen(dt, will) {                          // Lämpchen laufen (wie .birnen auf der Reise, 1,5 s)
+    const phase = will && !RUHIG ? Math.floor(t / 0.5) % 3 : -1;
+    if (phase !== BIRNEN.phase) { BIRNEN.phase = phase; posterMeter(phase); }
+  }
+  await pause();                                              // Livegang D: Leinwände gezeichnet, kurz abgeben
+
+  // ---------------------------------------------------------------- Aufbau wie die anderen Raum-Vignetten
+  const einheiten = [];
+  for (const o of knoten) {
+    if (GRUND.includes(o.name)) continue;
+    let p = o.parent, drunter = false;
+    for (; p && p !== gltf.scene; p = p.parent) if (istKnoten.has(p) && !GRUND.includes(p.name)) drunter = true;
+    if (drunter) continue;
+    const b = new THREE.Box3().setFromObject(o), m = b.getCenter(new V3());
+    const anker = o.parent.worldToLocal(new V3(m.x, b.min.y, m.z));
+    einheiten.push({ o, b, anker, pos: o.position.clone(), sc: o.scale.clone(), eltern: o.parent });
+  }
+  const T_WAND = 1.0, H0 = box.min.y, H1 = box.max.y, WEG = new V3();
+  const hoeheBei = t => H0 + (H1 - H0 + 0.1) * (1 - (1 - clamp(t / T_WAND, 0, 1)) ** 2);
+  const zuerst = h => { for (let s = 0; s < 3; s += 0.02) if (hoeheBei(s) >= h) return s; return T_WAND; };
+  zufall = 7;
+  for (const u of einheiten) { u.delay = Math.max(0.3, zuerst(u.b.min.y + 0.05)) + 0.12 + rnd() * 0.6; u.dauer = 0.45; }
+  const ENDE = Math.max(...einheiten.map(u => u.delay + u.dauer)), AN = ENDE + 0.1;
+  const FLACKERN = [[0, 1], [0.07, 0.3], [0.14, 1], [0.22, 0.45], [0.3, 0.9], [0.36, 0.55], [0.46, 1]];
+  const leuchten = t => { if (t < AN) return 0.12; let v = 1; for (const [s, w] of FLACKERN) if (t - AN >= s) v = w; return v; };
+  function aufbau(t) {
+    schnitt.value = t >= T_WAND ? 1e9 : Math.floor(hoeheBei(t) * 16) / 16 + 0.001;
+    for (const u of einheiten) {
+      if (u.o.parent !== u.eltern) continue;                  // gerade herausgeholt: hängt am Halter
+      const k = clamp((t - u.delay) / u.dauer, 0, 1), s = k <= 0 ? 0.0001 : backOut(k);
+      u.o.visible = k > 0;
+      u.o.scale.copy(u.sc).multiplyScalar(s);
+      u.o.position.copy(u.anker).addScaledVector(WEG.copy(u.pos).sub(u.anker), s);   // Livegang D: ohne neue Vektoren
+    }
+    const l = leuchten(t);
+    G.uLeuchten.value = l;
+    LICHT.value = Math.max(0.12, l);
+    G.uSchatten.value = glatt(clamp((t - ENDE + 0.5) / 1.2, 0, 1));
+  }
+
+  // ---------------------------------------------------------------- Stationen: was die Kamera zeigt, was herauskommt
+  // teile: Ausschnitt der Kamera (Knotennamen aus dem Export); min: kleinste sichtbare Kante (m); fuell: Anteil der
+  // freien Fläche. ding: was herausgeholt wird (Runde 80, Florian: sonst verliert man im Raum den Fokus); front: wohin
+  // seine Vorderseite schaut (Winkel wie AZ: 0 = Süden, −π/2 = Westen; null = nicht drehen); kipp: liegt flach und
+  // kippt zum Betrachter.
+  const W90 = -Math.PI / 2;
+  const STATIONEN = [
+    { alles: true, fuell: 0.92 },                                                                // Überblick
+    // Runde 82 (Florian: 1, 2 und 5 lagen zu eng auf der Pinnwand): 1 ist die ganze Pinnwand mit dem Foto, 2 der
+    // Farbfächer oben im Regal, 5 die Staffelei mit Daily UI
+    { teile: ['Atelier_Pinnwand', 'Atelier_Florian', 'Atelier_Schreibtisch'], min: 2.4, fuell: 0.86,
+      ding: ['Atelier_Pinnwand'], front: 0, nummer: 'mitte', voxel: 'pinnwand' },  // Hallo: Pinnwand samt Polaroid; Nummer mittig (oben läge sie am Poster)
+    { teile: ['Atelier_Farbfaecher', 'Atelier_Regal'], min: 2.2, fuell: 0.84, ding: ['Atelier_Farbfaecher'], front: W90,
+      voxel: 'farbfaecher' },                                // Runde 86: fächert sich herangeholt weit auf
+    { teile: ['Atelier_Whiteboard'], min: 2.4, fuell: 0.84, ding: ['Atelier_Whiteboard'], front: W90,
+      voxel: 'whiteboard' },                                 // Runde 87: Entwurf zeichnet sich, Notiz wandert nach „Done“
+    { teile: ['Atelier_Zeichentablett', 'Atelier_Kaktus', 'Atelier_Tastatur'], min: 2.2, fuell: 0.84,
+      ding: ['Atelier_Zeichentablett'], front: 0, kipp: true, voxel: 'tablett' },   // Runde 83: Voxel, Bildschirm unter Glas
+    { teile: ['Atelier_Staffelei'], min: 2.4, fuell: 0.84, ding: ['Atelier_Staffelei'], front: 0, voxel: 'staffelei' },
+    { teile: ['Atelier_Server', 'Atelier_Regal'], min: 2.4, fuell: 0.84, ding: ['Atelier_Server'], front: W90,
+      voxel: 'server' },                                     // Runde 86: Lämpchen blitzen einmal der Reihe nach
+    { teile: ['Atelier_Poster'], min: 2.4, fuell: 1, ding: ['Atelier_Poster'], front: 0,
+      voxel: 'poster', gross: 0.96 },                        // Runde 87: Klick öffnet die Seite; breit und flach: größer
+    { teile: ['Atelier_Monitore', 'Atelier_Florian'], min: 2.4, fuell: 0.86,
+      ding: ['Atelier_Monitore'], front: 0, voxel: 'monitore' },   // Runde 84: Voxel, Bildschirme bleiben an
+    { teile: ['Atelier_Teleskop', 'Atelier_Sitzkissen', 'Atelier_Tischchen'], min: 2.4, fuell: 0.84, ding: ['Atelier_Teleskop'], front: null,
+      voxel: 'teleskop' },                                   // Runde 82: wächst als echte Voxel heran (Verfeinern)
+  ];
+  const pw = new V3();
+  // Livegang D: Schlüssel als Zahl statt als Text (dieselben Zellen von 2 cm, dieselbe Reihenfolge; dreimal so schnell).
+  // Je Achse ±80 m in 2-cm-Schritten passen in 13 Bit, das Atelier ist kaum 10 m groß.
+  const zelle2cm = v => Math.round(v * 50) + 4096;
+  function punkteVon(objs) {                                  // Eckpunkte der Modelle (Welt), auf 2 cm zusammengefasst
+    const pkte = [], schon = new Set();
+    for (const o of objs) o.traverse(m => {
+      if (!m.isMesh || !m.geometry.attributes.position) return;
+      const pos = m.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        pw.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld);
+        const s = (zelle2cm(pw.x) * 8192 + zelle2cm(pw.y)) * 8192 + zelle2cm(pw.z);
+        if (!schon.has(s)) { schon.add(s); pkte.push(pw.clone()); }
+      }
+    });
+    return pkte;
+  }
+  scene.updateMatrixWorld(true);
+  for (const S of STATIONEN) {
+    const pkte = S.alles ? punkteVon([gltf.scene]) : punkteVon(S.teile.map(teil).filter(Boolean));
+    const b = new THREE.Box3().setFromPoints(pkte), c = b.getCenter(new V3()), g = b.getSize(new V3());
+    if (S.min) {                                              // zu klein: Kasten um die Mitte vergrößern
+      const h = new V3(Math.max(g.x, S.min), Math.max(g.y, S.min * 0.75), Math.max(g.z, S.min)).multiplyScalar(0.5);
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) pkte.push(new V3(c.x + sx * h.x, c.y + sy * h.y, c.z + sz * h.z));
+    }
+    S.pkte = pkte;
+  }
+  performance.mark('atelier:stationen');
+  await pause();
+
+  // Blickrichtung fest (von Südwesten, ins offene Puppenhaus): Die Kamera schiebt und zoomt nur, sie dreht nie
+  const AZ = -0.72, EL = 0.5;
+  const zur = new V3(Math.cos(EL) * Math.sin(AZ), Math.sin(EL), Math.cos(EL) * Math.cos(AZ));
+  const rechtsV = new V3(0, 1, 0).cross(zur).normalize(), obenV = zur.clone().cross(rechtsV);
+
+  // Freie Fläche neben Kopf bzw. Karte (Bildpunkte): dort steht das Ding, mittig
+  let W = 1, H = 1;
+  const SCHMAL = matchMedia('(max-width: 860px), (max-aspect-ratio: 1/1)');   // wie im CSS
+  function frei(i) {
+    const sn = parseFloat(getComputedStyle(root).getPropertyValue('--sn')) || 0;
+    if (SCHMAL.matches) {
+      const oben = 76, unten = H - Math.max(H * 0.44, 260) - 92;
+      return { x: 12, y: oben, w: W - 24, h: Math.max(140, unten - oben) };
+    }
+    const unten = sn ? H - 24 : H - 88;                       // ohne Liste links sitzt unten die Pille
+    if (i === 0) {
+      const k = $('kopf').getBoundingClientRect();
+      const x = Math.max(k.right + 24, sn + 40);
+      return { x, y: 80, w: Math.max(200, W - 24 - x), h: unten - 80 };
+    }
+    const kl = KARTEN[1].getBoundingClientRect().left;
+    const x = sn + 24;
+    return { x, y: 80, w: Math.max(200, kl - 28 - x), h: unten - 80 };
+  }
+  // Abstand und Blickpunkt, sodass alle Punkte mit Rand in die freie Fläche passen (wie das Einpassen der Vignetten,
+  // Runde 53, aber für eine feste Richtung und einen Ausschnitt des Bilds)
+  function rahmen(S, f) {
+    const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2), tanH = tanV * W / H;
+    const kh = 1 / (S.fuell * tanH * f.w / W), kv = 1 / (S.fuell * tanV * f.h / H);
+    const ziel = new THREE.Box3().setFromPoints(S.pkte).getCenter(new V3());
+    let d = 1;
+    for (let it = 0; it < 3; it++) {
+      d = 0;
+      for (const p of S.pkte) {
+        const qx = p.x - ziel.x, qy = p.y - ziel.y, qz = p.z - ziel.z;
+        const zb = qx * zur.x + qy * zur.y + qz * zur.z;
+        const rb = Math.abs(qx * rechtsV.x + qy * rechtsV.y + qz * rechtsV.z), ob = Math.abs(qx * obenV.x + qy * obenV.y + qz * obenV.z);
+        d = Math.max(d, zb + rb * kh, zb + ob * kv);
+      }
+      let lx = 1e9, hx = -1e9, ly = 1e9, hy = -1e9;            // mittig rücken (Perspektive: vorn wirkt größer)
+      for (const p of S.pkte) {                               // (Livegang D: wie q = p − ziel, q·zur …, ohne neue Vektoren)
+        const qx = p.x - ziel.x, qy = p.y - ziel.y, qz = p.z - ziel.z, z = d - (qx * zur.x + qy * zur.y + qz * zur.z);
+        const x = (qx * rechtsV.x + qy * rechtsV.y + qz * rechtsV.z) / z, y = (qx * obenV.x + qy * obenV.y + qz * obenV.z) / z;
+        lx = Math.min(lx, x); hx = Math.max(hx, x); ly = Math.min(ly, y); hy = Math.max(hy, y);
+      }
+      ziel.addScaledVector(rechtsV, (lx + hx) / 2 * d).addScaledVector(obenV, (ly + hy) / 2 * d);
+    }
+    return { ziel, ld: Math.log(d), sx: f.x + f.w / 2, sy: f.y + f.h / 2, f };
+  }
+  // Runde 82 (Florians Wahl nach dem Vergleich „steht“ gegen „fährt“): Die Kamera fährt beim Scrollen nur halb zum
+  // Ding hin, zwischen dem ganzen Raum neben der Karte (poseFest) und der Station (posen, schon 1,3-mal weiter weg als
+  // Runde 79): man hat den Fokus auf dem Ding, und der Raum bleibt im Bild. Karte und Linie wechseln sofort, die
+  // Nummern kleben an den Dingen.
+  const WEITER = Math.log(1.3), SANFT = 0.5;
+  let posen = [], poseFest = null, posenSanft = [];
+  const mischen = (a, b, k) => ({ ziel: a.ziel.clone().lerp(b.ziel, k), ld: a.ld + (b.ld - a.ld) * k,
+    sx: a.sx + (b.sx - a.sx) * k, sy: a.sy + (b.sy - a.sy) * k, f: b.f });
+  const pose = i => i ? posenSanft[i] : posen[0];
+  function groesse() {
+    W = innerWidth; H = innerHeight;
+    renderer.setSize(W, H, false);
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
+    posen = STATIONEN.map((S, i) => { const P = rahmen(S, frei(i)); if (i) P.ld += WEITER; return P; });
+    poseFest = rahmen(STATIONEN[0], frei(1));                 // der ganze Raum in der freien Fläche neben der Karte
+    posenSanft = posen.map((P, i) => i ? mischen(poseFest, P, SANFT) : P);
+  }
+  window.__rahmenNeu = () => requestAnimationFrame(groesse);   // Sprache: Kopf und Karte ändern ihre Größe
+  addEventListener('resize', groesse);
+  new ResizeObserver(() => groesse()).observe($('kopf'));
+  groesse();
+  performance.mark('atelier:rahmen');
+
+  // ---------------------------------------------------------------- Rausholen (Runde 80, Florians Wahl)
+  // Das Ding der Station löst sich aus dem Raum: Es schwebt auf die Bildachse vor die Kamera, wird größer und dreht
+  // sich zum Betrachter (das Ding dreht, die Kamera nicht), mit leichtem Überschwingen und sanftem Pendeln; der Raum
+  // dahinter wird blasser. Beim Weiterscrollen fällt es an seinen Platz zurück. Solange es draußen ist, liegt es auf
+  // Ebene 1 und wird nach dem Raum gezeichnet (Tiefe gelöscht): So schneidet es auf dem Weg nichts an.
+  let offen = -1;                                             // Runde 82: Station, deren Ding angeklickt herausgeholt ist
+  const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+  const HEBEN = STATIONEN.map(S => {
+    if (!S.ding) return null;
+    const objs = S.ding.map(d => typeof d === 'string' ? teil(d) : d).filter(Boolean);
+    if (!objs.length) return null;
+    const drin = new Set(TRAEGER.filter(o => { for (let p = o; p; p = p.parent) if (objs.includes(p)) return true; return false; }));
+    const halter = new THREE.Object3D();
+    scene.add(halter);
+    return { S, objs, drin, halter, k: 0, v: 0, ziel: 0, eltern: null, mitte: new V3(), dreh: new THREE.Quaternion(), s: 1, vor: 0 };
+  });
+  const qa = new THREE.Quaternion(), qb = new THREE.Quaternion(), Y = new V3(0, 1, 0);
+  function ebene(objs, l) { for (const o of objs) o.traverse(m => m.layers.set(l)); }
+  function herausholen(h, i) {                                // Ding an den Halter hängen, Ziel der Bewegung rechnen
+    const g = new THREE.Box3();
+    for (const o of h.objs) g.union(new THREE.Box3().setFromObject(o));
+    g.getCenter(h.mitte);
+    const gr = g.getSize(new V3());
+    h.r = Math.max(gr.x, gr.y, gr.z) / 2;                     // größte Kante (es dreht sich ja zu uns)
+    const S = h.S;
+    h.dreh.identity();
+    if (S.front !== null && S.front !== undefined) h.dreh.setFromAxisAngle(Y, wrap(AZ - S.front) * 0.85);
+    if (S.kipp) h.dreh.premultiply(qa.setFromAxisAngle(rechtsV, (Math.PI / 2 - EL) * 0.85));
+    h.halter.position.copy(h.mitte);
+    h.halter.quaternion.identity();
+    h.halter.scale.setScalar(1);
+    h.halter.updateMatrixWorld(true);
+    h.eltern = h.objs.map(o => o.parent);
+    for (const o of h.objs) h.halter.attach(o);
+    ebene(h.objs, 1);
+    if (h.vm) { h.halter.attach(h.vm.gruppe); h.vm.p = 0; h.vm.alpha = 0; }   // Voxel des Dings fliegen mit
+  }
+  function zuruecklegen(h) {
+    h.halter.position.copy(h.mitte);
+    h.halter.quaternion.identity();
+    h.halter.scale.setScalar(1);
+    h.halter.updateMatrixWorld(true);
+    h.objs.forEach((o, j) => h.eltern[j].attach(o));
+    h.eltern = null;
+    ebene(h.objs, 0);
+    if (h.vm) { scene.attach(h.vm.gruppe); h.vm.gruppe.visible = false; for (const o of h.objs) o.visible = true; }
+  }
+  // Runde 82: herausgeholt wird nur, was angeklickt ist (offenDa). Dinge mit Voxeldaten bleiben draußen, bis ihre
+  // Voxel wieder zusammengewachsen sind (vm.p 2 → 0), und fliegen erst dann heim.
+  function heben(dt, i, offenDa) {
+    for (const [j, h] of HEBEN.entries()) {
+      if (!h) continue;
+      const will = j === i && offenDa && t > ENDE, vm = h.vm;
+      h.ziel = will || (vm && h.eltern && (vm.p > 0 || (RUHIG && vm.alpha > 0))) ? 1 : 0;
+      if (h.ziel && !h.eltern) herausholen(h, j);
+      if (!h.eltern) continue;
+      if (vm) verfeinern(h, dt, will);
+      if (RUHIG) { h.k = h.ziel; h.v = 0; }
+      else {                                                  // Feder: hinaus mit Schwung, zurück ohne
+        const w = h.ziel ? 7 : 9, z = h.ziel ? 0.6 : 1, n = Math.ceil(dt / 0.008), st = dt / n;
+        for (let s = 0; s < n; s++) { h.v += (w * w * (h.ziel - h.k) - 2 * z * w * h.v) * st; h.k += h.v * st; }
+        if (!h.ziel && h.k < 0) { h.k = 0; h.v = 0; }
+      }
+      if (!h.ziel && h.k < 0.003 && Math.abs(h.v) < 0.01) { h.k = 0; zuruecklegen(h); continue; }
+      // Ziel vor der Kamera, wie sie gerade steht (Runde 82, Florian: beim Klick auf ein anderes Ding fuhr erst die
+      // Kamera und dann kam das Ding, versetzt): Es fliegt gleich los und bleibt mittig in der freien Fläche, während
+      // die Kamera noch hinfährt; die Größe folgt ihrem Abstand. So wird es eine Bewegung.
+      const d = Math.exp(K.ld), f = pose(j).f, tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+      h.vor = d * 0.22;
+      h.s = clamp((h.S.gross || 0.76) * Math.min(f.w, f.h * 1.1) * (d - h.vor) * tanV / (h.r * H), 1, 9);
+      const achse = K.p.clone().addScaledVector(zurDreh, h.vor);
+      h.halter.position.lerpVectors(h.mitte, achse, h.k);
+      qb.copy(h.dreh).multiply(qa.setFromAxisAngle(Y, RUHIG ? 0 : Math.sin(t * 0.9) * 0.05));
+      h.halter.quaternion.identity().slerp(qb, clamp(h.k, 0, 1.1));
+      h.halter.scale.setScalar(1 + (h.s - 1) * h.k);
+    }
+  }
+
+  // ---------------------------------------------------------------- Verfeinern (Runde 82, Florians Wahl)
+  // Dinge mit Voxeldaten (atelier_dinge.py: alle Stufen von grob = das Ding im Raum bis fein = Detailmodell, das
+  // Ding im Raum ist aus dem Detailmodell verkleinert) wachsen aus dem Raum-Ding heraus: Es fliegt als Ganzes nach
+  // vorn (Halter wie Runde 80), dann teilt sich jeder Voxel in zwei Schritten (1 → 8 → 64), leicht gestaffelt und mit
+  // Überschwingen, bis das Detailmodell steht; zurück erst zusammen, dann heim. Jede Stufe ist ein Netz aus den
+  // sichtbaren Flächen; jede Ecke kennt ihre Zellmitte und die ihres Elternvoxels, der Vertex-Shader schiebt sie
+  // dazwischen. Licht live statt gebacken (passt so auch gedreht): Sonne und Himmel wie look.py, Verdeckung je Ecke aus
+  // den Nachbarn (wie MagicaVoxel), Schatten per Strahl zur Sonne durchs Raster; einmal beim Laden gerechnet, seit
+  // Runde 92 im Hintergrund (atelier-voxel.js).
+  const SONNE = new V3(-0.409, -0.6675, 0.622).normalize();          // zur Sonne, Blender-Achsen (look.sun)
+  // Stärken wie look.py (Sonne 2,6, Himmel 1,1), der Himmel etwas schwächer und wärmer: Im Raum verdecken Wände und
+  // Dach einen Teil, der Boden wirft warmes Licht zurück (abgeglichen am gebackenen Teleskop im Raum, Runde 82)
+  const SONNE_L = new THREE.Color('#FFF1D8').multiplyScalar(2.6 / Math.PI);
+  const HIMMEL_L = new THREE.Color('#CFE6FF').lerp(new THREE.Color('#FFD9BC'), 0.22).multiplyScalar(0.7);
+  // Livegang D: Zellmitte und Elternmitte (vorher je ein Feld aMitte, aEltern) aus position und aEcke. Alles sind
+  // Vielfache von Zweierpotenzen (uS = Kante/16 = 2^−(Stufe+4), uKehr = 1/(2 uS)): Die Rechnung ist genau, es kommen
+  // Bit für Bit dieselben Zahlen heraus wie aus den alten Feldern. aEcke liegt als Int8 ±1 vor (die Ecke ist ±0,5).
+  function vmMaterial(g) {
+    return new THREE.ShaderMaterial({
+      uniforms: { uK: { value: 1 }, uS: { value: g / 16 }, uKehr: { value: 8 / g }, uEltern: { value: g < 1 ? 1 : 0 },
+                  uAlpha: { value: 1 } },
+      vertexShader: `attribute vec4 aEcke; attribute vec3 aFarbe;
+        attribute vec3 aFarbeE; attribute float aVerz; uniform float uK; uniform float uS; uniform float uKehr;
+        uniform float uEltern; varying vec3 vC;
+        void main() {
+          float k = clamp((uK - aVerz) / 0.7, 0.0, 1.0), j = k - 1.0, e = 1.0 + 2.2 * j * j * j + 1.2 * j * j;
+          vec3 ecke = aEcke.xyz * 0.5, mitte = position - ecke * uS;
+          vec3 eltern = uEltern > 0.5 ? (floor(mitte * uKehr) + 0.5) * (2.0 * uS) : mitte;   // gröbste Stufe: ohne Eltern
+          vec3 p = mix(eltern, mitte, e) + ecke * uS * mix(2.0, 1.0, e);
+          vC = mix(aFarbeE, aFarbe, smoothstep(0.0, 0.6, k));
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        }`,
+      fragmentShader: `uniform float uAlpha; varying vec3 vC;
+        void main() {
+          gl_FragColor = vec4(min(vC, 1.0), uAlpha);
+          #include <colorspace_fragment>
+        }`,
+      transparent: RUHIG });
+  }
+  function baueVoxel(info, r, name) {                                // r: Felder aus atelier-voxel.js (rechneVoxel)
+    const PAL = info.palette.map(h => new THREE.Color(h)), P = info.punkte || {}, f = info.faktor;
+    const netzAus = ({ g, A, I }) => {                                // Netz einer Stufe
+      const geo = new THREE.BufferGeometry();
+      for (const [k, v] of Object.entries(A)) geo.setAttribute(k, new THREE.BufferAttribute(v, k === 'aVerz' ? 1 : k === 'aEcke' ? 4 : 3));
+      geo.setIndex(new THREE.BufferAttribute(I, 1));
+      geo.computeBoundingBox(); geo.computeBoundingSphere();
+      const mesh = new THREE.Mesh(geo, vmMaterial(g));
+      mesh.frustumCulled = false;
+      mesh.layers.set(1);
+      mesh.visible = false;
+      return mesh;
+    };
+    const meshes = r.netze.map(netzAus);                               // je Stufe; beim Farbfächer die Streifen extra
+    const streifenNetz = r.streifen ? netzAus(r.streifen) : null;
+    const gruppe = new THREE.Group();
+    gruppe.position.copy(vox(...info.ursprung));
+    for (const m of meshes) gruppe.add(m);
+    if (streifenNetz) gruppe.add(streifenNetz);
+    gruppe.visible = false;
+    scene.add(gruppe);
+    const inGruppe = q => new V3(q[0] / f / 16, q[2] / f / 16, -q[1] / f / 16);
+    const schirme = Object.keys(P).filter(k => k.startsWith('glas_a'))           // glas_a, glas_a.links, …
+      .map(k => baueSchirm(gruppe, P, name + k.slice(6), k.slice(6), inGruppe))
+      .concat(Object.keys(P).filter(k => k.startsWith('papier_a'))               // Runde 85: Foto, Tafel
+        .map(k => bauePapier(gruppe, P, name + k.slice(8), k.slice(8), inGruppe)));
+    return { gruppe, m: meshes, n: meshes.length - 1, p: 0, alpha: 0, stern: P.stern ? inGruppe(P.stern) : null, schirme,
+      faden: P['nadel.1'] ? baueFaden(gruppe, P, f, inGruppe) : null,
+      faecher: streifenNetz ? baueFaecher(gruppe, P, f, inGruppe, info, PAL, streifenNetz) : null,
+      leds: Object.keys(P).some(k => k.startsWith('led.')) ? baueLeds(gruppe, P, f, inGruppe) : null };
+  }
+  // Runde 83: beliebig viele Stufen (Faktor 4: zwei Schritte je 0,42 s; Faktor 8 wie das Tablett: drei je 0,3 s, so
+  // dauert es etwa gleich lang). Hat das Ding einen Bildschirm, geht er an, wenn es fertig gewachsen ist, und beim
+  // Zurücklegen erst aus, dann wächst es zusammen.
+  function verfeinern(h, dt, will) {                                   // Stufe 0 grob … n fein (vm.p 0 … n)
+    const vm = h.vm, n = vm.n;
+    if (RUHIG) {                                                       // ohne Flug und Morph: das feine blendet ein
+      vm.alpha = clamp(vm.alpha + (will ? dt : -dt) / 0.25, 0, 1);
+      vm.p = will || vm.alpha > 0 ? n : 0;
+    } else if (will) { if (h.k > 0.82) vm.p = Math.min(n, vm.p + dt / (n > 2 ? 0.3 : 0.42)); }
+    else if (!vm.schirme.some(S => !S.immer && S.an > 0) && !(vm.faden && vm.faden.t > 0) && !(vm.faecher && vm.faecher.t > 0)) {
+      vm.p = Math.max(0, vm.p - dt / (n > 2 ? 0.22 : 0.3));             // erst aus, eingerollt, zusammengefächert
+    }
+    const p = vm.p;
+    for (const o of h.objs) o.visible = false;                         // das Raum-Ding ist jetzt die grobe Stufe
+    vm.gruppe.visible = true;
+    vm.m.forEach((m, k) => {
+      m.visible = k ? p > k - 1 && (p <= k || k === n) : p <= 0;
+      if (k) m.material.uniforms.uK.value = clamp(p - k + 1, 0, 1);
+      m.material.uniforms.uAlpha.value = RUHIG ? vm.alpha : 1;
+    });
+    for (const S of vm.schirme) schirmStellen(S, dt, will && p >= n, vm);
+    if (vm.faden) fadenStellen(vm.faden, dt, will && p >= n, vm);
+    if (vm.faecher) faecherStellen(vm.faecher, dt, will && p >= n, vm);
+    if (vm.leds) ledsStellen(vm.leds, dt, will && p >= n);
+  }
+  // Livegang C (Runde 92): Die Felder rechnet ein Worker (atelier-voxel.js), vorher stockte hier der Aufbau des Ateliers.
+  // Geht er nicht (ältere Browser), rechnet die Seite mit derselben Funktion selbst, wie bis Runde 91.
+  const licht = info => ({ pal: info.palette.flatMap(h => new THREE.Color(h).toArray()), sonne: SONNE.toArray(),
+                           sonneL: SONNE_L.toArray(), himmelL: HIMMEL_L.toArray() });
+  const AUFTRAG = new Map();                                           // Station → [info, Name, schon geschickt]
+  function voxelDa(i, info, name, r) {
+    const t0 = performance.now();
+    if (!HEBEN[i].eltern) HEBEN[i].vm = baueVoxel(info, r, name);    // nicht mitten im Herausholen umstellen
+    performance.measure('atelier:voxel:' + name, { start: t0 });
+  }
+  async function selbstRechnen(i, info, name, puffer) {
+    const { rechneVoxel } = await import('./js/atelier-voxel.js');
+    voxelDa(i, info, name, rechneVoxel(info, puffer, licht(info)));
+  }
+  let rechner = null;
+  try {
+    rechner = new Worker('js/atelier-voxel.js', { type: 'module' });
+    rechner.onmessage = ({ data: { nr, ...r } }) => {
+      const [info, name] = AUFTRAG.get(nr);
+      AUFTRAG.delete(nr);
+      voxelDa(nr, info, name, r);
+      if (!AUFTRAG.size) rechner.terminate();
+    };
+    rechner.onerror = e => {                                           // Worker geht nicht: den Rest selbst rechnen
+      e.preventDefault();
+      rechner.terminate(); rechner = null;
+      for (const [i, [info, name, geschickt]] of AUFTRAG) {      // die Daten sind beim Worker: noch einmal holen
+        if (geschickt) fetch(`bilder/atelier/dinge/${name}.bin`).then(r => r.arrayBuffer()).then(b => selbstRechnen(i, info, name, b));
+      }
+      AUFTRAG.clear();
+    };
+  } catch (e) { rechner = null; }
+  fetch('bilder/atelier/dinge/dinge.json').then(r => r.json()).then(j => STATIONEN.forEach((S, i) => {
+    const info = S.voxel && j[S.voxel] && j[S.voxel].voxel;
+    if (!info || !HEBEN[i]) return;
+    if (rechner) AUFTRAG.set(i, [info, S.voxel, false]);
+    fetch(`bilder/atelier/dinge/${S.voxel}.bin`).then(r => r.arrayBuffer()).then(b => {
+      if (!rechner) { selbstRechnen(i, info, S.voxel, b); return; }
+      AUFTRAG.get(i)[2] = true;
+      rechner.postMessage({ nr: i, info, puffer: b, licht: licht(info) }, [b]);
+    });
+  })).catch(e => console.warn(e));
+
+  // ---------------------------------------------------------------- Bildschirm unter Glas (Runde 83, Florians Wahl)
+  // Am Tablett und an den Monitoren: eine Glasfläche über Rand und Bild. Das Bild sitzt eingelassen darunter, etwas
+  // dunkler und satter, mit Innenschatten an den Rändern (oben am stärksten), eckig (Runde 84) und mit ganz feinem
+  // Pixelraster; auf den Rand fällt ein Hauch Schein in der Bildfarbe. Darüber ein schräger weicher Glanz, der beim Pendeln
+  // mitwandert und beim Bildwechsel stehen bleibt. Das Tablett ist im Raum aus und geht an, wenn es fertig gewachsen ist:
+  // erst das Licht dahinter (Schwarz → dunkles Blaugrau), dann das Bild mit kurzem Überschwingen; die Diashow läuft
+  // unter dem Glas. Runde 84: Die Monitore sind im Raum an und bleiben es (`immer`): Ihre Bildfläche liegt in jeder
+  // Stufe gleich, nur das Glas kommt dazu, wenn sie fertig sind; rechts tippt dann der Code weiter.
+  // Ecken aus dinge.py (Punkte glas_a/b, schirm_a/b, bei mehreren Bildschirmen mit .name; in Voxeln des Modells):
+  // liegend (gleiches z, Tablett) oder stehend mit der Front nach −y (gleiches y, Monitore).
+  const sternEl = $('stern');
+  const RUNDUNG = { tablett: 4 };                             // Radius der Glasecken (gestuft wie Gitter.rundtafel)
+  const IMMER_AN = name => name.startsWith('monitore');       // Bildschirme, die im Raum an sind und anbleiben
+  const schirmVS = 'varying vec2 vUv;\nvoid main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+  const schirmFS = `uniform sampler2D map; uniform vec2 uGr; uniform vec4 uSchirm; uniform float uR;
+    uniform float uLicht; uniform float uBild; uniform float uGlas; uniform float uGlanz; uniform float uAlpha;
+    varying vec2 vUv;
+    void main() {
+      vec2 p = vUv * uGr, q = min(p, uGr - p);                // in Voxeln des Modells, Abstand zu den Kanten
+      float zeile = floor(q.y), ein = 0.0;                    // Ecken gestuft wie das Modell
+      if (zeile < uR) ein = uR - floor(sqrt(uR * uR - (uR - zeile - 0.5) * (uR - zeile - 0.5)) + 0.5);
+      if (q.x < ein) discard;
+      vec2 s0 = uSchirm.xy * uGr, s1 = uSchirm.zw * uGr, su = (p - s0) / (s1 - s0), d = min(p - s0, s1 - p);
+      // Runde 84 (Florian: oben abgerundet, wirkt, als passe es nicht): Bildecken eckig wie ein echter Bildschirm, bis
+      // zur Kante ganz deckend (sonst sah man an den Ecken die Voxel darunter)
+      float innen = min(d.x, d.y), drin = smoothstep(-0.08, 0.0, innen);   // im Bild > 0
+      vec3 bild = texture2D(map, clamp(su, 0.0, 1.0)).rgb;
+      bild = max(mix(vec3(dot(bild, vec3(0.2126, 0.7152, 0.0722))), bild, 1.15), 0.0) * 0.86;   // satter, etwas dunkler
+      vec3 sc = vec3(0.0118, 0.0144, 0.0262) * uLicht * (1.0 - 0.6 * min(uBild, 1.0)) + bild * uBild;
+      sc *= (1.0 - 0.55 * exp(-(s1.y - p.y) / 0.9)) * (1.0 - 0.3 * exp(-d.x / 0.7))
+        * (1.0 - 0.18 * exp(-(p.y - s0.y) / 0.7));            // Innenschatten: oben, an den Seiten, unten
+      vec2 px = su * (s1 - s0) * 4.0, fw = fwidth(px), r = abs(fract(px) - 0.5) * 2.0;   // 4 Bildpunkte je Voxel
+      sc *= 1.0 - 0.08 * smoothstep(0.7, 1.0, max(r.x, r.y)) * (1.0 - smoothstep(0.3, 0.6, max(fw.x, fw.y)));   // Raster
+      float a = drin * clamp(max(uLicht, uBild), 0.0, 1.0);
+      vec3 C = sc * a; float A = a;                           // übereinander (vormultipliziert)
+      float aG = (1.0 - drin) * exp(min(innen, 0.0) / 0.45) * 0.1 * min(uBild, 1.0) * uGlas;   // Schein auf dem Rand
+      // (Runde 84, Florian: leuchtete zu sehr über den Rand: nur noch ein Hauch, ein halber Voxel breit)
+      C = texture2D(map, clamp(su, 0.0, 1.0), 4.0).rgb * 1.4 * aG + C * (1.0 - aG); A = aG + A * (1.0 - aG);
+      float b = vUv.x * 0.75 - vUv.y * 0.55 + 0.32 + uGlanz;  // Glanz: schräges weiches Band, ein schmales daneben
+      float g = smoothstep(0.0, 0.12, b) * (1.0 - smoothstep(0.12, 0.34, b)) * 0.16
+        + smoothstep(0.42, 0.46, b) * (1.0 - smoothstep(0.46, 0.52, b)) * 0.07 + 0.04 * vUv.y;
+      float aL = g * uGlas;
+      C = vec3(1.0, 0.98, 0.95) * aL + C * (1.0 - aL); A = aL + A * (1.0 - aL);
+      gl_FragColor = vec4(C / max(A, 1e-4), A * uAlpha);
+      #include <colorspace_fragment>
+    }`;
+  function baueSchirm(gruppe, P, name, n, inGruppe) {        // n: '' oder '.links' …; name: Ding + n
+    const ga = P['glas_a' + n], gb = P['glas_b' + n], sa = P['schirm_a' + n], sb = P['schirm_b' + n];
+    const liegt = ga[2] === gb[2], [i, j] = liegt ? [0, 1] : [0, 2];   // Achsen der Fläche (Voxel des Modells)
+    const gr = [gb[i] - ga[i], gb[j] - ga[j]], rel = (q, k, g) => (q[k] - ga[k]) / g;
+    let L = LEINWAND[name];                                   // Monitore: dieselbe Leinwand wie im Raum
+    if (!L) {
+      const cv = document.createElement('canvas');
+      cv.width = (sb[i] - sa[i]) * 16; cv.height = (sb[j] - sa[j]) * 16;
+      const tex = new THREE.CanvasTexture(cv);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 4;
+      L = { cv, c: cv.getContext('2d'), tex };
+    }
+    const u = { map: { value: L.tex }, uGr: { value: new THREE.Vector2(...gr) }, uR: { value: RUNDUNG[name] || 0 },
+      uSchirm: { value: new THREE.Vector4(rel(sa, i, gr[0]), rel(sa, j, gr[1]), rel(sb, i, gr[0]), rel(sb, j, gr[1])) },
+      uLicht: { value: 0 }, uBild: { value: 0 }, uGlas: { value: 0 }, uGlanz: { value: 0 }, uAlpha: { value: 1 } };
+    const a = inGruppe(ga), b = inGruppe(gb), eps = 0.05 / 16 / 8;
+    const geo = new THREE.PlaneGeometry(Math.abs(b.x - a.x), liegt ? Math.abs(b.z - a.z) : Math.abs(b.y - a.y));
+    if (liegt) geo.rotateX(-Math.PI / 2);                     // liegt oben auf dem Glas, v zur Oberkante (Norden)
+    const mesh = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms: u, vertexShader: schirmVS, fragmentShader: schirmFS,
+      transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+    mesh.position.set((a.x + b.x) / 2, liegt ? a.y + eps : (a.y + b.y) / 2, liegt ? (a.z + b.z) / 2 : a.z + eps);
+    mesh.layers.set(1);
+    mesh.renderOrder = 2;
+    mesh.frustumCulled = false;
+    mesh.visible = false;
+    gruppe.add(mesh);
+    const immer = IMMER_AN(name);
+    const zeichne = name === 'tablett' ? S => { diashow(S.c, Math.max(0, S.t - 0.45)); S.tex.needsUpdate = true; }
+      : name === 'monitore.rechts' ? (S, dt, will) => { CODE.aktiv = will && !RUHIG; if (CODE.aktiv) { CODE.zeit += dt; code(true); } }
+      : null;
+    return { mesh, u, c: L.c, tex: L.tex, t: 0, an: 0, immer, zeichne };
+  }
+  function schirmStellen(S, dt, will, vm) {                   // will: fertig gewachsen und soll an sein
+    if (S.papier) {                                           // Papier: immer da; Tafel, Whiteboard und Poster tun etwas
+      S.mesh.visible = true;
+      S.u.uAlpha.value = RUHIG ? vm.alpha : 1;
+      S.u.uHell.value += ((will && posterDrueber === S ? 1 : 0) - S.u.uHell.value) * (RUHIG ? 1 : 1 - Math.exp(-dt * 12));
+      if (S.zeichne) S.zeichne(S, dt, will);
+      return;
+    }
+    if (RUHIG) { S.an = vm.alpha; S.t = will ? Math.max(S.t, 1) + dt : S.an > 0 ? S.t : 0; }
+    else if (will) { S.t += dt; S.an = 1; }
+    else { S.an = Math.max(0, S.an - dt / 0.22); if (S.an <= 0) S.t = 0; }   // aus (bzw. Glas weg), bevor es zusammenwächst
+    S.mesh.visible = S.immer || S.an > 0;
+    if (S.zeichne) S.zeichne(S, dt, will);
+    if (!S.mesh.visible) return;
+    const st = S.t, e = clamp((st - 0.45) / 0.45, 0, 1);
+    S.u.uGlas.value = S.an * glatt(clamp(st / 0.25, 0, 1));
+    S.u.uLicht.value = S.immer ? 1 : S.an * glatt(clamp((st - 0.12) / 0.3, 0, 1));
+    S.u.uBild.value = S.immer ? 1 : S.an * (RUHIG ? 1 : e < 0.55 ? 1.18 * glatt(e / 0.55) : 1.18 - 0.18 * glatt((e - 0.55) / 0.45));
+    S.u.uGlanz.value = RUHIG ? 0 : Math.sin(t * 0.9) * 0.15;   // wie das Pendeln des Halters
+    S.u.uAlpha.value = S.immer && RUHIG ? vm.alpha : 1;
+  }
+  // Papier auf dem Modell (Runde 85): Foto und Tafel als Bild, bündig auf der Front, in jeder Stufe gleich (die Front
+  // liegt auf dem Raster); so hell wie die Fläche im Raum (0,94), dann gibt es beim Wechsel keinen Sprung.
+  function bauePapier(gruppe, P, name, n, inGruppe) {
+    const pa = P['papier_a' + n], pb = P['papier_b' + n], a = inGruppe(pa), b = inGruppe(pb);
+    const west = pa[0] === pb[0];                             // Runde 87: Whiteboard, Front nach −x (Westen)
+    const u = { map: { value: LEINWAND[name].tex }, uAlpha: { value: 1 }, uHell: { value: 0 } };
+    const geo = new THREE.PlaneGeometry(Math.abs((west ? b.z - a.z : b.x - a.x)), Math.abs(b.y - a.y));
+    if (west) geo.rotateY(-Math.PI / 2);                      // links = Norden, wie von vorn gesehen
+    const mesh = new THREE.Mesh(geo, new THREE.ShaderMaterial({
+      uniforms: u, vertexShader: schirmVS, transparent: RUHIG, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+      fragmentShader: 'uniform sampler2D map; uniform float uAlpha; uniform float uHell; varying vec2 vUv;\nvoid main() {\n' +
+        '  vec3 c = texture2D(map, vUv).rgb * 0.94;\n  c = mix(c, c * 1.1 + 0.03, uHell);\n' +   // heller beim Zeigen (Poster)
+        '  gl_FragColor = vec4(c, uAlpha);\n  #include <colorspace_fragment>\n}' }));
+    const eps = 0.05 / 16 / 8;
+    if (west) mesh.position.set(a.x - eps, (a.y + b.y) / 2, (a.z + b.z) / 2);
+    else mesh.position.set((a.x + b.x) / 2, (a.y + b.y) / 2, a.z + eps);   // steht, Front nach −y (Three +z)
+    mesh.layers.set(1);
+    mesh.renderOrder = 2;
+    mesh.frustumCulled = false;
+    mesh.visible = false;
+    gruppe.add(mesh);
+    const zeichne = name === 'staffelei' ? (S, dt, will) => kalenderStellen(dt, will)
+      : name === 'whiteboard' ? (S, dt, will) => whiteboardStellen(dt, will)
+      : name === 'poster.timer' ? (S, dt, will) => sandStellen(dt, will)
+      : name === 'poster.meter' ? (S, dt, will) => birnenStellen(dt, will) : null;
+    return { mesh, u, name, papier: true, immer: true, t: 0, an: 0, zeichne };
+  }
+  // Der rote Faden (Runde 85, Florians Wahl): von Nadel zu Nadel der Pinnwand (Foto → Farbfächer → Bildschirm →
+  // Terminal → Stern), gerade gespannt knapp vor den Zetteln. Zieht sich, wenn die Wand fertig gewachsen ist (je
+  // Stück 0,32 s), beim Zurücklegen rollt er sich schnell wieder ein, bevor sie zusammenwächst.
+  const FADEN_STUECK = 0.32;
+  function baueFaden(gruppe, P, f, inGruppe) {
+    const pkte = Object.keys(P).filter(k => k.startsWith('nadel.')).sort().map(k => inGruppe(P[k]));
+    const mat = new THREE.MeshBasicMaterial({ color: '#d63a2c', transparent: RUHIG });
+    const r = 0.32 / f / 16, Yachse = new V3(0, 1, 0);
+    const segs = pkte.slice(1).map((b, k) => {
+      const a = pkte[k], d = b.clone().sub(a), geo = new THREE.CylinderGeometry(r, r, 1, 6, 1);
+      geo.translate(0, 0.5, 0);
+      const m = new THREE.Mesh(geo, mat);
+      m.position.copy(a);
+      m.quaternion.setFromUnitVectors(Yachse, d.clone().normalize());
+      m.layers.set(1);
+      m.visible = false;
+      gruppe.add(m);
+      return { m, laenge: d.length() };
+    });
+    return { segs, mat, t: 0 };
+  }
+  // Farbfächer (Runde 86, Florians Wahl): fertig gewachsen tauschen die Voxel-Streifen gegen glatte (gleiche Farben,
+  // Licht wie die Vorderseite der Voxel) und schwingen nacheinander weit auf (172° … 8° statt 130° … 50°), mit
+  // leichtem Nachfedern; zurück erst zusammen, dann wieder Voxel. Die Streifen drehen um die Niete (x-Achse).
+  const FAECHER_STUFEN = [[-10.5, 14, null], [14, 25, '_3'], [25, 26, 'sep'], [26, 37, '_2'], [37, 38, 'sep'],
+    [38, 49, '_1'], [49, 50, 'sep'], [50, 64, '']];
+  function baueFaecher(gruppe, P, f, inGruppe, info, PAL, netzStreifen) {
+    const D = P.drehpunkt, e = 1 / f / 16, mats = {};
+    const vorn = new THREE.Color().copy(SONNE_L).multiplyScalar(Math.max(0, -SONNE.x)).add(new THREE.Color().copy(HIMMEL_L).multiplyScalar(0.86));
+    const mat = name => {
+      if (!mats[name]) { const i = info.namen.indexOf(name); mats[name] = new THREE.MeshBasicMaterial({ color: new THREE.Color().copy(PAL[Math.max(0, i)]).multiply(vorn), transparent: RUHIG }); }
+      return mats[name];
+    };
+    const streifen = Object.keys(P).filter(k => k.startsWith('streifen.')).sort().map((k, i, alle) => {
+      const farbe = k.split('.')[2], t = P[k];
+      const ruhe = Math.atan2(t[2] - D[2], t[1] - D[1]), offen = THREE.MathUtils.degToRad(172 - i * 164 / (alle.length - 1));
+      const halter = new THREE.Group();
+      halter.position.copy(inGruppe(D));
+      for (const [s0, s1, art] of FAECHER_STUFEN) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(1 * e, (s1 - s0) * e, 6 * e),
+          mat(art === null ? 'sign_white' : art === 'sep' ? 'white' : farbe + art));
+        m.position.set((t[0] - D[0]) * e, (s0 + s1) / 2 * e, 0);         // Lage des Streifens, entlang +y
+        m.layers.set(1);
+        halter.add(m);
+      }
+      halter.visible = false;
+      gruppe.add(halter);
+      return { halter, ruhe, offen };
+    });
+    return { streifen, netz: netzStreifen, t: 0 };
+  }
+  function faecherStellen(F, dt, will, vm) {
+    if (RUHIG) { F.netz.visible = vm.m[vm.n].visible; F.netz.material.uniforms.uAlpha.value = vm.alpha; return; }
+    const ganz = 0.55 + 0.05 * (F.streifen.length - 1);
+    F.t = will ? Math.min(ganz, F.t + dt) : Math.max(0, F.t - dt * 2);
+    const glatt_ = F.t > 0;
+    F.netz.visible = vm.m[vm.n].visible && !glatt_;                    // Voxel-Streifen nur, solange nicht gefächert
+    F.netz.material.uniforms.uK.value = vm.m[vm.n].material.uniforms.uK.value;
+    F.streifen.forEach(({ halter, ruhe, offen }, k) => {
+      halter.visible = glatt_;
+      const q = clamp((F.t - 0.05 * k) / 0.55, 0, 1), j = q - 1, e = 1 + 2.2 * j * j * j + 1.2 * j * j;
+      halter.rotation.x = ruhe + (offen - ruhe) * e - Math.PI / 2;     // Blender-Winkel → Drehung um x in Three
+    });
+  }
+  // Server-Lämpchen (Runde 86, Florians Wahl): fertig gewachsen gehen sie der Reihe nach an (von oben nach unten), dann
+  // gehen alle zusammen wieder aus; er war mal an. Kleine leuchtende Flächen vor den dunklen Voxel-Lämpchen.
+  function baueLeds(gruppe, P, f, inGruppe) {
+    const e = 1 / f / 16, schein = document.createElement('canvas');
+    schein.width = schein.height = 64;
+    const sc = schein.getContext('2d'), grad = sc.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.35, 'rgba(255,255,255,.5)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+    sc.fillStyle = grad; sc.fillRect(0, 0, 64, 64);
+    const tex = new THREE.CanvasTexture(schein);
+    const FARBE = { signal_green: '#2BE65C', neon_cyan: '#3FE6FF', neon_orange: '#FF7A1A' };
+    const leds = Object.keys(P).filter(k => k.startsWith('led.')).sort().map(k => {
+      const mat = new THREE.MeshBasicMaterial({ map: tex, color: FARBE[k.split('.')[2]] || '#ffffff', transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0 });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(4 * e, 4 * e), mat);
+      m.geometry.rotateY(-Math.PI / 2);                                   // Front nach −x (Westen)
+      m.position.copy(inGruppe(P[k])).add(new V3(-0.1 * e, 0, 0));
+      m.layers.set(1);
+      m.renderOrder = 3;
+      m.visible = false;
+      gruppe.add(m);
+      return m;
+    });
+    return { leds, t: 0 };
+  }
+  function ledsStellen(Ls, dt, will) {
+    Ls.t = will && !RUHIG ? Ls.t + dt : 0;
+    const n = Ls.leds.length, aus = 0.25 + 0.07 * n + 0.45;           // alle an, dann gehen sie zusammen aus
+    Ls.leds.forEach((m, k) => {
+      const an = clamp((Ls.t - 0.25 - 0.07 * k) / 0.08, 0, 1) * (1 - clamp((Ls.t - aus) / 0.6, 0, 1));
+      m.visible = an > 0.01;
+      m.material.opacity = an;
+    });
+  }
+  function fadenStellen(F, dt, will, vm) {
+    const ganz = F.segs.length * FADEN_STUECK;
+    if (RUHIG) { F.t = will || vm.alpha > 0 ? ganz : 0; F.mat.opacity = vm.alpha; }
+    else F.t = will ? Math.min(ganz, F.t + dt) : Math.max(0, F.t - dt * 4);
+    F.segs.forEach(({ m, laenge }, k) => {
+      const q = glatt(clamp((F.t - k * FADEN_STUECK) / FADEN_STUECK, 0, 1));
+      m.visible = q > 0.001;
+      m.scale.set(1, Math.max(q, 0.001) * laenge, 1);
+    });
+  }
+  // Florians freiberufliche Arbeiten (ohne Racingleague: Namen aus einem Spiel; bei Cure Steam- und Switch-Symbol
+  // verwischt). Hochformat (Getränkekarte) füllt die Breite und fährt langsam hinunter.
+  // Livegang D: Die Fotos (gut 0,5 MB) laden erst, wenn das Atelier steht (vorher beim Start, neben GLB und Voxeldaten);
+  // herangeholt werden kann das Tablett ohnehin erst danach
+  const DIAS_NAMEN = ['helping-hands', 'cure', 'galaxy', 'teamspeak', 'getraenkekarte'], DIAS = DIAS_NAMEN.map(() => new Image());
+  const diasLaden = () => { if (!DIAS[0].src) DIAS.forEach((im, k) => { im.src = `bilder/atelier/frei/${DIAS_NAMEN[k]}.jpg`; }); };
+  function dia(c, im, p, alpha) {
+    if (!im.complete || !im.naturalWidth) return;
+    const w = c.canvas.width, h = c.canvas.height, iw = im.naturalWidth, ih = im.naturalHeight;
+    c.globalAlpha = alpha;
+    c.fillStyle = '#14121f'; c.fillRect(0, 0, w, h);          // mit den Balken überblenden (Florian: das Hochformat
+    if (ih / iw > (h / w) * 1.3) {                            // ploppte weg, es blieb neben dem breiten Bild stehen)
+      const s = w / iw, hh = ih * s;
+      c.drawImage(im, 0, -(hh - h) * glatt(clamp(p * 1.2 - 0.1, 0, 1)), w, hh);
+    } else {
+      const s = Math.min(w / iw, h / ih), dw = iw * s, dh = ih * s;
+      c.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    }
+    c.globalAlpha = 1;
+  }
+  const DIA_T = 3.6, DIA_UE = 0.5;
+  function diashow(c, t) {                                    // t: Sekunden, seit das Bild an ist
+    const w = c.canvas.width, h = c.canvas.height;
+    c.fillStyle = '#14121f'; c.fillRect(0, 0, w, h);
+    const n = DIAS.length, nr = Math.floor(t / DIA_T) % n, lokal = t % DIA_T;
+    dia(c, DIAS[nr], RUHIG ? 0 : lokal / DIA_T, 1);
+    if (!RUHIG && lokal > DIA_T - DIA_UE) dia(c, DIAS[(nr + 1) % n], 0, (lokal - DIA_T + DIA_UE) / DIA_UE);
+    for (let j = 0; j < n; j++) {                             // Punkte unten: welches Bild
+      c.fillStyle = j === nr ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.4)';
+      c.beginPath(); c.arc(w / 2 + (j - (n - 1) / 2) * 22, h - 20, j === nr ? 6 : 5, 0, Math.PI * 2); c.fill();
+    }
+  }
+  // Stern in Verlängerung des Rohrs (Runde 81), jetzt am Teleskop aus Voxeln: erscheint, wenn es fertig gewachsen ist
+  const sternP = new V3();
+  function sternZeigen(i) {
+    const h = HEBEN[i], vm = h && h.vm;
+    const an = !!(vm && vm.stern && h.eltern && offen === i && vm.p >= vm.n - 0.1);
+    sternEl.classList.toggle('an', an);
+    if (!an) return;
+    sternP.copy(vm.stern).applyMatrix4(vm.gruppe.matrixWorld).project(camera);
+    const f = pose(i).f;
+    const x = clamp((sternP.x + 1) / 2 * W, f.x + 30, f.x + f.w - 30), y = clamp((1 - sternP.y) / 2 * H, Math.max(70, f.y), f.y + f.h - 30);
+    sternEl.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  // Markierung (Runde 80): runder Punkt mit der Nummer am Ding, gepunktete Linie zur Karte (wie die Reise). Runde 82:
+  // Am Desktop trägt jedes Ding seine Nummer (klein und hell; Klick fährt zur Station), die der Station ist groß und
+  // zeigt per Linie auf die Karte; holt man das Ding heran, wandert sie mit. Am Handy nur die aktuelle, unter dem Ding.
+  const linien = $('linien'), linie = linien.querySelector('line');
+  let markeDrueber = -1;                                      // Zeiger über einer Nummer (wie über dem Ding)
+  const MARKEN = STATIONEN.map((S, j) => {
+    if (!j || !HEBEN[j]) return null;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'marke neben'; b.textContent = String(j); b.tabIndex = -1;
+    b.setAttribute('aria-hidden', 'true');
+    b.addEventListener('click', () => { if (j === zielNr()) umschalten(j); else { offen = j; geheZuNr(j); } });   // hin und heran
+    b.addEventListener('pointerenter', () => { markeDrueber = j; });
+    b.addEventListener('pointerleave', () => { if (markeDrueber === j) markeDrueber = -1; });
+    $('marken').appendChild(b);
+    return b;
+  });
+  // Worauf gerade gezeigt wird (Ding oder Nummer): Punkt gefüllt, Ding leicht heller (Runde 82, Florians Wunsch)
+  const zeigtAuf = () => offen >= 0 ? -1 : markeDrueber >= 0 ? markeDrueber : drueber;
+  function hervorheben(dt) {
+    const hj = zeigtAuf(), f = RUHIG ? 1 : 1 - Math.exp(-dt * 12), dran = hj > 0 && HEBEN[hj] ? HEBEN[hj].drin : null;
+    for (const o of TRAEGER) o.userData.hell.value += ((dran && dran.has(o) ? 1 : 0) - o.userData.hell.value) * f;
+  }
+  let anker = null, pulsFuer = -1, drueber = -1;
+  // Anker auf dem Modell selbst (Runde 82, Florian: Punkte schwebten daneben und wanderten beim Zoomen): je ein echter
+  // Eckpunkt, kein gedachter Punkt davor oder dahinter (der verschiebt sich mit der Perspektive gegen das Ding). Oben:
+  // der höchste Punkt im mittleren Streifen des Dings (auch die Nummer der Station, so springt sie nicht); unten (Handy):
+  // der tiefste in der Mitte. Die Kamera dreht nie, also bleiben sie richtig.
+  function ankerVon(objs) {
+    const pk = punkteVon(objs).map(q => ({ q, r: q.dot(rechtsV), o: q.dot(obenV) }));
+    let rMin = Infinity, rMax = -Infinity;
+    for (const p of pk) { rMin = Math.min(rMin, p.r); rMax = Math.max(rMax, p.r); }
+    const mitteR = (rMin + rMax) / 2, band = (rMax - rMin) * 0.15 + 0.03;
+    let oben = null, unten = null;
+    for (const p of pk) {
+      if (Math.abs(p.r - mitteR) <= band) {
+        if (!oben || p.o > oben.o) oben = p;
+        if (!unten || p.o < unten.o) unten = p;
+      }
+    }
+    const top = pk.reduce((a, b) => (b.o > a.o ? b : a));
+    const mn = new V3(Infinity, Infinity, Infinity), mx = new V3(-Infinity, -Infinity, -Infinity);
+    for (const p of pk) { mn.min(p.q); mx.max(p.q); }
+    // mitte: Mitte des Kastens, bei flachen Dingen an der Wand (Pinnwand) liegt sie auf ihrer Fläche
+    return { oben: (oben || top).q, unten: (unten || top).q, mitte: mn.add(mx).multiplyScalar(0.5) };
+  }
+  const ap = new V3();
+  function bildpunkt(p, h, cam = camera) {                    // Anker → Bildpunkt; herausgeholt fährt er mit dem Halter
+    ap.copy(p);
+    if (h && h.eltern) ap.sub(h.mitte).applyMatrix4(h.halter.matrixWorld);
+    ap.project(cam);
+    return [(ap.x + 1) / 2 * W, (1 - ap.y) / 2 * H];
+  }
+  const ankerArt = (j, i) => j === i && SCHMAL.matches ? 'unten' : STATIONEN[j].nummer || 'oben';
+  function verschieben(art, x, y, gross) { return art === 'unten' ? [x, y + 10] : art === 'mitte' ? [x, y] : [x, y - (gross ? 14 : 8)]; }
+  // Liegen Punkte übereinander (Polaroid, Farbfächer, Pinnwand), rückt der spätere ein Stück nach rechts. Einmal für
+  // den ganzen Raum gerechnet (Pose der stehenden Kamera) und dann für alle Stationen fest: so springt nichts.
+  const zielKamera = camera.clone();
+  let versatz = [], versatzFuer = '';
+  function versatzRechnen() {
+    const P = poseFest, schluessel = `${W} ${H} ${P.ld}`;
+    if (schluessel === versatzFuer) return;
+    versatzFuer = schluessel;
+    zielKamera.copy(camera);
+    zielKamera.position.copy(P.ziel).addScaledVector(zur, Math.exp(P.ld));
+    zielKamera.lookAt(P.ziel);
+    zielKamera.setViewOffset(W, H, W / 2 - P.sx, H / 2 - P.sy, W, H);
+    zielKamera.updateMatrixWorld();
+    const stellen = [];
+    for (const [j, m] of MARKEN.entries()) {
+      if (!m) continue;
+      const art = ankerArt(j, -1), [x, y] = verschieben(art, ...bildpunkt(anker[j][art], null, zielKamera));
+      stellen.push({ j, x, x0: x, y });
+    }
+    stellen.sort((p, q) => p.x - q.x || p.j - q.j);
+    const gesetzt = [], R = 15;
+    versatz = [];
+    for (const s of stellen) {
+      for (let n = 0; n < 20 && gesetzt.some(g => Math.abs(g.x - s.x) < 2 * R && Math.abs(g.y - s.y) < 2 * R); n++) s.x += 4;
+      gesetzt.push(s);
+      versatz[s.j] = s.x - s.x0;
+    }
+  }
+  // Runde 82 (Florian: die Zahlen wischten beim Scrollen weg und tauchten erst am Ziel wieder auf): Die Nummern sind
+  // immer da und kleben an ihren Dingen, auch während die Kamera fährt; Kopf und Karte liegen einfach darüber. Nur wenn
+  // ein Ding herangeholt ist, treten die anderen zurück. Die Linie zur Karte erscheint mit der Karte.
+  function markieren(i, da) {
+    if (t <= ENDE) { MARKEN.forEach(m => m && m.classList.remove('an')); linien.classList.remove('an'); return; }
+    if (!anker) anker = HEBEN.map(h => h ? ankerVon(h.objs) : null);   // einmal, nach dem Aufbau (alles am Platz)
+    versatzRechnen();
+    if (da && i > 0 && pulsFuer !== i && MARKEN[i]) {         // angekommen: der Punkt pulsiert einmal
+      pulsFuer = i;
+      const m = MARKEN[i];
+      m.classList.remove('puls'); void m.offsetWidth; m.classList.add('puls');
+      setTimeout(() => m.classList.remove('puls'), 1300);
+    }
+    if (!da) pulsFuer = -1;
+    const h = HEBEN[i], draussen = !!(h && h.eltern && h.ziel && h.k > 0.25), hj = zeigtAuf();
+    let linieAn = false;
+    for (const [j, m] of MARKEN.entries()) {
+      if (!m) continue;
+      const aktuellJ = j === i;
+      let sichtbar = aktuellJ || (!SCHMAL.matches && !draussen);
+      let mx, my;
+      {                                                       // am Anker; herausgeholt fährt er mit
+        const art = ankerArt(j, i);
+        [mx, my] = verschieben(art, ...bildpunkt(anker[j][art], aktuellJ ? h : null), aktuellJ);
+        if (art !== 'unten') mx += versatz[j] || 0;
+      }
+      if (!Number.isFinite(mx + my)) sichtbar = false;         // (Fenster noch ohne Größe)
+      m.classList.toggle('an', sichtbar);
+      m.classList.toggle('neben', !aktuellJ);
+      m.classList.toggle('drueber', hj === j);
+      if (!sichtbar) continue;
+      m.style.translate = `${mx}px ${my}px`;
+      if (aktuellJ) {                                           // Linie zur Karte: rechts hinüber bzw. unten hinunter
+        const k = KARTEN[i].getBoundingClientRect();
+        if (SCHMAL.matches) { linie.setAttribute('x2', clamp(mx, k.left + 34, k.right - 34)); linie.setAttribute('y2', k.top + 4); }
+        else { linie.setAttribute('x2', k.left + 4); linie.setAttribute('y2', clamp(my, k.top + 48, k.bottom - 48)); }
+        linie.setAttribute('x1', mx); linie.setAttribute('y1', my); linieAn = true;
+      }
+    }
+    linien.classList.toggle('an', linieAn);
+  }
+
+  // ---------------------------------------------------------------- Kamerafahrt (Federn wie bei der Reise)
+  function feder(x, v, z, w, dt) {                            // kritisch gedämpft, genaue Lösung über dt
+    const d = x - z, c = v + w * d, E = Math.exp(-w * dt);
+    return [z + (d + c * dt) * E, (v - w * c * dt) * E];
+  }
+  const ZIEL = 3.2;                                           // Federhärte: ca. 1,5 s von Station zu Station
+  const K = { p: posen[0].ziel.clone(), pv: new V3(), ld: posen[0].ld, ldv: 0, sx: posen[0].sx, sxv: 0, sy: posen[0].sy, syv: 0 };
+  let aktuell = -1, start = 1;
+  const rest = P => K.p.distanceTo(P.ziel) / Math.exp(K.ld) + Math.abs(K.ld - P.ld) + (Math.abs(K.sx - P.sx) + Math.abs(K.sy - P.sy)) / W;
+  function fahre(dt, P) {
+    if (RUHIG || !Number.isFinite(K.ld + K.p.x + K.sx)) {     // (ohne Fenstergröße beim Start wäre alles NaN)
+      K.p.copy(P.ziel); K.ld = P.ld; K.sx = P.sx; K.sy = P.sy; K.pv.set(0, 0, 0); K.ldv = K.sxv = K.syv = 0; return;
+    }
+    for (const a of ['x', 'y', 'z']) [K.p[a], K.pv[a]] = feder(K.p[a], K.pv[a], P.ziel[a], ZIEL, dt);
+    [K.ld, K.ldv] = feder(K.ld, K.ldv, P.ld, ZIEL, dt);
+    [K.sx, K.sxv] = feder(K.sx, K.sxv, P.sx, ZIEL, dt);
+    [K.sy, K.syv] = feder(K.sy, K.syv, P.sy, ZIEL, dt);
+  }
+  // Mitdrehen zur Maus (Runde 82, Florian: ohne Zoom beim Scrollen wirkt es starr): die Kamera schwenkt um den
+  // Blickpunkt höchstens ±5° um die Hochachse und ±2° in der Höhe, weich gefedert (wie der Kopf der WispUI-Seite, nur
+  // kleiner). Steht still, solange ein Ding herangeholt ist oder die Kamera fährt (nie drehen, während sie fliegt);
+  // nicht bei „Bewegung reduzieren“, nicht ohne Maus (Handy). Nummern und Linien hängen an den Dingen und gehen mit.
+  let mausX = 0, mausY = 0, drehX = 0, drehY = 0;
+  addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    mausX = clamp(e.clientX / W * 2 - 1, -1, 1); mausY = clamp(e.clientY / H * 2 - 1, -1, 1);
+  });
+  root.addEventListener('mouseleave', () => { mausX = 0; mausY = 0; });
+  function drehen(dt, still) {
+    if (RUHIG || still) return;
+    const k = 1 - Math.exp(-dt * 3);
+    drehX += (mausX - drehX) * k; drehY += (mausY - drehY) * k;
+  }
+  const zurDreh = new V3();
+  function kamera() {
+    const d = Math.exp(K.ld), az = AZ - drehX * 0.087, el = EL - drehY * 0.035;
+    zurDreh.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
+    camera.position.copy(K.p).addScaledVector(zurDreh, d);
+    camera.lookAt(K.p);
+    camera.setViewOffset(W, H, W / 2 - K.sx, H / 2 - K.sy, W, H);
+    camera.updateMatrixWorld();
+  }
+  // Karte der Station (Runde 79: erst bei Ankunft; Runde 82: sofort, sonst blinkt beim Scrollen alles)
+  function zeige(i, da) {
+    $('kopf').classList.toggle('weg', !(i === 0 && t > 0.5));
+    KARTEN.forEach((k, j) => {
+      if (!k) return;
+      const an = j === i && da;
+      if (k.classList.contains('an') !== an) {
+        k.classList.toggle('an', an);
+        k.toggleAttribute('inert', !an);
+        if (an) k.querySelector('.karte-innen').scrollTop = 0;
+      }
+      const auf = an && offen === j;                         // Runde 82: dieselbe Karte geht auf
+      if (k.classList.contains('offen') !== auf) {
+        k.classList.toggle('offen', auf);
+        if (!auf) k.querySelector('.karte-innen').scrollTop = 0;
+      }
+    });
+  }
+  KARTEN.forEach(k => k && k.toggleAttribute('inert', true));
+
+  // ---------------------------------------------------------------- Heranholen per Klick (Runde 82, Florians Idee)
+  // Scrollen ist der Rundgang, das Ding bleibt im Raum. Ein Klick aufs Ding, seine Nummer oder „Genauer ansehen“ holt
+  // es heran (und die Karte geht auf); noch ein Klick auf den Knopf, Esc, ✕, ein Klick daneben oder Weiterscrollen legt
+  // es zurück. Am Desktop führt ein Klick auf ein anderes Ding (oder seine Nummer) zu dessen Station.
+  function umschalten(j = zielNr()) {
+    if (j <= 0 || !HEBEN[j]) return;
+    offen = offen === j ? -1 : j;
+  }
+  window.__genauer = () => umschalten();
+  document.addEventListener('keydown', e => {                 // Esc legt erst das Ding zurück (vor „Karte schließen“)
+    if (e.key === 'Escape' && offen >= 0 && $('lupe').hidden) { offen = -1; e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+  const strahl = new THREE.Raycaster(), zeiger = new THREE.Vector2();
+  strahl.layers.enableAll();
+  function getroffen(x, y) {                                  // welches Ding liegt unter dem Zeiger (Station oder −1)
+    if (t <= ENDE) return -1;
+    zeiger.set(x / W * 2 - 1, 1 - y / H * 2);
+    strahl.setFromCamera(zeiger, camera);
+    const i = zielNr();
+    let best = -1, nah = Infinity;
+    for (const [j, h] of HEBEN.entries()) {
+      if (!h || (SCHMAL.matches && j !== i) || (offen >= 0 && j !== offen)) continue;
+      const objs = h.vm && h.eltern ? [h.vm.gruppe] : h.objs;
+      const treffer = strahl.intersectObjects(objs, true).find(x => x.object.visible);
+      if (treffer && (h.eltern ? 0 : treffer.distance) < nah) { nah = h.eltern ? 0 : treffer.distance; best = j; }
+    }
+    return best;
+  }
+  // Runde 85 (Florians Wahl): Auf der herangeholten Staffelei öffnet ein Klick auf einen Ausdruck die Lupe
+  function druckUnter(x, y) {
+    const h = offen >= 0 && HEBEN[offen], vm = h && h.vm;
+    const S = vm && h.eltern && vm.p >= vm.n && vm.schirme.find(s => s.name === 'staffelei');
+    if (!S) return -1;
+    zeiger.set(x / W * 2 - 1, 1 - y / H * 2);
+    strahl.setFromCamera(zeiger, camera);
+    const t = strahl.intersectObject(S.mesh, false)[0];
+    return t && t.uv ? druckBei(t.uv.x, t.uv.y) : -1;
+  }
+  // Runde 87 (Florians Wahl): Auf den herangeholten Postern öffnet ein Klick auf HamMeter oder WispUI die Seite des Tools,
+  // wie die Knöpfe der Karte (als Karte über der Gasse); beim Zeigen wird das Poster etwas heller, der Zeiger zur Hand.
+  let posterDrueber = null;
+  function posterUnter(x, y) {
+    const h = offen >= 0 && HEBEN[offen], vm = h && h.vm;
+    if (!vm || !h.eltern || vm.p < vm.n) return null;
+    zeiger.set(x / W * 2 - 1, 1 - y / H * 2);
+    strahl.setFromCamera(zeiger, camera);
+    return vm.schirme.find(S => POSTER_SEITE[S.name] && strahl.intersectObject(S.mesh, false).length) || null;
+  }
+  $('welt').addEventListener('click', e => {
+    if (root.classList.contains('ohne-3d')) return;
+    const P = posterUnter(e.clientX, e.clientY);
+    if (P) { document.querySelector(`#k-tools a[data-seite="${POSTER_SEITE[P.name]}"]`).click(); return; }
+    const druck = druckUnter(e.clientX, e.clientY);
+    if (druck >= 0) { lupeZeigen(druck); return; }
+    const i = zielNr(), j = getroffen(e.clientX, e.clientY);
+    if (offen >= 0) { if (j !== offen) offen = -1; return; } // daneben: zurücklegen
+    if (j < 0) return;
+    if (j === i) umschalten(j); else { offen = j; geheZuNr(j); }   // anderes Ding: hinfahren und gleich heranholen
+  });
+  let zeigerBei = null;
+  $('welt').addEventListener('pointermove', e => { if (e.pointerType === 'mouse') zeigerBei = [e.clientX, e.clientY]; });
+  $('welt').addEventListener('pointerleave', () => { zeigerBei = null; drueber = -1; posterDrueber = null; $('welt').classList.remove('zeigt'); });
+  function zeigerPruefen() {                                  // höchstens einmal je Bild: Hand über klickbaren Dingen
+    if (!zeigerBei) return;
+    const j = getroffen(...zeigerBei), druck = druckUnter(...zeigerBei);
+    posterDrueber = posterUnter(...zeigerBei);
+    zeigerBei = null;
+    drueber = offen >= 0 ? -1 : j;
+    $('welt').classList.toggle('zeigt', (j >= 0 && offen < 0) || druck >= 0 || !!posterDrueber);
+  }
+
+  // ---------------------------------------------------------------- Bild für Bild
+  let t = RUHIG ? 99 : 0, vorher = performance.now(), letzterCode = 0;
+  aufbau(t);
+  kamera();
+  performance.mark('atelier:vorbereitet');
+  await renderer.compileAsync(scene, camera);                 // Livegang D: übersetzen, ohne auf den Treiber zu warten
+  performance.mark('atelier:compile');
+  await pause();
+  // Livegang D: Leinwände und Bilder vorab auf die Grafikkarte (vorher geschah das im ersten Bild, mit dem Zeichnen)
+  const texturen = new Set(Object.values(LEINWAND).map(L => L.tex));
+  scene.traverse(o => { const u = o.material && o.material.uniforms; if (u && u.map && u.map.value) texturen.add(u.map.value); });
+  for (const tex of texturen) renderer.initTexture(tex);
+  performance.mark('atelier:texturen');
+  await pause();
+  // Vorwärmen wie in der Gasse (Runde 43): einmal das fertige Atelier zeichnen, solange „Atelier öffnet …“ davor liegt;
+  // das erste Zeichnen jedes Shaders kostet den Treiber am meisten (vorher im ersten Bild des Aufbaus, 65–77 ms)
+  // Teil für Teil, mit Pausen, sobald ein Stück 12 ms dauert (in der Karte teilt sich das iframe den Hauptthread mit
+  // der Gasse, die beim Hochfliegen noch zeichnet)
+  aufbau(99);
+  const warm = [];
+  scene.traverse(o => { if (o.isMesh) warm.push(o); });
+  let stueck = performance.now();
+  for (const o of warm) {
+    renderer.render(o, camera);
+    if (performance.now() - stueck > 12) { await pause(); stueck = performance.now(); }
+  }
+  aufbau(t);
+  performance.mark('atelier:warm');
+  await pause();
+  function zeichnen() {
+    renderer.clear();
+    camera.layers.set(0);
+    renderer.render(scene, camera);
+    if (HEBEN.some(h => h && h.eltern)) {                     // das herausgeholte Ding über allem
+      renderer.clearDepth();
+      camera.layers.set(1);
+      renderer.render(scene, camera);
+    }
+  }
+  function bild(now, fest) {
+    const dt = fest ?? clamp((now - vorher) / 1000, 0, 0.1);
+    vorher = now;
+    if (pausiert && fest === undefined) return;
+    t += dt;
+    if (t < ENDE + 2) aufbau(t);
+    if (t >= ENDE && t - dt < ENDE) performance.mark('atelier:aufbau-ende');
+    if (t >= ENDE) diasLaden();
+    if (t >= ENDE + 0.8 && t - dt < ENDE + 0.8) melde('ruhig');   // Schatten liegen: die Gasse darf laden (Runde 92)
+    const i = zielNr(), P = pose(i);
+    if (i !== aktuell || !Number.isFinite(start)) { aktuell = i; start = Math.max(1e-3, rest(P) || 0); }
+    if (offen >= 0 && offen !== i) offen = -1;                // weitergescrollt: Ding zurücklegen
+    fahre(dt, P);
+    const da = RUHIG || rest(P) < Math.max(0.05, start * 0.18);
+    drehen(dt, !da || HEBEN.some(h => h && h.eltern));          // still, solange sie fährt oder ein Ding draußen ist
+    zeige(i, true);                                           // Runde 82: Karte sofort, nicht erst nach der Fahrt
+    heben(dt, i, offen === i);                                // gleich mit der Fahrt, nicht erst danach
+    const f = RUHIG ? 1 : 1 - Math.exp(-dt * 4);
+    vornAlpha.value += ((i === 0 ? 1 : 0) - vornAlpha.value) * (RUHIG ? 1 : 1 - Math.exp(-dt * 5));
+    for (const o of VORN_TEILE) o.visible = vornAlpha.value > 0.02 && (t >= ENDE + 2 || o.visible);
+    const h = HEBEN[i];                                       // der Raum tritt zurück, das Ding nicht
+    for (const o of TRAEGER) {
+      const z = h && h.eltern && h.ziel ? (h.drin.has(o) ? 0 : 0.5) : 0;
+      o.userData.blass.value += (z - o.userData.blass.value) * f;
+    }
+    if (!CODE.aktiv && now - letzterCode > 250) { code(RUHIG || Math.floor(t * 2) % 2 === 0); letzterCode = now; }   // Cursor blinkt
+    G.uZeit.value = RUHIG ? 0 : t;
+    kamera();
+    zeichnen();
+    sternZeigen(i);
+    zeigerPruefen();
+    markieren(i, da);
+    hervorheben(dt);
+  }
+  const schleife = now => { bild(now); requestAnimationFrame(schleife); };
+  // Sprungmarke in der Adresse (#s-server …): gleich dort anfangen
+  const sprung = RASTEN.findIndex(r => '#' + r.id === location.hash);
+  if (sprung > 0) { scrollTo({ top: sprung * STUFE(), behavior: 'instant' }); const P = pose(sprung); K.p.copy(P.ziel); K.ld = P.ld; K.sx = P.sx; K.sy = P.sy; }
+  requestAnimationFrame(now => {
+    performance.mark('atelier:erstes-bild');
+    vorher = now; schleife(now); $('laden').classList.add('weg'); melde('bereit');
+    if (RUHIG) melde('ruhig');                                // ohne Aufbau: gleich fertig (Runde 92)
+  });
+  window.__atelier = { scene, camera, renderer, gltf, knoten, get posen() { return posen; }, STATIONEN, HEBEN, K, G, einheiten, ENDE, geheZuNr,
+    get offen() { return offen; }, umschalten,
+    schritt: (n, dt = 0.05) => { for (let j = 0; j < n; j++) bild(performance.now(), dt); } };   // nur zum Testen
+}
+</script>
+</body>
+</html>

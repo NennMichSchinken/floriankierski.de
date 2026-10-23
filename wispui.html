@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>WispUI · Florian Kierski</title>
+<meta name="description" content="WispUI: a curated UI suite for FINAL FANTASY XIV, built as a Dalamud plugin.">
+<!-- Tool-Seite WispUI als Karte über der Gasse. Runde 71: Kopf mit dem Elektronikladen als Raum-Vignette
+     (3d/web/diorama.py --raum Elektronik), WispUI auf der Bildschirmwand. Runde 72 (Florian: der Rest sah wie
+     „AI Slop“ aus, alles auf Weiß in Kacheln): ein Kabel läuft in Kurven durch die Seite zu fünf Retro-Fernsehern auf
+     Podesten, jeder zeigt ein Modul der Suite animiert, wie im Spiel (wispui-schirme.js, nach Florians Config und dem
+     Code); der Text steht im Wechsel daneben auf dem Pfirsich-Grund.
+     Runde 73 (mit Florian abgestimmt): Kopf als Schaufenster in der Ladenfarbe mit Bordstein und Steckdose, aus der das
+     Kabel kommt; fünf verschiedene Fernseher (3d/web/fernseher.py), jeder zum Text gedreht; das Kabel ist eine Kette
+     von Buchse zu Buchse (links rein, vorn raus), ein Fernseher geht erst an, wenn das Licht ankommt (Röhren-Effekt),
+     und bleibt an; am Ende ein Voxel-PC, der hochfährt, wenn die Installation abgehakt ist.
+     Runden 74–77: Kabel hängen durch, Schreibtisch mit Install-Wizard, weiches Scrollen, und links die gemeinsame
+     Seitennavigation aller Unterseiten (seitennav.css/.js; ersetzt die Fernbedienung).
+     Inhalte nur aus README, CHANGELOG und WispUI.json des Repos. EN/DE. Vorschau-Server (lädt GLB). -->
+<script>
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    const de = q ? q === 'de' : localStorage.getItem('nullAlleySprache') === 'de';
+    if (de) { document.documentElement.dataset.sprache = 'de'; document.documentElement.lang = 'de'; }
+  } catch (e) { /* Englisch */ }
+  if (window.parent !== window && new URLSearchParams(location.search).has('eingebettet')) {
+    document.documentElement.classList.add('eingebettet');
+  }
+  // Runde 75 (Florian): Die Seite erscheint immer als Karte über der Gasse. Direkt aufgerufen geht es dorthin
+  // (mit ?allein bleibt sie allein, zum Testen).
+  else if (window.parent === window && !new URLSearchParams(location.search).has('allein')) {
+    location.replace('./?seite=wispui');
+  }
+</script>
+<link rel="stylesheet" href="css/seitennav.css">
+<script src="js/seitennav.js" defer></script>
+<link rel="stylesheet" href="css/nachoben.css">
+<script src="js/nachoben.js" defer></script>
+<link rel="stylesheet" href="schriften/schriften.css">
+<style>
+  :root {
+    --hg: #FFC8A4;
+    --k: #1a9cbf; --k-text: #0b7491;                       /* Elektronikladen (FARBEN im Web-Test) */
+    --k-hell: color-mix(in srgb, var(--k) 13%, #fff);
+    --kopf: #CDE9F1;                                       /* Schaufenster: helles Türkis aus --k (22 % auf Weiß) */
+    --tinte: #2d2b45; --tinte2: #5d5770; --tinte3: #7a6f80;
+    --kabel: #2d2b45; --signal: #9ff0ff;
+    /* Platz links für die Seitennavigation: --sn aus seitennav.css */
+  }
+  :root[data-sprache="de"] [lang="en"]:not(html), :root:not([data-sprache="de"]) [lang="de"]:not(html) { display: none !important; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  html.eingebettet { scrollbar-width: none; }
+  html.eingebettet::-webkit-scrollbar { display: none; }
+  body { margin: 0; background: var(--hg); color: var(--tinte); font: 18px/1.6 'Hanken Grotesk', system-ui, sans-serif;
+    overflow-x: clip; }
+  a { color: var(--k-text); }
+  button { font-family: inherit; }
+  svg.sym { width: 1.1em; height: 1.1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round; }
+  code { font: .9em ui-monospace, 'Cascadia Mono', Consolas, monospace; background: rgba(255, 255, 255, .55);
+    padding: 2px 7px; border-radius: 8px; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* Kopfleiste */
+  .leiste { position: absolute; top: 0; left: 0; right: 0; z-index: 42; display: flex; justify-content: flex-end;
+    align-items: center; gap: 10px; padding: 18px clamp(16px, 3vw, 32px); }
+  .eingebettet .leiste { padding-top: 24px; }
+  .pille { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 0;
+    background: rgba(255, 249, 242, .92); color: var(--tinte); font: 700 15px/1.2 'Hanken Grotesk', system-ui, sans-serif;
+    text-decoration: none; box-shadow: 0 3px 12px rgba(45, 43, 69, .12); cursor: pointer; white-space: nowrap; }
+  .pille:hover { background: #fff; }
+  .pille.voll { background: var(--k); color: #fff; }
+  .pille.voll:hover { background: color-mix(in srgb, var(--k) 88%, #000); }
+  .sprache { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255, 249, 242, .92);
+    box-shadow: 0 3px 12px rgba(45, 43, 69, .12); }
+  .sprache button { border: 0; background: none; font: 700 14px/1 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--tinte); padding: 8px 12px; border-radius: 999px; cursor: pointer; opacity: .65; }
+  .sprache button[aria-pressed="true"] { background: var(--k-hell); color: var(--k-text); opacity: 1; }
+
+  /* Seitennavigation (Runde 77, Florians Wahl A, statt der Fernbedienung): seitennav.css und seitennav.js, für alle
+     Unterseiten gleich. Schmal sitzt sie unten als Pille: Platz unter dem Inhalt. */
+  @media (max-width: 1179.98px), (max-height: 559.98px) { body { padding-bottom: 76px; } }
+
+  /* Kopf: Schaufenster in der Ladenfarbe (Florian, Runde 73), unten der Bordstein mit der Steckdose */
+  .schaufenster { position: relative; z-index: 1; background: var(--kopf); padding-left: var(--sn); }
+  .held { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center;
+    min-height: min(80vh, 820px); padding: 84px clamp(16px, 4vw, 56px) 30px; gap: clamp(16px, 3vw, 40px);
+    max-width: 1360px; margin: 0 auto; position: relative; }
+  .held.ohne-raum { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .held-text { max-width: 540px; }
+  .ort { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, .7); color: var(--k-text); font-weight: 700; font-size: 15px; }
+  .kicker { margin: 22px 0 6px; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--k-text); }
+  h1 { margin: 0; font-size: clamp(48px, 7vw, 84px); line-height: .95; font-weight: 800; letter-spacing: -.02em; }
+  .unter { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .unter li { padding: 6px 12px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--k) 30%, #fff);
+    background: rgba(255, 255, 255, .6); font-weight: 700; font-size: 14px; }
+  .held-text p { margin: 20px 0 0; font-size: 19px; }
+  .knoepfe { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .knopf { display: inline-flex; align-items: center; gap: 10px; padding: 15px 24px; border-radius: 999px;
+    font: 800 18px/1 'Hanken Grotesk', system-ui, sans-serif; text-decoration: none; cursor: pointer; border: 0; }
+  .knopf.voll { background: var(--k); color: #fff; box-shadow: 0 8px 22px color-mix(in srgb, var(--k) 35%, transparent); }
+  .knopf.voll:hover { background: color-mix(in srgb, var(--k) 88%, #000); }
+  .knopf.leer { background: rgba(255, 249, 242, .9); color: var(--tinte); }
+  .knopf.leer:hover { background: #fff; }
+  .raum { position: relative; aspect-ratio: 16 / 11; width: 100%; }
+  .raum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+  .raum::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: 3%; height: 10%; z-index: -1;
+    background: radial-gradient(closest-side, rgba(11, 90, 112, .2), transparent); opacity: 0; transition: opacity .6s; }
+  .raum.da::after { opacity: 1; }                           /* Runde 93: der Schatten kommt mit dem Raum (erstes Bild) */
+  .tipp { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 8px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, .8); font-size: 14px; color: var(--tinte2); white-space: nowrap; transition: opacity .6s; }
+  .tipp.weg { opacity: 0; }
+  /* Bordstein: eine Voxel-Stufe (oben hell, vorn mit Fugen), darunter ein weicher Schatten auf dem Pfirsich */
+  .bordstein { position: relative; height: 36px; margin-left: calc(-1 * var(--sn));
+    background: linear-gradient(#FBF0DC 0 3px, #F4E3C1 3px 11px, #E2CDA6 11px 100%); }
+  .bordstein::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 94px, rgba(150, 110, 70, .22) 94px 96px); }
+  .bordstein::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 16px;
+    background: linear-gradient(rgba(107, 51, 49, .2), rgba(107, 51, 49, 0)); }
+  .steckdose { position: absolute; top: 13px; left: 40px; width: 30px; height: 20px; border-radius: 5px;
+    background: #FFF7EA; box-shadow: inset 0 -3px 0 #E8D6BC, 0 1px 0 rgba(107, 51, 49, .25); }
+  .steckdose::before { content: ''; position: absolute; left: 50%; top: 45%; width: 16px; height: 16px; translate: -50% -50%;
+    border-radius: 50%; background: var(--kabel); box-shadow: 0 0 0 2px #E8D6BC; }
+
+  /* Strecke: Kabelstücke und Geräte im Wechsel übereinander (jedes Stück liegt über seinem Anfang, unter seinem Ziel) */
+  /* overflow-x: clip auch hier (Runde 102): am Handy ragen die Geräte mit ihrem durchsichtigen Bildrand über den
+     Bildschirm (PC bei 440 px je 14 px), clip am body allein hielt das seitliche Wischen auf dem iPhone nicht auf */
+  .bahn { padding-left: var(--sn); overflow-x: clip; }
+  .strecke { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px) 40px; }
+  .kabel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .kabel .mantel { fill: none; stroke: var(--kabel); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+  .kabel .glanz { fill: none; stroke: #4c4868; stroke-width: 3; stroke-linecap: round; transform: translate(-2px, -2px); opacity: .75; }
+  /* Licht im Kabel (Runden 74–76): drei Striche auf dem Kabelweg, weichgezeichnet und aufgehellt statt deckend (Florian:
+     wirkte wie aufgelegte Flächen): außen ein breiter Hof, der über das Kabel hinaus strahlt, darin das Leuchten in
+     Mantelbreite und ein heller Kern; die Enden laufen weich aus. Der Glanzstreifen liegt darunter. */
+  .kabel .puls { opacity: 0; mix-blend-mode: screen; }
+  .kabel .puls path { fill: none; stroke-linecap: round; }
+  .kabel .puls .p1 { stroke: #5fd6f5; stroke-width: 22; opacity: .55; filter: blur(6px); }
+  .kabel .puls .p2 { stroke: var(--signal); stroke-width: 8; filter: blur(2px); }
+  .kabel .puls .p3 { stroke: #f4feff; stroke-width: 3; filter: blur(.8px); }
+  .station { position: relative; display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    align-items: center; gap: clamp(20px, 4vw, 64px); padding: clamp(40px, 6vw, 80px) 0; scroll-margin-top: 20px; }
+  .station.rechts { grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); }
+  .station.rechts .platz { order: 2; }
+  .platz { position: relative; min-width: 0; }
+  .tv { position: relative; left: 50%; translate: -50% 0; width: 100%; }
+  .tv img { display: block; width: 100%; height: auto; }
+  .tv canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .text { position: relative; z-index: 20; max-width: 470px; }
+  .station.rechts .text { justify-self: end; }
+  .modul { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 14px; font-weight: 800;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--k-text); }
+  .modul i { font-style: normal; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--kabel); color: var(--signal); letter-spacing: 0; font-size: 14px; }
+  .neu { margin-left: 4px; padding: 3px 10px; border-radius: 999px; background: var(--k); color: #fff; letter-spacing: .04em; }
+  h2 { margin: 0 0 14px; font-size: clamp(32px, 4.2vw, 50px); line-height: 1.04; font-weight: 800; letter-spacing: -.015em; }
+  .text p { margin: 0 0 14px; }
+  .punkte { list-style: none; margin: 18px 0 0; padding: 0; color: var(--tinte2); font-size: 16px; }
+  .punkte li { position: relative; padding-left: 22px; }
+  .punkte li + li { margin-top: 6px; }
+  .punkte li::before { content: ''; position: absolute; left: 2px; top: .62em; width: 8px; height: 8px;
+    background: var(--k); box-shadow: 2px 2px 0 var(--kabel); }                      /* kleiner Voxel statt Punkt */
+  .ham { margin-top: 22px; padding-top: 18px; border-top: 2px dashed color-mix(in srgb, var(--kabel) 25%, transparent); }
+  .ham p { margin: 0 0 12px; }
+  .ham .knopf { padding: 13px 20px; font-size: 16px; }
+
+  /* Ende: der Schreibtisch (Florian, Runde 74): eigene Fläche in hellem Holz, oben die Tischkante als Voxel-Stufe; das
+     Kabel läuft darüber zum PC. Daneben der Wizard: ein Schritt nach dem anderen. */
+  .tisch { position: relative; margin-top: clamp(24px, 4vw, 48px); padding-left: var(--sn); overflow-x: clip;
+    background-color: #F3D3A2;
+    background-image: repeating-linear-gradient(#F3D3A2 0 214px, rgba(150, 95, 45, .13) 214px 216px, #F0CE9B 216px 430px,
+      rgba(150, 95, 45, .13) 430px 432px); }                /* breite Bretter, leicht verschieden hell */
+  .tischkante { position: relative; height: 34px; margin-left: calc(-1 * var(--sn));
+    background: linear-gradient(#FCE6C4 0 3px, #EDC48E 3px 12px, #D7A266 12px 100%); }
+  .tischkante::before { content: ''; position: absolute; left: 0; right: 0; top: 12px; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 190px, rgba(120, 70, 30, .16) 190px 192px); }
+  .tischkante::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 16px;
+    background: linear-gradient(rgba(107, 51, 49, .16), rgba(107, 51, 49, 0)); }
+  .tisch-innen { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px) 32px; }
+  .ende { position: relative; display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    gap: clamp(20px, 4vw, 64px); align-items: start; padding: clamp(36px, 5vw, 64px) 0 16px; }
+  .ende .platz { margin-top: 8px; }
+  .ende .text { max-width: 560px; }
+  .led { position: absolute; width: 7px; height: 5px; translate: -50% -50%; border-radius: 2px; background: transparent;
+    transition: background .4s, box-shadow .4s; }
+  .pc.strom .led { background: #FFB347; box-shadow: 0 0 6px #FFB347, 0 0 12px #FF8A3D; }
+  .pc.laeuft .led { background: #7CF0A6; box-shadow: 0 0 6px #5BD98A, 0 0 14px #2BE65C; }
+  .wizard { margin-top: 26px; }
+  .wz-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-bottom: 20px; }
+  .wz-punkte { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+  .wz-punkte li { display: flex; align-items: center; }
+  .wz-punkte li + li::before { content: ''; width: 22px; height: 6px; background: var(--kabel); transition: background .3s, box-shadow .3s; }
+  .wz-punkte li.an::before { background: var(--signal); box-shadow: 0 0 8px #5fd6f5; }   /* Kabel zwischen zwei erledigten leuchtet */
+  .wz-punkt { width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
+    background: var(--kabel); color: #FFF1D0; font: 800 14px/1 'Hanken Grotesk', system-ui, sans-serif;
+    box-shadow: inset 0 -3px 0 #1B1A2E; transition: background .25s, box-shadow .25s, transform .2s; }
+  .wz-punkt:hover { transform: translateY(-1px); }
+  .wz-punkt .sym { display: none; width: 17px; height: 17px; stroke-width: 3; }
+  .wz-punkt.erledigt { background: var(--k); color: #fff; box-shadow: inset 0 -3px 0 var(--k-text), 0 0 10px #5fd6f5; }
+  .wz-punkt.erledigt .sym { display: block; }
+  .wz-punkt.erledigt .nr { display: none; }
+  .wz-punkt.aktuell { box-shadow: inset 0 -3px 0 #1B1A2E, 0 0 0 3px #F3D3A2, 0 0 0 6px var(--k); }
+  .wz-punkt.erledigt.aktuell { box-shadow: inset 0 -3px 0 var(--k-text), 0 0 0 3px #F3D3A2, 0 0 0 6px var(--k); }
+  .wz-zahl { margin: 0; font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--k-text); }
+  .wz-schritt { font-size: 21px; line-height: 1.55; min-height: 128px; }
+  .wz-schritt[hidden] { display: none; }
+  .wz-schritt.rein { animation: wz-rein .32s cubic-bezier(.2, .8, .3, 1); }
+  .wz-schritt.zurueck { animation-name: wz-zurueck; }
+  @keyframes wz-rein { from { opacity: 0; translate: 22px 0; } }
+  @keyframes wz-zurueck { from { opacity: 0; translate: -22px 0; } }
+  @media (prefers-reduced-motion: reduce) { .wz-schritt.rein { animation: none; } }
+  .wz-fertig { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; align-items: start; font-size: 19px; }
+  .wz-fertig p { margin: 4px 0 0; font-weight: 700; }
+  .wz-stecker { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--k);
+    color: #fff; box-shadow: inset 0 -4px 0 var(--k-text), 0 0 16px #5fd6f5; }
+  .wz-stecker .sym { width: 26px; height: 26px; stroke-width: 3; }
+  .wz-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin-top: 22px; }
+  .wz-knoepfe .knopf { padding: 14px 22px; font-size: 17px; }
+  .wz-knoepfe .knopf[disabled] { opacity: .45; cursor: default; }
+  .wz-knoepfe .knopf[hidden] { display: none; }
+  .wz-klein { border: 0; background: none; padding: 6px 2px; font: 700 15px/1.2 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--tinte2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .wz-klein[hidden] { display: none; }
+  .adresse { position: relative; margin: 12px 0 2px; padding: 12px 96px 12px 16px; border-radius: 16px; background: var(--kabel);
+    color: var(--signal); font: 14px/1.6 ui-monospace, 'Cascadia Mono', Consolas, monospace; white-space: nowrap; }
+  .adresse span { display: block; overflow: hidden; text-overflow: ellipsis; }   /* ganz kopiert der Knopf */
+  .kopieren { position: absolute; top: 8px; right: 10px; border: 0; border-radius: 999px; padding: 6px 12px;
+    background: rgba(255, 255, 255, .16); color: #fff; font: 700 13px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; }
+  .brauchst { margin-top: 30px; color: var(--tinte2); font-size: 16px; }
+  .fuss { position: relative; z-index: 20; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 28px;
+    margin-top: 56px; padding-top: 22px; border-top: 2px dashed color-mix(in srgb, var(--kabel) 25%, transparent);
+    font-size: 14px; color: var(--tinte2); }
+  .fuss p { margin: 0; max-width: 640px; }
+
+  /* Eigener Scrollbalken in der Karte (wie die Reise) */
+  .balken { display: none; }
+  .eingebettet .balken { display: block; position: fixed; right: 8px; top: 96px; bottom: 28px; width: 16px; z-index: 41;
+    cursor: pointer; touch-action: none; }
+  .balken::before, .balken i { position: absolute; left: 50%; width: 6px; translate: -50% 0; border-radius: 999px; }
+  .balken::before { content: ''; top: 0; bottom: 0; background: rgba(255, 249, 242, .7);
+    box-shadow: inset 0 0 0 1px rgba(107, 51, 49, .07); transition: width .15s; }
+  .balken i { top: 0; height: 40px; background: var(--k); box-shadow: 0 2px 6px rgba(107, 51, 49, .18); transition: width .15s; }
+  .balken:hover::before, .balken.zieht::before, .balken:hover i, .balken.zieht i { width: 10px; }
+
+  @media (max-width: 860px) {
+    .held { grid-template-columns: minmax(0, 1fr); padding-top: 76px; min-height: 0; }
+    .raum { order: -1; aspect-ratio: 4 / 3; }
+    .station, .station.rechts, .ende { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .station.rechts .platz { order: 0; }
+    .station.rechts .text { justify-self: start; }
+    .station .text, .ende .text { padding-left: 24px; }     /* Platz für das Kabel am linken Rand */
+    .station .text { margin-top: 18px; }                    /* und darüber für seinen Bogen unter dem Podest */
+    .eingebettet .balken { right: 3px; top: 84px; bottom: 96px; width: 12px; }
+    .balken::before, .balken i { width: 4px; }
+  }
+  @media (max-width: 480px) { .leiste .pille.voll span { display: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./lib/three/build/three.module.min.js",
+  "three/addons/": "./lib/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<nav class="leiste" aria-label="Navigation">
+  <a class="pille voll" href="#installieren" aria-label="Install / Installieren">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+    <span><span lang="en">Install</span><span lang="de">Installieren</span></span></a>
+  <div class="sprache" role="group" aria-label="Language / Sprache">
+    <button type="button" data-sprache="en">EN</button><button type="button" data-sprache="de">DE</button>
+  </div>
+  <a class="pille heim" href="./" title="Florian Kierski">
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>Home</a>
+</nav>
+
+<nav class="seitennav" aria-label="WispUI">
+  <a class="sn-name" href="#held">WispUI</a>
+  <ul class="sn-liste">
+    <li><a href="#gruppe"><span lang="en">Party frames</span><span lang="de">Gruppenfenster</span></a></li>
+    <li><a href="#marken"><span lang="en">Marks</span><span lang="de">Marken</span></a></li>
+    <li><a href="#meter">Damage Meter</a></li>
+    <li><a href="#slidecast">Slidecast</a></li>
+    <li><a href="#profile"><span lang="en">Profiles</span><span lang="de">Profile</span></a></li>
+    <li><a href="#installieren"><span lang="en">Install</span><span lang="de">Installieren</span>
+      <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-5" /><path d="M9 8V2" /><path d="M15 8V2" /><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z" /></svg></a></li>
+  </ul>
+  <button class="sn-knopf" type="button" aria-expanded="false"><span class="sn-jetzt"></span>
+    <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6" /></svg></button>
+</nav>
+
+<div class="schaufenster" id="schaufenster">
+  <header class="held" id="held">
+    <div class="held-text">
+      <span class="ort">
+        <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" x2="16" y1="21" y2="21" /><line x1="12" x2="12" y1="17" y2="21" /></svg>
+        <span lang="en">Electronics store</span><span lang="de">Elektronikladen</span>
+      </span>
+      <p class="kicker"><span lang="en">By Florian Kierski</span><span lang="de">Von Florian Kierski</span></p>
+      <h1>WispUI</h1>
+      <ul class="unter">
+        <li>UI suite</li><li>FFXIV</li><li><span lang="en">Dalamud plugin</span><span lang="de">Dalamud-Plugin</span></li><li>0.2.0</li>
+      </ul>
+      <p>
+        <span lang="en">A curated UI suite for FINAL FANTASY XIV: a short list of elements a serious player actually needs,
+          each done properly, with good defaults instead of hundreds of switches.</span>
+        <span lang="de">Eine kuratierte UI-Suite für FINAL FANTASY XIV: eine kurze Liste von Elementen, die man wirklich
+          braucht, jedes richtig gemacht, mit guten Standards statt hundert Schaltern.</span>
+      </p>
+      <div class="knoepfe">
+        <a class="knopf voll" href="#gruppe">
+          <span lang="en">Follow the cable</span><span lang="de">Dem Kabel folgen</span>
+          <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></svg>
+        </a>
+        <a class="knopf leer" href="#installieren"><span lang="en">Install</span><span lang="de">Installieren</span></a>
+      </div>
+    </div>
+    <div class="raum" id="raum">
+      <span class="tipp weg" id="tipp"><span lang="en">Move the mouse to look around</span><span lang="de">Mit der Maus umsehen</span></span>
+    </div>
+  </header>
+  <div class="bordstein" aria-hidden="true"><span class="steckdose" id="steckdose"></span></div>
+</div>
+
+<div class="bahn">
+<main class="strecke" id="strecke">
+  <section class="station" id="gruppe" aria-labelledby="h-gruppe">
+    <div class="platz"><div class="tv" data-modell="antenne" data-modul="gruppe"><img src="bilder/wispui/antenne.webp" width="715" height="740" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>1</i><span lang="en">Party frames</span><span lang="de">Gruppenfenster</span></p>
+      <h2 id="h-gruppe"><span lang="en">Frames you size yourself</span><span lang="de">Fenster, so groß du willst</span></h2>
+      <p><span lang="en">FFXIV's party list is a set of narrow health bars with almost no control over size or layout.
+        WispUI replaces it with real rectangular unit frames: free width, height, padding and spacing.</span>
+        <span lang="de">Die Gruppenliste von FFXIV besteht aus schmalen Lebensbalken, an Größe und Anordnung lässt sich kaum
+        etwas ändern. WispUI ersetzt sie durch echte rechteckige Fenster: Breite, Höhe, Innenabstand und Abstand frei.</span></p>
+      <ul class="punkte">
+        <li><span lang="en">In the party order you already set in the game</span><span lang="de">In der Reihenfolge, die du im Spiel schon eingestellt hast</span></li>
+        <li><span lang="en">Health bar in nine looks, shields in five, coloured by role or job</span><span lang="de">Lebensbalken in neun Looks, Schilde in fünf, gefärbt nach Rolle oder Job</span></li>
+        <li><span lang="en">Effect icons in three rows, with time left and a sweep</span><span lang="de">Effekt-Symbole in drei Reihen, mit Restzeit und Sweep</span></li>
+        <li><span lang="en">A live preview in the settings, so you can set it up without a party</span><span lang="de">Live-Vorschau in den Einstellungen, einrichten ohne Gruppe</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="station rechts" id="marken" aria-labelledby="h-marken">
+    <div class="platz tv-rechts"><div class="tv" data-modell="tragbar" data-modul="marken"><img src="bilder/wispui/tragbar.webp" width="715" height="745" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>2</i><span lang="en">Marks and Quick Dispel</span><span lang="de">Marken und Quick Dispel</span></p>
+      <h2 id="h-marken"><span lang="en">Who needs you, at a glance</span><span lang="de">Wer dich braucht, auf einen Blick</span></h2>
+      <p><span lang="en">A mark on anyone who needs cleansing and on anyone being raised. Quick Dispel adds one small square
+        per party member that lights up when they need a cleanse; a click on it cleanses that member without changing
+        your target.</span>
+        <span lang="de">Eine Marke auf allen, die gereinigt werden müssen, und auf allen, die gerade wiederbelebt werden.
+        Quick Dispel setzt ein kleines Kästchen je Gruppenmitglied, das aufleuchtet, wenn eine Reinigung nötig ist; ein
+        Klick darauf reinigt, ohne dein Ziel zu wechseln.</span></p>
+      <ul class="punkte">
+        <li><span lang="en">Works on the game's own party list too</span><span lang="de">Geht auch mit der Gruppenliste des Spiels</span></li>
+        <li><span lang="en">A ring around whoever you have targeted</span><span lang="de">Ein Ring um dein Ziel</span></li>
+        <li><span lang="en">Mouseover casting, chosen one spell at a time</span><span lang="de">Mouseover-Zauber, einzeln ausgewählt</span></li>
+        <li><span lang="en">Mouseover casting and Quick Dispel clicks are off in PvP</span><span lang="de">In PvP sind Mouseover-Zauber und Quick-Dispel-Klicks aus</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="station" id="meter" aria-labelledby="h-meter">
+    <div class="platz"><div class="tv" data-modell="konsole" data-modul="meter"><img src="bilder/wispui/konsole.webp" width="715" height="688" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>3</i>Damage Meter</p>
+      <h2 id="h-meter"><span lang="en">The meter, built in</span><span lang="de">Der Meter, gleich dabei</span></h2>
+      <p><span lang="en">A combat tracker in the same look, fed by <a href="https://www.iinact.com/">IINACT</a>. Without
+        IINACT the module stays inactive and walks you through installing it; nothing else in the suite is affected.</span>
+        <span lang="de">Ein Combat Tracker im selben Look, gefüttert von <a href="https://www.iinact.com/">IINACT</a>. Ohne
+        IINACT bleibt das Modul aus und führt dich durch die Installation; der Rest der Suite läuft ganz normal.</span></p>
+      <div class="ham">
+        <p><span lang="en">The meter also comes on its own: <strong>HamMeter</strong>, for FFXIV and Aion 2.</span>
+          <span lang="de">Den Meter gibt es auch eigenständig: <strong>HamMeter</strong>, für FFXIV und Aion 2.</span></p>
+        <a class="knopf voll" id="zu-hammeter" href="null-meter-reise.html?halt=install_F" data-seite="null-meter" data-halt="install_F">
+          <span lang="en">Install HamMeter for FFXIV</span><span lang="de">HamMeter für FFXIV installieren</span>
+          <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="station rechts" id="slidecast" aria-labelledby="h-slidecast">
+    <div class="platz tv-rechts"><div class="tv" data-modell="wuerfel" data-modul="slidecast"><img src="bilder/wispui/wuerfel.webp" width="715" height="748" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>4</i>Slidecast <span class="neu"><span lang="en">new in 0.2.0</span><span lang="de">neu in 0.2.0</span></span></p>
+      <h2 id="h-slidecast"><span lang="en">Know when you can move</span><span lang="de">Wissen, wann du laufen darfst</span></h2>
+      <p><span lang="en">The cast bar shows when you can start moving without losing the cast. A window sits over the end of
+        the bar: red while you wait, green once you can go.</span>
+        <span lang="de">Der Zauberbalken zeigt, ab wann du dich bewegen kannst, ohne den Zauber zu verlieren. Ein Fenster
+        liegt über dem Ende des Balkens: rot, solange du wartest, grün, sobald du loslaufen kannst.</span></p>
+    </div>
+  </section>
+
+  <section class="station" id="profile" aria-labelledby="h-profile">
+    <div class="platz"><div class="tv" data-modell="fuss" data-modul="profile"><img src="bilder/wispui/fuss.webp" width="715" height="727" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>5</i><span lang="en">Profiles</span><span lang="de">Profile</span></p>
+      <h2 id="h-profile"><span lang="en">Every job its own setup</span><span lang="de">Jeder Job sein eigenes Setup</span></h2>
+      <p><span lang="en">Different settings per job or role, switched when you change job. Share your whole setup as one
+        line of text, and copy and paste the look between elements.</span>
+        <span lang="de">Eigene Einstellungen je Job oder Rolle, gewechselt, wenn du den Job wechselst. Das ganze Setup als
+        eine Zeile Text teilen und das Aussehen zwischen Elementen kopieren.</span></p>
+      <ul class="punkte">
+        <li><span lang="en">Your own colour for every job and role</span><span lang="de">Eigene Farbe für jeden Job und jede Rolle</span></li>
+        <li><span lang="en">Six fonts, three weights, and a folder for your own</span><span lang="de">Sechs Schriften, drei Stärken und ein Ordner für eigene</span></li>
+        <li><span lang="en">Arrow buttons instead of dropdowns, with a live preview</span><span lang="de">Pfeilknöpfe statt Dropdowns, mit Live-Vorschau</span></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<div class="tisch" id="tisch">
+  <div class="tischkante" aria-hidden="true"></div>
+  <div class="tisch-innen">
+  <section class="ende" id="installieren" aria-labelledby="h-installieren">
+    <div class="platz"><div class="tv pc" id="pc" data-modell="pc" data-modul="pc"><img src="bilder/wispui/pc.webp" width="780" height="776" alt=""><canvas aria-hidden="true"></canvas></div></div>
+    <div class="text">
+      <p class="modul"><i>
+        <svg class="sym" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px"><path d="M12 22v-5" /><path d="M9 8V2" /><path d="M15 8V2" /><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z" /></svg>
+      </i><span lang="en">Install</span><span lang="de">Installieren</span></p>
+      <h2 id="h-installieren"><span lang="en">Plug it in</span><span lang="de">Einstecken</span></h2>
+      <p><span lang="en">WispUI comes from its own plugin repository, because damage meters are not eligible for the official
+        one. Five steps: mark each one done once you have done it.</span>
+        <span lang="de">WispUI kommt aus einem eigenen Plugin-Repository, weil Damage Meter im offiziellen nicht zugelassen
+        sind. Fünf Schritte: Markier jeden als erledigt, sobald du ihn gemacht hast.</span></p>
+
+      <!-- Wizard (Florian, Runde 74): ein Schritt nach dem anderen, oben die Schritte als kleine Kabelkette -->
+      <div class="wizard" id="wizard">
+        <div class="wz-kopf">
+          <ol class="wz-punkte">
+            <li><button type="button" class="wz-punkt" data-i="0"><span class="nr">1</span><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg><span class="vh"><span lang="en">Step 1</span><span lang="de">Schritt 1</span></span></button></li>
+            <li><button type="button" class="wz-punkt" data-i="1"><span class="nr">2</span><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg><span class="vh"><span lang="en">Step 2</span><span lang="de">Schritt 2</span></span></button></li>
+            <li><button type="button" class="wz-punkt" data-i="2"><span class="nr">3</span><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg><span class="vh"><span lang="en">Step 3</span><span lang="de">Schritt 3</span></span></button></li>
+            <li><button type="button" class="wz-punkt" data-i="3"><span class="nr">4</span><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg><span class="vh"><span lang="en">Step 4</span><span lang="de">Schritt 4</span></span></button></li>
+            <li><button type="button" class="wz-punkt" data-i="4"><span class="nr">5</span><svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg><span class="vh"><span lang="en">Step 5</span><span lang="de">Schritt 5</span></span></button></li>
+          </ol>
+          <p class="wz-zahl" id="wz-zahl" aria-live="polite"></p>
+        </div>
+        <div class="wz-schritte">
+          <div class="wz-schritt" data-i="0"><span lang="en">In game, open the Dalamud settings with</span><span lang="de">Im Spiel die Dalamud-Einstellungen öffnen mit</span> <code>/xlsettings</code>.</div>
+          <div class="wz-schritt" data-i="1"><span lang="en">Go to the <strong>Experimental</strong> tab.</span><span lang="de">Zum Reiter <strong>Experimental</strong> gehen.</span></div>
+          <div class="wz-schritt" data-i="2"><span lang="en">Under <strong>Custom Plugin Repositories</strong> (the lower of the two lists), add this URL:</span>
+            <span lang="de">Unter <strong>Custom Plugin Repositories</strong> (die untere der beiden Listen) diese Adresse eintragen:</span>
+            <div class="adresse"><span id="repo">https://raw.githubusercontent.com/NennMichSchinken/WispUI/main/repo.json</span>
+              <button type="button" class="kopieren" data-kopiere="repo"><span lang="en">Copy</span><span lang="de">Kopieren</span></button></div></div>
+          <div class="wz-schritt" data-i="3"><span lang="en">Click the <strong>+</strong> to add it, then <strong>Save</strong>.</span><span lang="de">Auf <strong>+</strong> klicken, dann <strong>Save</strong>.</span></div>
+          <div class="wz-schritt" data-i="4"><span lang="en">Open the plugin installer with</span><span lang="de">Den Plugin-Installer öffnen mit</span> <code>/xlplugins</code>,
+            <span lang="en">search for <strong>WispUI</strong>, and install it.</span><span lang="de">nach <strong>WispUI</strong> suchen und installieren.</span></div>
+          <div class="wz-schritt wz-fertig" data-i="5">
+            <span class="wz-stecker" aria-hidden="true"><svg class="sym" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg></span>
+            <p><span lang="en">Plugged in. Open the settings with <code>/wisp</code>. The party frames are off until you turn
+              them on, so nothing changes on screen until you ask for it.</span>
+              <span lang="de">Eingesteckt. Die Einstellungen öffnest du mit <code>/wisp</code>. Die Gruppenfenster sind aus,
+              bis du sie einschaltest, auf dem Bildschirm ändert sich also nichts, bis du es willst.</span></p>
+          </div>
+        </div>
+        <div class="wz-knoepfe">
+          <button type="button" class="knopf leer" id="wz-zurueck">
+            <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></svg>
+            <span lang="en">Back</span><span lang="de">Zurück</span></button>
+          <button type="button" class="knopf voll" id="wz-weiter"><span id="wz-weiter-text"></span>
+            <svg class="sym" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+          <button type="button" class="wz-klein" id="wz-nochmal"></button>
+        </div>
+      </div>
+      <p class="brauchst"><span lang="en">You need FINAL FANTASY XIV with XIVLauncher / Dalamud (API 15), and
+        <a href="https://www.iinact.com/">IINACT</a> for the damage meter only.</span>
+        <span lang="de">Du brauchst FINAL FANTASY XIV mit XIVLauncher / Dalamud (API 15) und
+        <a href="https://www.iinact.com/">IINACT</a> nur für den Damage Meter.</span></p>
+    </div>
+  </section>
+
+  <footer class="fuss">
+    <p><span lang="en">MIT licence. WispUI is an independent project and is not affiliated with or endorsed by Square Enix.
+      Bundled: icons from Lucide (ISC), the fonts Figtree and DM Sans (SIL Open Font License). FINAL FANTASY is a
+      registered trademark of Square Enix Holdings Co., Ltd.</span>
+      <span lang="de">MIT-Lizenz. WispUI ist ein unabhängiges Projekt, nicht mit Square Enix verbunden und nicht von
+      Square Enix unterstützt. Dabei: Symbole von Lucide (ISC), die Schriften Figtree und DM Sans (SIL Open Font License).
+      FINAL FANTASY ist eine eingetragene Marke der Square Enix Holdings Co., Ltd.</span></p>
+    <p><a href="https://github.com/NennMichSchinken/WispUI">GitHub</a> ·
+      <a href="https://github.com/NennMichSchinken/WispUI/blob/main/CHANGELOG.md">Changelog</a> ·
+      <a class="heim" href="./">Home</a></p>
+    <p><a href="impressum.html" data-seite="impressum"><span lang="en">Legal notice</span><span lang="de">Impressum</span></a> ·
+      <a href="datenschutz.html" data-seite="datenschutz"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a></p>
+  </footer>
+  </div>
+</div>
+<div class="balken" id="balken" aria-hidden="true"><i></i></div>
+
+<script src="js/karte.js"></script>
+<script>
+// Ohne 3D (läuft auch ohne WebGL): Sprache, Karte über der Gasse (karte.js), Schritte, Kopieren, Balken, Fernbedienung
+(() => {
+  const root = document.documentElement, $ = id => document.getElementById(id);
+  const de = () => root.dataset.sprache === 'de';
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const EINGEBETTET = KARTE.eingebettet;
+  const W = window.WISP = { pausiert: false, fertig: false, melde: KARTE.melde };
+  const setzeSprache = KARTE.setzeSprache;
+  KARTE.verbinde({
+    pause: an => { W.pausiert = an; },
+    sprache: () => { hakenZeigen(); if (W.neuLegen) W.neuLegen(); },
+  });
+
+  // Install-Wizard (Florian, Runde 74): ein Schritt nach dem anderen, „Erledigt, weiter“ markiert ihn (im Browser
+  // gemerkt). Oben die Schritte als kleine Kabelkette: erledigte leuchten, der aktuelle hat einen Ring, jeder ist
+  // anklickbar. Sind alle fünf erledigt, kommt „Eingesteckt“ und der PC fährt hoch (sobald er Strom hat).
+  const SPEICHER = 'wispuiSchritte', N = 5;
+  const schritte = [...document.querySelectorAll('#wizard .wz-schritt')], punkte = [...document.querySelectorAll('#wizard .wz-punkt')];
+  let erledigt = [];
+  try { erledigt = JSON.parse(localStorage.getItem(SPEICHER) || '[]').filter(i => i >= 0 && i < N); } catch (e) { /* ohne Speicher */ }
+  const ersterOffen = () => { for (let i = 0; i < N; i++) if (!erledigt.includes(i)) return i; return N; };
+  let aktuell = ersterOffen();
+  const merken = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(erledigt)); } catch (e) { /* egal */ } };
+  function hakenZeigen(richtung = 0) {
+    W.erledigt = erledigt;
+    W.fertig = erledigt.length >= N;
+    if (aktuell === N && !W.fertig) aktuell = ersterOffen();
+    schritte.forEach((s, i) => {
+      const war = !s.hidden;
+      s.hidden = i !== aktuell;
+      if (!s.hidden && !war && richtung) { s.classList.remove('rein', 'zurueck'); void s.offsetWidth; s.classList.add('rein'); s.classList.toggle('zurueck', richtung < 0); }
+    });
+    punkte.forEach((p, i) => {
+      p.classList.toggle('erledigt', erledigt.includes(i));
+      p.classList.toggle('aktuell', i === aktuell);
+      p.setAttribute('aria-current', i === aktuell ? 'step' : 'false');
+      p.parentElement.classList.toggle('an', i > 0 && erledigt.includes(i) && erledigt.includes(i - 1));
+    });
+    const fertigBlick = aktuell === N, ist = erledigt.includes(aktuell);
+    $('wz-zahl').textContent = fertigBlick ? (de() ? 'Eingesteckt' : 'Plugged in')
+      : de() ? `Schritt ${aktuell + 1} von ${N}` : `Step ${aktuell + 1} of ${N}`;
+    $('wz-zurueck').disabled = aktuell === 0;
+    $('wz-weiter').hidden = fertigBlick;
+    $('wz-weiter-text').textContent = ist ? (de() ? 'Weiter' : 'Next')
+      : aktuell === N - 1 ? (de() ? 'Erledigt' : 'Done') : (de() ? 'Erledigt, weiter' : 'Done, next');
+    const nochmal = $('wz-nochmal');
+    nochmal.hidden = !(fertigBlick || ist);
+    nochmal.textContent = fertigBlick ? (de() ? 'Von vorn' : 'Start over') : (de() ? 'Doch nicht erledigt' : 'Not done after all');
+    if (W.pcPruefen) W.pcPruefen();
+  }
+  const gehe = i => { const r = Math.sign(i - aktuell); aktuell = i; hakenZeigen(r); };
+  $('wz-weiter').onclick = () => {
+    const neu = !erledigt.includes(aktuell);
+    if (neu) { erledigt = [...erledigt, aktuell]; merken(); }
+    if (neu && erledigt.length >= N) gehe(N);                   // damit ist alles erledigt: Eingesteckt
+    else gehe(aktuell + 1 < N ? aktuell + 1 : erledigt.length >= N ? N : ersterOffen());
+  };
+  $('wz-zurueck').onclick = () => gehe(Math.max(0, Math.min(aktuell, N) - 1));
+  $('wz-nochmal').onclick = () => {
+    if (aktuell === N) { erledigt = []; merken(); gehe(0); return; }
+    erledigt = erledigt.filter(x => x !== aktuell); merken(); hakenZeigen();
+  };
+  punkte.forEach((p, i) => { p.onclick = () => gehe(i); });
+
+  document.addEventListener('click', async e => {
+    const z = e.target.closest('button, a');
+    if (!z) return;                                             // ✕ Home, HamMeter (data-seite), Sprache: karte.js
+    if (z.matches('.kopieren')) {
+      try {
+        await navigator.clipboard.writeText($(z.dataset.kopiere).textContent.trim());
+        const alt = z.innerHTML;
+        z.textContent = de() ? 'Kopiert' : 'Copied';
+        setTimeout(() => { z.innerHTML = alt; }, 1500);
+      } catch (err) { /* Adresse steht da zum Markieren */ }
+    }
+  });
+
+  // Scrollbalken in der Karte (wie die Reise)
+  function balkenZeigen() {
+    const b = $('balken');
+    if (!EINGEBETTET || !b) return;
+    const weg = root.scrollHeight - innerHeight, h = b.clientHeight;
+    const g = Math.max(36, h * innerHeight / (weg + innerHeight)), griff = b.firstElementChild;
+    griff.style.height = `${g}px`;
+    griff.style.top = `${weg > 0 ? (h - g) * clamp(scrollY / weg, 0, 1) : 0}px`;
+  }
+  if (EINGEBETTET) {
+    const b = $('balken');
+    let zieht = false;
+    const nach = y => {
+      const r = b.getBoundingClientRect(), g = b.firstElementChild.offsetHeight;
+      scrollTo({ top: clamp((y - r.top - g / 2) / Math.max(1, r.height - g), 0, 1) * (root.scrollHeight - innerHeight), behavior: 'instant' });
+    };
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); b.setPointerCapture(e.pointerId); zieht = true; b.classList.add('zieht'); root.classList.add('zieht');
+      nach(e.clientY);
+    });
+    b.addEventListener('pointermove', e => { if (zieht) nach(e.clientY); });
+    const los = () => { zieht = false; b.classList.remove('zieht'); root.classList.remove('zieht'); };
+    b.addEventListener('pointerup', los);
+    b.addEventListener('pointercancel', los);
+    addEventListener('scroll', balkenZeigen, { passive: true });
+    addEventListener('resize', balkenZeigen);
+    new ResizeObserver(balkenZeigen).observe(document.body);
+  }
+  // Weiches Scrollen (Florian, Runde 75: kein Einrasten mehr, das stockte; man sieht ja am Fernseher, wann man richtig
+  // ist). Am Desktop mit Maus führt die Seite das Mausrad selbst weich nach. Tasten, Balken, Klicks und Sprünge der
+  // Fernbedienung beenden die Fahrt und scrollen normal; „Bewegung reduzieren“: normales Scrollen.
+  const GLATT = matchMedia('(min-width: 1000px) and (hover: hover) and (pointer: fine)');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let ziel = null, y = 0, raf = 0, vorher = 0;
+    const maxY = () => root.scrollHeight - innerHeight;
+    const fahren = now => {
+      const dt = Math.min(0.05, (now - vorher) / 1000);
+      vorher = now;
+      y += (ziel - y) * (1 - Math.exp(-dt * 9));
+      if (Math.abs(ziel - y) < 0.5) y = ziel;
+      scrollTo({ top: y, behavior: 'instant' });
+      raf = y === ziel ? 0 : requestAnimationFrame(fahren);
+      if (!raf) ziel = null;
+    };
+    const halt = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } ziel = null; };
+    addEventListener('wheel', e => {
+      if (!GLATT.matches || e.ctrlKey || W.pausiert) return;
+      const d = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1);
+      if (!d) return;
+      e.preventDefault();
+      if (ziel === null) { ziel = scrollY; y = scrollY; }
+      ziel = clamp(ziel + d, 0, maxY());
+      if (!raf) { vorher = performance.now(); raf = requestAnimationFrame(fahren); }
+    }, { passive: false });
+    addEventListener('keydown', halt);
+    addEventListener('pointerdown', halt);
+    addEventListener('scroll', () => { if (!raf) ziel = null; }, { passive: true });   // fremd gescrollt: neu ansetzen
+    window.__glatt = { ziel: () => ziel };                       // nur zum Testen
+  }
+
+  setzeSprache(de() ? 'de' : 'en');
+  hakenZeigen();
+})();
+</script>
+
+<script type="module">
+// ---------------------------------------------------------------- Geräte, Kabelkette und Licht (Runden 72–73)
+import { W as SW, H as SH, viereck, ladeTexturen, zeichne } from './js/wispui-schirme.js';
+import { pause } from './js/laden.js';
+const WI = window.WISP;
+const RUHIG = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const $ = id => document.getElementById(id);
+const geraete = [...document.querySelectorAll('.tv')];           // fünf Fernseher, dann der PC
+const pc = $('pc'), strecke = $('strecke'), dose = $('steckdose');
+const EIN = 0.9;                                                  // Dauer des Röhren-Effekts in s
+let INFO = null, SK = 0.8;
+const sichtbar = new Set();
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) sichtbar.add(e.target); else sichtbar.delete(e.target); }),
+  { rootMargin: '120px 0px' });
+for (const g of geraete) {
+  const cv = g.querySelector('canvas');
+  cv.width = SW * 2; cv.height = SH * 2; cv.style.width = SW + 'px'; cv.style.height = SH + 'px';
+  g.an = RUHIG ? -1e9 : null;                                     // Zeitpunkt des Einschaltens (ms), null = aus
+  io.observe(g);
+}
+
+// Stapel: Kabelstück 0 (Steckdose → Gerät 1) über dem Kopf, dann Gerät 1, Stück 1, Gerät 2 … Jedes Stück hat zwei
+// Ebenen (Runde 75): hinten liegt es über dem Gerät, aus dem es vorn kommt, und unter dem nächsten (dort läuft es auf
+// dem Boden hinter ihm entlang); vorn liegt die Schlaufe, mit der es links vom Podest in die Buchse hängt, über dem
+// nächsten Gerät. Bei den nach links gedrehten Fernsehern ist die Buchse hinten: keine vordere Ebene.
+const NS = 'http://www.w3.org/2000/svg', KETTE = [];
+const ebene = z => {
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'kabel'); svg.setAttribute('aria-hidden', 'true');
+  svg.style.zIndex = z;
+  svg.innerHTML = '<path class="mantel" /><path class="glanz" /><g class="puls"><path class="p1" /><path class="p2" /><path class="p3" /></g>';
+  strecke.prepend(svg);
+  const puls = svg.querySelector('.puls');
+  return { svg, mantel: svg.querySelector('.mantel'), glanz: svg.querySelector('.glanz'), puls, striche: [...puls.children] };
+};
+const mess = document.createElementNS(NS, 'svg');                 // unsichtbar: misst den ganzen Weg
+mess.setAttribute('class', 'kabel'); mess.style.visibility = 'hidden';
+strecke.prepend(mess);
+geraete.forEach((g, i) => {
+  g.style.zIndex = 3 + 2 * i;
+  const weg = document.createElementNS(NS, 'path');
+  mess.append(weg);
+  KETTE.push({ hinten: ebene(2 + 2 * i), vorn: ebene(4 + 2 * i), weg, laenge: 0, laengeHinten: 0, y0: 0, y1: 0 });
+});
+
+function legen() {
+  if (!INFO) return;
+  const r0 = strecke.getBoundingClientRect(), cs = getComputedStyle(strecke);
+  const innen = r0.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const einspaltig = getComputedStyle(geraete[0].closest('section')).gridTemplateColumns.split(' ').length === 1;
+  // Maßstab: ein Bildpunkt je … CSS-Pixel, für alle Geräte gleich (gleiche Kamera, gleiche Voxelgröße)
+  SK = einspaltig ? Math.min(0.62, innen * 1.06 / 715) : Math.min(0.9, innen * 0.56 / 715);
+  for (const g of geraete) {
+    const d = INFO[g.dataset.modell];
+    g.style.width = `${d.breite * SK}px`;
+    g.querySelector('img').style.aspectRatio = `${d.breite} / ${d.hoehe}`;
+    g.querySelector('canvas').style.transform = viereck(d.bildschirm, SK);
+    for (const [j, p] of (d.led || []).entries()) {
+      let led = g.querySelectorAll('.led')[j];
+      if (!led) { led = document.createElement('i'); led.className = 'led'; g.append(led); }
+      led.style.left = `${p[0] * SK}px`; led.style.top = `${p[1] * SK}px`;
+    }
+  }
+  kabel(r0, einspaltig);
+}
+WI.neuLegen = legen;
+
+// Punkte in Koordinaten der Strecke: Stecker-Spitzen aus geraete.json, Bildkanten
+function punkt(g, p, r0) {
+  const r = g.getBoundingClientRect();
+  return [r.left - r0.left + p[0] * SK, r.top - r0.top + p[1] * SK];
+}
+// Weiche Kurve durch Wegpunkte (zentripetales Catmull-Rom als Bézier-Stücke, Runde 74): keine geraden Stücke mit
+// engen Knicken. ta/te: Richtung am Anfang (aus dem Stecker) und am Ende (in die Buchse). Gibt die Stücke einzeln
+// zurück (Stück j von P[j] nach P[j + 1]), damit der Weg auf zwei Ebenen verteilt werden kann.
+function weich(P, ta, te) {
+  const n = P.length, d = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const Q = [[P[0][0] - ta[0] * d(P[0], P[1]), P[0][1] - ta[1] * d(P[0], P[1])], ...P,
+    [P[n - 1][0] + te[0] * d(P[n - 2], P[n - 1]), P[n - 1][1] + te[1] * d(P[n - 2], P[n - 1])]];
+  const stuecke = [];
+  for (let i = 1; i < Q.length - 2; i++) {
+    const [p0, p1, p2, p3] = [Q[i - 1], Q[i], Q[i + 1], Q[i + 2]];
+    const t01 = Math.max(1e-3, Math.sqrt(d(p0, p1))), t12 = Math.max(1e-3, Math.sqrt(d(p1, p2)));
+    const t23 = Math.max(1e-3, Math.sqrt(d(p2, p3)));
+    const m1 = [0, 1].map(j => (p2[j] - p1[j]) + t12 * ((p1[j] - p0[j]) / t01 - (p2[j] - p0[j]) / (t01 + t12)));
+    const m2 = [0, 1].map(j => (p2[j] - p1[j]) + t12 * ((p3[j] - p2[j]) / t23 - (p3[j] - p1[j]) / (t12 + t23)));
+    stuecke.push(` C${p1[0] + m1[0] / 3} ${p1[1] + m1[1] / 3} ${p2[0] - m2[0] / 3} ${p2[1] - m2[1] / 3} ${p2[0]} ${p2[1]}`);
+  }
+  return stuecke;
+}
+const richtung = (a, b) => { const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / l, (b[1] - a[1]) / l]; };
+
+// Kabelweg (Runde 75, Florian: „wirkt als ob es fliegt“, Kabel sollen durchhängen): wie ein echtes Kabel. Aus dem
+// vorderen Stecker fällt es aufs Podest, über die Vorderkante auf den Boden (Punkte aus fernseher.py, geraete.json),
+// läuft am Boden zum nächsten Gerät (über Textblöcken vorbei), von rechts auf halber Höhe hinter das Gerät
+// (verdeckt), kommt links über der Buchse hervor und hängt in einer Schlaufe von unten hinein (Florians Skizze).
+// Buchse hinten: links neben das Gerät und dahinter. Handy: am Boden über den linken Rand.
+function kabel(r0, einspaltig) {
+  const zuMessen = [];
+  const B = r0.width, LANE = 19;
+  const bilder = geraete.map(g => { const r = g.getBoundingClientRect(); return { oben: r.top - r0.top, unten: r.bottom - r0.top }; });
+  const P = (i, key) => { const v = INFO[geraete[i].dataset.modell][key]; return v ? punkt(geraete[i], v, r0) : null; };
+  // Steckdose im Bordstein: links über dem ersten Gerät (Handy: am linken Rand)
+  const h0 = P(0, 'links_hinten'), dx = einspaltig ? LANE : clamp(h0[0] - 40, 24, B - 24);
+  const bord = dose.parentElement.getBoundingClientRect();
+  dose.style.left = `${r0.left + dx - bord.left - 15}px`;
+  const dr = dose.getBoundingClientRect();
+  const start = [dx, dr.top + dr.height * 0.45 - r0.top];
+  KETTE.forEach((k, i) => {
+    const info = INFO[geraete[i].dataset.modell], E = P(i, 'links'), aus = P(i, 'links_aus');
+    const bildPunkt = (x, y) => punkt(geraete[i], [x, y], r0);    // Bildpixel dieses Geräts → Strecke
+    const [ex, ey] = info.links;
+    const weg = i === 0 ? [start, [start[0], start[1] + 40]]
+      : ['vorne', 'vorne_unter', 'vorne_kante', 'vorne_boden'].map(n => P(i - 1, n)).filter(Boolean);
+    const F = weg[weg.length - 1];
+    // Schlaufe (Florians Skizze): links über der Buchse kommt das Kabel hinter dem Gerät hervor (R), hängt außen
+    // herunter bis aufs Podest bzw. den Boden (U) und von unten in die Buchse. Hinter dem Gerät läuft es auf halber
+    // Höhe (verdeckt) von der rechten Seite herüber, wenn es von rechts kommt.
+    const R = bildPunkt(ex - 110, ey - 50), hinter = bildPunkt(info.hinter[0], ey - 90);
+    const unten = P(i, 'links_unter') || (() => { const b = P(i, 'links_boden'); return [aus[0] + (b[0] - aus[0]) * 0.55, aus[1] + (b[1] - aus[1]) * 0.55]; })();
+    const U = [R[0] + (aus[0] - R[0]) * 0.55, unten[1]];         // tiefster Punkt zwischen den beiden Strängen
+    const ziel = info.links_sichtbar ? R : bildPunkt(ex - 110, ey + 10);   // Buchse hinten: links neben das Gerät
+    const vonRechts = !einspaltig && info.links_sichtbar && F[0] > R[0] + 80;
+    const neben = bildPunkt(info.breite - 70, ey - 130);           // rechts neben dem oberen Teil (über dem Stecker)
+    if (einspaltig) {                                           // am Boden zum linken Rand, dort am Text vorbei
+      if (i > 0) weg.push([(F[0] + LANE) / 2, F[1] + 24]);
+      const a = F[1] + 70, b = ziel[1] - 70;                     // gerade am Rand: Paare dicht beieinander, damit die
+      weg.push([LANE, a], [LANE, a + 40]);                        // Kurve dort senkrecht bleibt und nicht ausbeult
+      if (b - a > 200) weg.push([LANE, (a + b) / 2]);
+      weg.push([LANE, b - 40], [LANE, b]);
+    } else if (i > 0) {                                          // am Boden im Abstand zwischen den Stationen
+      const naechstes = vonRechts ? neben : ziel;
+      let G = [F[0] + (naechstes[0] - F[0]) * 0.5, Math.max(F[1] + 50, (bilder[i - 1].unten + bilder[i].oben) / 2)];
+      const t = geraete[i].closest('section').querySelector('.text').getBoundingClientRect();
+      const T = { l: t.left - r0.left - 30, r: t.right - r0.left + 20, o: t.top - r0.top - 45, u: t.bottom - r0.top };
+      const trifft = (a, b) => { for (let s = 0; s <= 1; s += 0.05) { const x = a[0] + (b[0] - a[0]) * s, y = a[1] + (b[1] - a[1]) * s;
+        if (x > T.l && x < T.r && y > T.o && y < T.u) return true; } return false; };
+      if (trifft(G, naechstes)) G = [naechstes[0] + (G[0] - naechstes[0]) * 0.25, Math.min(G[1], T.o)];   // über den Text
+      weg.push(G);
+    }
+    if (vonRechts) weg.push(neben, hinter);
+    let vorn = null;
+    if (info.links_sichtbar) {
+      weg.push(R);
+      vorn = weg.length - 1;                                     // ab hier vorn: die Schlaufe vor dem Gerät
+      weg.push(U, aus, E);
+    } else weg.push(ziel, E);
+    for (const p of weg) p[0] = Math.max(p[0], 10);              // nie über den linken Rand (Handy)
+    const st = weich(weg, [0, 1], richtung(P(i, 'links_aus'), E));
+    const kopf = j => `M${weg[j][0]} ${weg[j][1]}`;
+    const dh = kopf(0) + st.slice(0, vorn ?? st.length).join(''), dv = vorn === null ? '' : kopf(vorn) + st.slice(vorn).join('');
+    for (const [e, d] of [[k.hinten, dh], [k.vorn, dv]]) {
+      e.mantel.setAttribute('d', d); e.glanz.setAttribute('d', d);
+      for (const s of e.striche) s.setAttribute('d', d);
+      e.laenge = d ? e.mantel.getTotalLength() : 0;
+    }
+    const d = kopf(0) + st.join('');
+    if (d !== k.d) {                                             // Runde 93: nur ein geänderter Weg wird neu vermessen
+      k.d = d;
+      k.weg.setAttribute('d', d);
+      k.laenge = k.weg.getTotalLength();
+    }
+    if (k.gemessen !== d) zuMessen.push({ k, d, ey: E[1], y0: weg[0][1] });   // (auch, wenn eine Messung abbrach)
+  });
+  messen(zuMessen);
+}
+
+// Licht: für jede Bildhöhe die erste Stelle des Wegs, die so tief liegt; nach dem tiefsten Punkt (Schlaufe) läuft es
+// mit dem weiteren Scrollen hinauf in die Buchse. Runde 93: Das Abtasten (alle 4 Pixel, gut 1600 Aufrufe von
+// getPointAtLength, zusammen ca. 100 ms) läuft in Stücken von höchstens 8 ms; dieselben Werte wie vorher. Eine neue
+// Vermessung bricht eine laufende ab, bis dahin gelten die alten Werte.
+let messung = 0;
+async function messen(liste) {
+  const nr = ++messung, erg = [];
+  let stueck = performance.now();
+  for (const { k, d, ey, y0 } of liste) {
+    const proben = [];
+    let tief = -1e9, sTief = 0;
+    for (let s = 0; s <= k.laenge; s += 4) {
+      const y = k.weg.getPointAtLength(s).y;
+      if (y > tief) { tief = y; sTief = s; }
+      proben.push([s, tief]);
+      if (performance.now() - stueck > 8) { await pause(); if (nr !== messung) return; stueck = performance.now(); }
+    }
+    erg.push({ k, gemessen: d, proben, sTief, tief, steig: Math.max(0, tief - ey), y0 });
+  }
+  for (const { k, ...e } of erg) Object.assign(k, e, { y1: e.tief + e.steig });
+  if (!KETTE.every(k => k.proben)) return;
+  // Das Licht vorn läuft erst los, wenn das Gerät davor an ist (vorher leuchteten zwei Kabel zugleich)
+  KETTE.forEach((k, i) => { k.start = i ? Math.max(k.y0, KETTE[i - 1].y1) : k.y0; });
+  licht();
+}
+
+// Licht: läuft beim Scrollen mit, auf 66 % der Bildhöhe (so ist es an der Buchse, bevor die Station mittig steht).
+// Kommt es an der Buchse eines Geräts an, geht das Gerät an und bleibt an; zwischen Buchse links und vorn ist es drin.
+// Am Seitenende kommt die Linie nicht beliebig tief (Runde 78: der PC fuhr nie hoch, das Licht blieb in seiner
+// Schlaufe stecken): Liegt das Ende eines Wegs tiefer, als man scrollen kann, wird der Weg gestaucht, sodass das Licht
+// genau am Seitenende ankommt.
+function licht() {
+  if (!KETTE.every(k => k.proben)) return;                  // Runde 93: erst wenn alle Wege vermessen sind
+  const r0 = strecke.getBoundingClientRect(), roh = innerHeight * 0.66 - r0.top;
+  const tiefste = document.documentElement.scrollHeight - innerHeight - scrollY + roh - 8;   // tiefste erreichbare Linie
+  KETTE.forEach((k, i) => {
+    let y = roh;
+    if (k.y1 > tiefste && roh > k.start) {
+      y = tiefste <= k.start + 1 ? (roh >= tiefste ? k.y1 : roh)
+        : k.start + (roh - k.start) * (k.y1 - k.start) / (tiefste - k.start);
+    }
+    const drin = y > k.start && y < k.y1 - 1;
+    if (drin) {
+      let s;
+      if (y <= k.tief) {
+        let lo = 0, hi = k.proben.length - 1;
+        while (lo < hi) { const m = (lo + hi) >> 1; if (k.proben[m][1] < y) lo = m + 1; else hi = m; }
+        s = Math.min(k.proben[lo][0], (y - k.start) * 1.6);   // vom Stecker aus, bis es die Bildhöhe einholt
+      } else s = k.sTief + (k.laenge - k.sTief) * (y - k.tief) / Math.max(1, k.steig);
+      for (const [e, s0] of [[k.hinten, 0], [k.vorn, k.hinten.laenge]]) {
+        if (!e.laenge) continue;
+        [120, 70, 34].forEach((l, j) => {                        // Striche mittig um die Stelle s
+          e.striche[j].style.strokeDasharray = `${l} ${e.laenge + l}`;
+          e.striche[j].style.strokeDashoffset = `${l / 2 - (s - s0)}`;
+        });
+      }
+    }
+    k.hinten.puls.style.opacity = k.vorn.puls.style.opacity = drin ? 1 : 0;
+    const g = geraete[i];
+    if (y >= k.y1 && g.an === null) { g.an = performance.now(); if (g === pc) pcPruefen(); }
+  });
+}
+addEventListener('scroll', licht, { passive: true });
+const neuLegen = new ResizeObserver(() => legen());
+neuLegen.observe(strecke);
+neuLegen.observe($('installieren'));                              // der Wizard ändert die Höhe: PC und Kabel nachziehen
+
+// PC: Strom, sobald das Licht da ist (Röhre an, Leuchtdioden gelb, der Monitor zeigt den Fortschritt des Wizards);
+// sind alle Schritte erledigt, fährt er hoch (grün, /wisp)
+let boot = null;
+function pcPruefen() {
+  const strom = pc.an !== null, laeuft = strom && WI.fertig;
+  pc.classList.toggle('strom', strom && !laeuft);
+  pc.classList.toggle('laeuft', laeuft);
+  if (laeuft && boot === null) boot = RUHIG ? -1e9 : performance.now();
+  if (!laeuft) boot = null;
+  if (RUHIG && INFO) male();
+}
+WI.pcPruefen = pcPruefen;
+
+function stand(g, now) {                                         // Zeit, Einschalt-Fortschritt und Zustand eines Geräts
+  const t = (now - t0) / 1000, k = g.an === null ? 0 : (now - g.an) / 1000 / EIN;
+  if (g !== pc) return [t, k];
+  return [t, k, { anzahl: (WI.erledigt || []).length, boot: boot === null ? null : (now - boot) / 1000 }];
+}
+let t0 = performance.now();
+function male(t, k) {                                            // alle Geräte (Test und ruhiges Bild)
+  const now = performance.now();
+  for (const g of geraete) {
+    const [tg, kg, s] = stand(g, now);
+    zeichne(g.querySelector('canvas'), g.dataset.modul, RUHIG ? 3.3 : (t ?? tg), k ?? kg, s);
+  }
+}
+
+Promise.all([fetch('bilder/wispui/geraete.json').then(r => r.json()), ladeTexturen(),
+  document.fonts ? document.fonts.load('700 16px Figtree').then(() => document.fonts.load('600 16px "DM Sans"')) : null])
+  .then(([info]) => {
+    INFO = info;
+    legen();
+    pcPruefen();
+    male();
+    window.__tv = { male, legen, licht, KETTE, geraete, info: INFO, pc: () => ({ an: pc.an, boot }) };   // nur zum Testen
+    if (RUHIG) return;                                            // Bewegung reduzieren: ruhige Bilder, gleich an
+    const schleife = now => {
+      if (!WI.pausiert) {
+        for (const g of sichtbar) {
+          const [t, k, s] = stand(g, now);
+          zeichne(g.querySelector('canvas'), g.dataset.modul, t, k, s);
+        }
+      }
+      requestAnimationFrame(schleife);
+    };
+    requestAnimationFrame(schleife);
+  })
+  .catch(e => console.warn(e));
+</script>
+
+<script type="module">
+// ---------------------------------------------------------------- Kopf: der Elektronikladen als Raum-Vignette
+// Wie die Spielhalle auf null-meter.html (Runde 50/51): baut sich auf, Leuchtbänder gehen an, pendelt leicht und wendet
+// sich der Maus zu. Der Laden öffnet nach Westen, die Kamera schaut von vorn links (dort fehlt die Nordwand).
+import * as THREE from 'three';
+import { gemeinsam, voxelMaterial, bereite } from './js/voxel.js';
+import { glbLader, pause } from './js/laden.js';
+
+const W = window.WISP;
+const RUHIG = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const huelle = document.getElementById('raum'), tipp = document.getElementById('tipp');
+const V3 = THREE.Vector3, clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const glatt = k => k * k * (3 - 2 * k);
+const backOut = k => { const c = 1.70158; return 1 + (c + 1) * (k - 1) ** 3 + c * (k - 1) ** 2; };
+function ohneRaum() {                                        // ohne WebGL oder wenn die GLB nicht lädt: nur der Text
+  huelle.remove();
+  document.getElementById('held').classList.add('ohne-raum');
+  W.melde('bereit');
+}
+
+let renderer, gltf;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  gltf = await glbLader().loadAsync('modelle/raum_elektronik.glb');
+} catch (e) {
+  console.warn(e);
+  if (renderer) renderer.dispose();
+  ohneRaum();
+}
+// Runde 93 (Florian: beim Hochfliegen der Karte und im Aufbau ruckelte es): Der Raum beginnt erst, wenn die Karte
+// gelandet ist (karte.js); ?wispui=sofort in der Adresse der Gasse: wie vorher gleich beginnen (zum Vergleichen)
+let sofort = false;
+try { sofort = /[?&]wispui=sofort\b/.test(location.search + top.location.search); } catch (e) { /* allein */ }
+if (gltf) { if (!sofort) await KARTE.gelandet(); start(); }
+
+async function start() {
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.setClearColor(0x000000, 0);
+  huelle.prepend(renderer.domElement);
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(24, 1, 0.5, 200);
+  const G = gemeinsam(), motive = bereite(THREE, gltf, G);
+  scene.add(gltf.scene);
+  gltf.scene.updateMatrixWorld(true);
+
+  const assoc = gltf.parser.associations, knoten = [];
+  gltf.scene.traverse(o => { const a = assoc.get(o); if (a && a.nodes !== undefined) knoten.push(o); });
+  const box = new THREE.Box3().setFromObject(gltf.scene), mitte = box.getCenter(new V3());
+  const AZ = -Math.PI / 2 - 0.7, EL = 0.56;                // von Westen, etwas von Norden (Nordwand fehlt), 32° von oben
+
+  // Aufbau wie die Spielhalle: Sockel, Boden und Wände wachsen Lage für Lage, dann ploppen die Teile auf
+  const GRUND = ['Raum_Sockel', 'Raum_Gehweg', 'Elektronikladen', 'Elektronik_innen'];
+  const schnitt = { value: RUHIG ? 1e9 : box.min.y };
+  for (const o of knoten.filter(k => GRUND.includes(k.name))) {
+    o.traverse(m => { if (m.isMesh && m.material.isShaderMaterial) m.material = voxelMaterial(THREE, G, { schnitt }); });
+  }
+  const istKnoten = new Set(knoten), einheiten = [];
+  for (const o of knoten) {
+    if (GRUND.includes(o.name)) continue;
+    let p = o.parent, drunter = false;
+    for (; p && p !== gltf.scene; p = p.parent) if (istKnoten.has(p) && !GRUND.includes(p.name)) drunter = true;
+    if (drunter) continue;
+    const b = new THREE.Box3().setFromObject(o), m = b.getCenter(new V3());
+    const anker = o.parent.worldToLocal(new V3(m.x, b.min.y, m.z));
+    einheiten.push({ o, b, anker, pos: o.position.clone(), sc: o.scale.clone() });
+  }
+  const T_WAND = 1.2, H0 = box.min.y, H1 = box.max.y;
+  const hoeheBei = t => H0 + (H1 - H0 + 0.1) * (1 - (1 - clamp(t / T_WAND, 0, 1)) ** 2);
+  const zuerst = t => { for (let s = 0; s < 3; s += 0.02) if (hoeheBei(s) >= t) return s; return T_WAND; };
+  let zufall = 7;
+  const rnd = () => { zufall = (zufall * 16807) % 2147483647; return zufall / 2147483647; };
+  for (const u of einheiten) { u.delay = Math.max(0.35, zuerst(u.b.min.y + 0.05)) + 0.15 + rnd() * 0.75; u.dauer = 0.45; }
+  const ENDE = Math.max(...einheiten.map(u => u.delay + u.dauer));
+  const AN = ENDE + 0.1;
+  const FLACKERN = [[0, 1], [0.07, 0.3], [0.14, 1], [0.22, 0.45], [0.3, 0.9], [0.36, 0.55], [0.46, 1]];
+  const leuchten = t => { if (t < AN) return 0.12; let v = 1; for (const [s, w] of FLACKERN) if (t - AN >= s) v = w; return v; };
+
+  // Bildschirmwand (komplex.elektronik): 6 × 3 Schirme, je 12 × 7 Voxel sichtbar, Gesicht bei x 120 nach Westen.
+  // Jeder Schirm bekommt ein Stück einer Leinwand (Atlas 6 × 3 Kacheln à 24 × 14 Pixel, 2 Pixel je Voxel) und zeigt
+  // WispUI: Gruppenfenster mit Cleanse-Marke, Quick-Dispel-Kästchen, Meter, Zauberbalken mit Slidecast.
+  const wand = gltf.scene.getObjectByProperty('name', knoten.map(k => k.name).find(n => /Bildschirmwand$/.test(n)) || '');
+  const leinwand = document.createElement('canvas'), stift = leinwand.getContext('2d');
+  const KW = 24, KH = 14;
+  leinwand.width = KW * 6; leinwand.height = KH * 3;
+  const tex = new THREE.CanvasTexture(leinwand);
+  tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
+  const schirmMat = new THREE.MeshBasicMaterial({ map: tex });
+  if (wand) {
+    const b = new THREE.Box3().setFromObject(wand), v = 1 / 16;
+    const yS = -b.max.z / v, zS = b.min.y / v, xS = b.min.x / v;   // Blender: Südkante y 138, Unterkante z, x 118
+    for (let k = 0; k < 6; k++) {
+      for (let r = 0; r < 3; r++) {
+        const ya = yS + k * 18 + 2, za = zS + r * 12 + 2;           // sichtbarer Schirm: 12 breit, 7 hoch
+        const g = new THREE.PlaneGeometry(12 * v, 7 * v);
+        const c = 5 - k, zeile = 2 - r;                             // von Westen gesehen ist Norden links
+        const u0 = c / 6, u1 = (c + 1) / 6, v1 = 1 - zeile / 3, v0 = 1 - (zeile + 1) / 3;
+        g.setAttribute('uv', new THREE.Float32BufferAttribute([u0, v1, u1, v1, u0, v0, u1, v0], 2));
+        const ebene = new THREE.Mesh(g, schirmMat);
+        ebene.rotation.y = -Math.PI / 2;
+        ebene.position.set((xS + 2) * v - 0.004, (za + 3.5) * v, -(ya + 6) * v);
+        scene.add(ebene);
+        wand.attach(ebene);                                          // ploppt mit der Wand auf
+      }
+    }
+  }
+  // Inhalt der Kacheln (Spalte von links, Zeile von oben)
+  const ROLLE = ['#006EFF', '#006EFF', '#6EF54D', '#6EF54D', '#FF6C6C', '#FF6C6C', '#FF6C6C', '#FF6C6C'];
+  const HP = [1, 0.88, 1, 0.93, 0.71, 1, 0.64, 0.97], mark = new Array(8).fill(0);
+  const KACHELN = [['f', 0], ['f', 1], ['f', 2], ['f', 3], ['meter'], ['q', 0],
+                   ['f', 4], ['f', 5], ['f', 6], ['f', 7], ['zauber'], ['q', 4],
+                   ['icons'], ['meter'], ['zauber'], ['icons'], ['f', 2], ['q', 0]];
+  let naechsteMarke = 1;
+  function zeichneWand(t, dt) {
+    naechsteMarke -= dt;
+    for (let i = 0; i < 8; i++) mark[i] = Math.max(0, mark[i] - dt);
+    if (naechsteMarke <= 0) { mark[Math.floor(Math.random() * 8)] = 2.5; naechsteMarke = 1.2 + Math.random() * 1.5; }
+    const c = stift;
+    KACHELN.forEach((art, i) => {
+      const x = (i % 6) * KW, y = Math.floor(i / 6) * KH;
+      c.fillStyle = '#1b1d24'; c.fillRect(x, y, KW, KH);
+      if (art[0] === 'f') {                                          // ein Gruppenfenster
+        const m = art[1];
+        c.fillStyle = '#141314'; c.fillRect(x + 2, y + 3, 20, 8);
+        c.fillStyle = ROLLE[m]; c.fillRect(x + 2, y + 3, Math.round(20 * HP[m]), 8);
+        c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(x + 2, y + 3, Math.round(20 * HP[m]), 1);
+        c.fillStyle = '#fff'; c.fillRect(x + 4, y + 6, 6, 2);                     // Name als Strich
+        if (mark[m] > 0) {
+          c.fillStyle = 'rgba(179,130,221,.35)'; c.fillRect(x + 2, y + 3, 20, 4);
+          c.fillStyle = 'rgba(179,130,221,.8)'; c.fillRect(x + 2, y + 7, 20, 4);
+          c.strokeStyle = '#B382DD'; c.lineWidth = 1; c.strokeRect(x + 1.5, y + 2.5, 21, 9);
+        }
+      } else if (art[0] === 'q') {                                   // vier Quick-Dispel-Kästchen
+        for (let j = 0; j < 4; j++) {
+          const m = art[1] + j, qx = x + 2 + j * 5.5;
+          c.fillStyle = mark[m] > 0 ? '#B382DD' : '#141314'; c.fillRect(qx, y + 4, 4, 4);
+          c.strokeStyle = ROLLE[m]; c.lineWidth = 1; c.strokeRect(qx + 0.5, y + 4.5, 3, 3);
+        }
+      } else if (art[0] === 'meter') {                               // Damage Meter: vier Balken
+        [['#FF6C6C', 1], ['#FF6C6C', 0.8], ['#006EFF', 0.55], ['#6EF54D', 0.4]].forEach(([f, w], j) => {
+          const b = Math.round(20 * w * (0.92 + 0.08 * Math.sin(t * 0.9 + j * 1.7)));
+          c.fillStyle = '#26262e'; c.fillRect(x + 2, y + 2 + j * 3, 20, 2);
+          c.fillStyle = f; c.fillRect(x + 2, y + 2 + j * 3, b, 2);
+        });
+      } else if (art[0] === 'zauber') {                              // Zauberbalken mit Slidecast-Fenster am Ende
+        const k = (t * 0.45 + i * 0.13) % 1;
+        c.fillStyle = '#26262e'; c.fillRect(x + 2, y + 5, 20, 4);
+        c.fillStyle = 'rgba(179,130,221,.45)'; c.fillRect(x + 18, y + 5, 4, 4);
+        c.fillStyle = '#e8d38a'; c.fillRect(x + 2, y + 5, Math.round(20 * k), 4);
+      } else {                                                       // Effekt-Symbole mit Sweep
+        for (let j = 0; j < 4; j++) {
+          const ix = x + 2 + j * 5.5, rest = (t * 0.3 + j * 0.27 + i * 0.1) % 1;
+          c.fillStyle = j === 0 ? '#B382DD' : ['#e8a23a', '#4fb6b2', '#d06a6a'][j - 1]; c.fillRect(ix, y + 4, 4, 4);
+          c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(ix, y + 4, 4, Math.round(4 * rest));
+        }
+      }
+    });
+    tex.needsUpdate = true;
+  }
+
+  const weg = new V3();                                       // Livegang D: ohne neue Vektoren je Bild
+  function aufbau(t) {
+    schnitt.value = t >= T_WAND ? 1e9 : Math.floor(hoeheBei(t) * 16) / 16 + 0.001;
+    for (const u of einheiten) {
+      const k = clamp((t - u.delay) / u.dauer, 0, 1), s = k <= 0 ? 0.0001 : backOut(k);
+      u.o.visible = k > 0;
+      u.o.scale.copy(u.sc).multiplyScalar(s);
+      u.o.position.copy(u.anker).addScaledVector(weg.copy(u.pos).sub(u.anker), s);
+    }
+    const l = leuchten(t);
+    G.uLeuchten.value = l;
+    for (const m of motive) m.color.setScalar(Math.max(0.12, l));
+    schirmMat.color.setScalar(Math.max(0.12, l));
+    G.uSchatten.value = glatt(clamp((t - ENDE + 0.5) / 1.2, 0, 1));
+  }
+
+  // Blick: pendelt leicht, wendet sich der Maus zu; auf dem Handy mit dem Finger drehen, nach 2 s zurück
+  let mx = 0, my = 0, zx = 0, zy = 0, zieh = null, ziehAz = 0, ziehZiel = 0, ruheBis = 0;
+  const hold = document.getElementById('held');
+  hold.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    const r = renderer.domElement.getBoundingClientRect();
+    mx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
+    my = clamp(((e.clientY - r.top) / r.height) * 2 - 1, -1, 1);
+    tipp.classList.add('weg');
+  });
+  hold.addEventListener('pointerleave', () => { mx = 0; my = 0; });
+  const cv = renderer.domElement;
+  cv.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') zieh = { x: e.clientX, az: ziehZiel }; });
+  addEventListener('pointermove', e => { if (zieh) ziehZiel = clamp(zieh.az - (e.clientX - zieh.x) * 0.006, -0.9, 0.9); });
+  addEventListener('pointerup', () => { if (zieh) { zieh = null; ruheBis = performance.now() + 2000; } });
+  addEventListener('pointercancel', () => { zieh = null; ruheBis = performance.now() + 2000; });
+  if (!RUHIG && matchMedia('(pointer: fine)').matches) setTimeout(() => tipp.classList.remove('weg'), 3600);
+
+  // Einpassen wie Runde 53: der ganze Raum bei jedem erreichbaren Winkel (Pendeln ± 0,12 und Maus ± 0,2 im Azimut,
+  // ± 0,1 in der Höhe) mit Rand im Bild, senkrecht mittig. Vorher die Hüllkugel: Sie schnitt die vordere Ecke des
+  // Gehwegs unten ab (Florian, Runde 72). Statt der acht Ecken des Quaders (oben vorn ist nur Luft, der Raum wurde
+  // klein) zählen die Eckpunkte der Modelle selbst, auf ganze Zentimeter zusammengefasst.
+  const ecken = [], schon = new Set(), pw = new V3();
+  gltf.scene.traverse(o => {
+    if (!o.isMesh) return;
+    const pos = o.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      pw.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      const s = `${Math.round(pw.x * 50)},${Math.round(pw.y * 50)},${Math.round(pw.z * 50)}`;
+      if (!schon.has(s)) { schon.add(s); ecken.push(pw.clone()); }
+    }
+  });
+  const achsen = (az, el) => {
+    const zur = new V3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
+    const rechts = new V3(0, 1, 0).cross(zur).normalize();
+    return { zur, rechts, oben: zur.clone().cross(rechts) };
+  };
+  const blickpunkt = mitte.clone();
+  let abstand = 10;
+  function einpassen() {
+    const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2), tanH = tanV * camera.aspect, RAND = 0.94;
+    const noetig = ziel => {
+      let d = 0;
+      for (let az = AZ - 0.34; az <= AZ + 0.341; az += 0.068) for (const el of [EL - 0.1, EL, EL + 0.1]) {
+        const { zur, rechts, oben } = achsen(az, el), kh = 1 / (RAND * tanH), kv = 1 / (RAND * tanV);
+        for (const p of ecken) {
+          const qx = p.x - ziel.x, qy = p.y - ziel.y, qz = p.z - ziel.z;
+          const zb = qx * zur.x + qy * zur.y + qz * zur.z;
+          const rb = Math.abs(qx * rechts.x + qy * rechts.y + qz * rechts.z), ob = Math.abs(qx * oben.x + qy * oben.y + qz * oben.z);
+          d = Math.max(d, zb + rb * kh, zb + ob * kv);
+        }
+      }
+      return d;
+    };
+    blickpunkt.copy(mitte);
+    abstand = noetig(blickpunkt);
+    const { zur, oben } = achsen(AZ, EL);
+    let lo = 1e9, hi = -1e9;
+    for (const p of ecken) {
+      const q = p.clone().sub(mitte), y = q.dot(oben) / ((abstand - q.dot(zur)) * tanV);
+      lo = Math.min(lo, y); hi = Math.max(hi, y);
+    }
+    blickpunkt.addScaledVector(oben, (lo + hi) / 2 * abstand * tanV);
+    abstand = noetig(blickpunkt);
+  }
+  function groesse() {
+    const w = huelle.clientWidth, h = huelle.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    einpassen();
+  }
+  new ResizeObserver(groesse).observe(huelle);
+  groesse();
+  function blick(t, dt) {
+    const pendel = RUHIG ? 0 : glatt(clamp((t - ENDE) / 1.5, 0, 1));
+    const k = 1 - Math.exp(-dt * 3);
+    zx += ((RUHIG ? 0 : mx) - zx) * k; zy += ((RUHIG ? 0 : my) - zy) * k;
+    if (!zieh && performance.now() > ruheBis) ziehZiel *= 1 - Math.min(1, dt * 1.2);
+    ziehAz += (ziehZiel - ziehAz) * (1 - Math.exp(-dt * 8));
+    const az = AZ + pendel * 0.12 * Math.sin(t * 2 * Math.PI / 18) - zx * 0.2 + ziehAz;
+    const el = EL + pendel * 0.03 * Math.sin(t * 2 * Math.PI / 11) - zy * 0.07;
+    camera.position.set(blickpunkt.x + abstand * Math.cos(el) * Math.sin(az), blickpunkt.y + abstand * Math.sin(el),
+                        blickpunkt.z + abstand * Math.cos(el) * Math.cos(az));
+    camera.lookAt(blickpunkt);
+  }
+
+  // Schleife; steht, solange der Kopf nicht zu sehen ist oder die Karte zu ist
+  let sichtbar = true, t = RUHIG ? 99 : 0, vorher = performance.now(), letzteWand = 0;
+  new IntersectionObserver(e => { sichtbar = e[0].isIntersecting; }).observe(huelle);
+  aufbau(t);
+  zeichneWand(0, 0);
+  // Runde 93: übersetzen ohne auf den Treiber zu warten, dann einmal den fertigen Raum unsichtbar zeichnen (Vorwärmen
+  // wie Gasse und Atelier; das erste Zeichnen jedes Shaders kostet am meisten, vorher fiel es in den Aufbau)
+  await renderer.compileAsync(scene, camera);
+  await pause();
+  cv.style.visibility = 'hidden';                             // (cv = renderer.domElement, siehe oben)
+  blick(t, 0);
+  aufbau(99);
+  renderer.render(scene, camera);
+  aufbau(t);
+  await pause();
+  function bild(now, immer = false) {
+    const dt = Math.min(0.1, (now - vorher) / 1000);
+    vorher = now;
+    if ((!sichtbar || W.pausiert) && !immer) return;
+    t += dt;
+    if (t < Math.max(ENDE, T_WAND) + 2) aufbau(t);           // Livegang D: danach steht alles (wie im Atelier)
+    if (now - letzteWand > 90) { zeichneWand(RUHIG ? 0 : t, RUHIG ? 0 : (now - letzteWand) / 1000); letzteWand = now; }
+    G.uZeit.value = RUHIG ? 0 : t;
+    blick(t, dt);
+    renderer.render(scene, camera);
+  }
+  const schleife = now => { bild(now); requestAnimationFrame(schleife); };
+  requestAnimationFrame(now => { vorher = now; cv.style.visibility = ''; huelle.classList.add('da'); schleife(now); W.melde('bereit'); });
+  window.__raum = { scene, camera, renderer, gltf, G, einheiten, ENDE, groesse, wand,
+    schritt: n => { for (let i = 0; i < n; i++) bild(vorher + 50, true); } };
+}
+</script>
+</body>
+</html>

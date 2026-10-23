@@ -1,0 +1,1060 @@
+{
+ "tablett": {
+  "voxel": {
+   "faktor": 8,
+   "ursprung": [
+    209,
+    144,
+    164
+   ],
+   "stufen": [
+    38,
+    146,
+    1164,
+    6876
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -3,
+     -2,
+     0,
+     3,
+     3,
+     0
+    ],
+    [
+     -6,
+     -4,
+     0,
+     7,
+     6,
+     0
+    ],
+    [
+     -12,
+     -8,
+     0,
+     15,
+     13,
+     1
+    ],
+    [
+     -24,
+     -16,
+     0,
+     31,
+     26,
+     2
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#B8C2CC",
+    "#4A4F5C",
+    "#2D2B45",
+    "#FFFBF2"
+   ],
+   "namen": [
+    "black",
+    "metal",
+    "metal_dark",
+    "sign_dark",
+    "wall_white"
+   ],
+   "punkte": {
+    "glas_a": [
+     -24,
+     -16,
+     3
+    ],
+    "glas_b": [
+     32,
+     24,
+     3
+    ],
+    "schirm_a": [
+     -20,
+     -12,
+     3
+    ],
+    "schirm_b": [
+     28,
+     20,
+     3
+    ]
+   }
+  }
+ },
+ "teleskop": {
+  "voxel": {
+   "faktor": 4,
+   "ursprung": [
+    184,
+    109,
+    169
+   ],
+   "stufen": [
+    523,
+    2459,
+    13674
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -9,
+     -5,
+     -19,
+     10,
+     8,
+     7
+    ],
+    [
+     -17,
+     -10,
+     -38,
+     20,
+     16,
+     15
+    ],
+    [
+     -33,
+     -20,
+     -76,
+     41,
+     33,
+     30
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#2E3A70",
+    "#B8C2CC",
+    "#4A4F5C",
+    "#FFF1D0",
+    "#6EC6FF",
+    "#34405E",
+    "#D99A5F",
+    "#8A5A38"
+   ],
+   "namen": [
+    "black",
+    "cloth_navy",
+    "metal",
+    "metal_dark",
+    "wall_cream",
+    "wall_sky",
+    "window_dark",
+    "wood",
+    "wood_dark"
+   ],
+   "punkte": {
+    "stern": [
+     69.06,
+     -22.67,
+     47.85
+    ],
+    "vorn": [
+     37.09,
+     -10.91,
+     25.04
+    ]
+   }
+  }
+ },
+ "monitore": {
+  "voxel": {
+   "faktor": 4,
+   "ursprung": [
+    220,
+    147,
+    164
+   ],
+   "stufen": [
+    324,
+    1936,
+    12188
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -10,
+     -1,
+     0,
+     10,
+     2,
+     14
+    ],
+    [
+     -19,
+     -2,
+     0,
+     20,
+     5,
+     28
+    ],
+    [
+     -38,
+     -4,
+     0,
+     41,
+     11,
+     57
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#3A3D4A",
+    "#B8C2CC",
+    "#3FE6FF",
+    "#20284A",
+    "#FF7FB0",
+    "#4FE6C8",
+    "#FFD34E"
+   ],
+   "namen": [
+    "black",
+    "frame",
+    "metal",
+    "neon_cyan",
+    "screen_ui",
+    "ui_a",
+    "ui_b",
+    "ui_c"
+   ],
+   "punkte": {
+    "glas_a.links": [
+     -38,
+     -4,
+     14
+    ],
+    "glas_b.links": [
+     6,
+     -4,
+     42
+    ],
+    "schirm_a.links": [
+     -36,
+     -4,
+     16
+    ],
+    "schirm_b.links": [
+     4,
+     -4,
+     40
+    ],
+    "glas_a.rechts": [
+     14,
+     -4,
+     14
+    ],
+    "glas_b.rechts": [
+     42,
+     -4,
+     58
+    ],
+    "schirm_a.rechts": [
+     16,
+     -4,
+     16
+    ],
+    "schirm_b.rechts": [
+     40,
+     -4,
+     56
+    ]
+   }
+  }
+ },
+ "pinnwand": {
+  "voxel": {
+   "faktor": 8,
+   "ursprung": [
+    206,
+    155,
+    168
+   ],
+   "stufen": [
+    174,
+    680,
+    2697,
+    15212
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -6,
+     -1,
+     0,
+     5,
+     0,
+     13
+    ],
+    [
+     -12,
+     -1,
+     0,
+     11,
+     0,
+     27
+    ],
+    [
+     -24,
+     -1,
+     0,
+     23,
+     0,
+     55
+    ],
+    [
+     -48,
+     -2,
+     0,
+     47,
+     1,
+     111
+    ]
+   ],
+   "palette": [
+    "#4D96FF",
+    "#2E3A70",
+    "#C98B55",
+    "#A36A3D",
+    "#B8C2CC",
+    "#4A4F5C",
+    "#FFE14F",
+    "#2D2B45",
+    "#2BE65C",
+    "#FF7FB0",
+    "#4FE6C8",
+    "#FFD34E",
+    "#FFF1D0",
+    "#B9A3FF",
+    "#7FDCC5",
+    "#FFB060",
+    "#A487FF",
+    "#F0604D",
+    "#6EC6FF",
+    "#FFFBF2",
+    "#FFD35A",
+    "#FFFFFF",
+    "#D99A5F",
+    "#8A5A38"
+   ],
+   "namen": [
+    "cloth_b",
+    "cloth_navy",
+    "earth",
+    "earth_dark",
+    "metal",
+    "metal_dark",
+    "neon_yellow",
+    "sign_dark",
+    "signal_green",
+    "ui_a",
+    "ui_b",
+    "ui_c",
+    "wall_cream",
+    "wall_lilac",
+    "wall_mint",
+    "wall_orange",
+    "wall_purple",
+    "wall_red",
+    "wall_sky",
+    "wall_white",
+    "wall_yellow",
+    "white",
+    "wood",
+    "wood_dark"
+   ],
+   "punkte": {
+    "papier_a.foto": [
+     -42,
+     0,
+     6
+    ],
+    "papier_b.foto": [
+     -10,
+     0,
+     42
+    ],
+    "nadel.1": [
+     -26,
+     -0.6,
+     39
+    ],
+    "nadel.2": [
+     7,
+     -0.6,
+     43
+    ],
+    "nadel.3": [
+     -28,
+     -0.6,
+     71
+    ],
+    "nadel.4": [
+     9,
+     -0.6,
+     77
+    ],
+    "nadel.5": [
+     33,
+     -0.6,
+     101
+    ]
+   }
+  }
+ },
+ "staffelei": {
+  "voxel": {
+   "faktor": 4,
+   "ursprung": [
+    235,
+    106,
+    152
+   ],
+   "stufen": [
+    592,
+    2431,
+    15942
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -8,
+     -2,
+     0,
+     7,
+     5,
+     34
+    ],
+    [
+     -16,
+     -4,
+     0,
+     15,
+     11,
+     69
+    ],
+    [
+     -32,
+     -8,
+     0,
+     31,
+     22,
+     139
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#FF7FB0",
+    "#4FE6C8",
+    "#FFD34E",
+    "#FF8FA3",
+    "#B9A3FF",
+    "#6EC6FF",
+    "#FFD35A",
+    "#FFFFFF",
+    "#D99A5F",
+    "#8A5A38",
+    "#F2CC94"
+   ],
+   "namen": [
+    "black",
+    "ui_a",
+    "ui_b",
+    "ui_c",
+    "wall_coral",
+    "wall_lilac",
+    "wall_sky",
+    "wall_yellow",
+    "white",
+    "wood",
+    "wood_dark",
+    "wood_light"
+   ],
+   "punkte": {
+    "papier_a": [
+     -26,
+     -4,
+     42
+    ],
+    "papier_b": [
+     26,
+     -4,
+     126
+    ]
+   }
+  }
+ },
+ "farbfaecher": {
+  "voxel": {
+   "faktor": 8,
+   "ursprung": [
+    248,
+    113,
+    180
+   ],
+   "stufen": [
+    166,
+    586,
+    2124,
+    8472
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -4,
+     -5,
+     0,
+     2,
+     5,
+     9
+    ],
+    [
+     -8,
+     -10,
+     0,
+     5,
+     11,
+     18
+    ],
+    [
+     -15,
+     -20,
+     0,
+     10,
+     23,
+     37
+    ],
+    [
+     -30,
+     -39,
+     0,
+     21,
+     46,
+     75
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#FFC4D8",
+    "#4D96FF",
+    "#7AB0FF",
+    "#A6CAFF",
+    "#CDE2FF",
+    "#FFE3A3",
+    "#9BE06B",
+    "#B4E890",
+    "#CDF0B5",
+    "#E3F6D6",
+    "#B8C2CC",
+    "#3FE6FF",
+    "#FF4FA3",
+    "#FFE14F",
+    "#FFF8EE",
+    "#FF7FB0",
+    "#4FE6C8",
+    "#FF8FA3",
+    "#FFABBA",
+    "#FFC7D1",
+    "#FFE0E5",
+    "#B9A3FF",
+    "#CABAFF",
+    "#DCD1FF",
+    "#EBE5FF",
+    "#7FDCC5",
+    "#9FE5D4",
+    "#BFEEE2",
+    "#DBF5EF",
+    "#FFB060",
+    "#FFC488",
+    "#FFD8B0",
+    "#FFE9D2",
+    "#F0604D",
+    "#F4887A",
+    "#F8B0A6",
+    "#FBD2CD",
+    "#6EC6FF",
+    "#92D4FF",
+    "#B6E2FF",
+    "#D6EFFF",
+    "#5CC8C0",
+    "#85D6D0",
+    "#AEE4E0",
+    "#D1F0ED",
+    "#FFFBF2",
+    "#FFD35A",
+    "#FFDE83",
+    "#FFE9AC",
+    "#FFF3D1",
+    "#FFFFFF",
+    "#A8DDF7"
+   ],
+   "namen": [
+    "black",
+    "blossom_light",
+    "cloth_b",
+    "cloth_b_1",
+    "cloth_b_2",
+    "cloth_b_3",
+    "cushion",
+    "leaf_light",
+    "leaf_light_1",
+    "leaf_light_2",
+    "leaf_light_3",
+    "metal",
+    "neon_cyan",
+    "neon_pink",
+    "neon_yellow",
+    "sign_white",
+    "ui_a",
+    "ui_b",
+    "wall_coral",
+    "wall_coral_1",
+    "wall_coral_2",
+    "wall_coral_3",
+    "wall_lilac",
+    "wall_lilac_1",
+    "wall_lilac_2",
+    "wall_lilac_3",
+    "wall_mint",
+    "wall_mint_1",
+    "wall_mint_2",
+    "wall_mint_3",
+    "wall_orange",
+    "wall_orange_1",
+    "wall_orange_2",
+    "wall_orange_3",
+    "wall_red",
+    "wall_red_1",
+    "wall_red_2",
+    "wall_red_3",
+    "wall_sky",
+    "wall_sky_1",
+    "wall_sky_2",
+    "wall_sky_3",
+    "wall_teal",
+    "wall_teal_1",
+    "wall_teal_2",
+    "wall_teal_3",
+    "wall_white",
+    "wall_yellow",
+    "wall_yellow_1",
+    "wall_yellow_2",
+    "wall_yellow_3",
+    "white",
+    "window"
+   ],
+   "punkte": {
+    "streifen.00.wall_red": [
+     -0.5,
+     -37.14,
+     61.03
+    ],
+    "streifen.01.wall_orange": [
+     0.5,
+     -29.07,
+     66.79
+    ],
+    "streifen.02.wall_yellow": [
+     1.5,
+     -20.2,
+     71.25
+    ],
+    "streifen.03.leaf_light": [
+     2.5,
+     -10.76,
+     74.27
+    ],
+    "streifen.04.wall_mint": [
+     3.5,
+     -0.96,
+     75.81
+    ],
+    "streifen.05.wall_teal": [
+     4.5,
+     8.96,
+     75.81
+    ],
+    "streifen.06.wall_sky": [
+     5.5,
+     18.76,
+     74.27
+    ],
+    "streifen.07.cloth_b": [
+     6.5,
+     28.2,
+     71.25
+    ],
+    "streifen.08.wall_lilac": [
+     7.5,
+     37.07,
+     66.79
+    ],
+    "streifen.09.wall_coral": [
+     8.5,
+     45.14,
+     61.03
+    ],
+    "drehpunkt": [
+     4.0,
+     4.0,
+     12.0
+    ]
+   }
+  }
+ },
+ "server": {
+  "voxel": {
+   "faktor": 8,
+   "ursprung": [
+    247,
+    137,
+    152
+   ],
+   "stufen": [
+    302,
+    1290,
+    5607,
+    23522
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -8,
+     -6,
+     0,
+     2,
+     3,
+     13
+    ],
+    [
+     -15,
+     -12,
+     0,
+     5,
+     7,
+     27
+    ],
+    [
+     -30,
+     -23,
+     0,
+     11,
+     15,
+     55
+    ],
+    [
+     -60,
+     -46,
+     0,
+     23,
+     31,
+     111
+    ]
+   ],
+   "palette": [
+    "#2A2A33",
+    "#3A3D4A",
+    "#B8C2CC",
+    "#4A4F5C",
+    "#34405E"
+   ],
+   "namen": [
+    "black",
+    "frame",
+    "metal",
+    "metal_dark",
+    "window_dark"
+   ],
+   "punkte": {
+    "led.00.signal_green": [
+     -23,
+     -18.5,
+     88.5
+    ],
+    "led.01.signal_green": [
+     -23,
+     -10.5,
+     88.5
+    ],
+    "led.02.signal_green": [
+     -23,
+     -2.5,
+     88.5
+    ],
+    "led.03.signal_green": [
+     -23,
+     5.5,
+     88.5
+    ],
+    "led.04.signal_green": [
+     -23,
+     13.5,
+     88.5
+    ],
+    "led.05.signal_green": [
+     -23,
+     21.5,
+     88.5
+    ],
+    "led.06.neon_cyan": [
+     -23,
+     24.5,
+     72.5
+    ],
+    "led.07.signal_green": [
+     -23,
+     24.5,
+     64.5
+    ],
+    "led.08.neon_orange": [
+     -23,
+     -20.5,
+     50.5
+    ],
+    "led.09.signal_green": [
+     -23,
+     -16.5,
+     50.5
+    ],
+    "led.10.signal_green": [
+     -23,
+     -12.5,
+     50.5
+    ],
+    "led.11.neon_orange": [
+     -23,
+     -8.5,
+     50.5
+    ],
+    "led.12.signal_green": [
+     -23,
+     -4.5,
+     50.5
+    ],
+    "led.13.signal_green": [
+     -23,
+     -0.5,
+     50.5
+    ],
+    "led.14.neon_orange": [
+     -23,
+     3.5,
+     50.5
+    ],
+    "led.15.signal_green": [
+     -23,
+     7.5,
+     50.5
+    ],
+    "led.16.signal_green": [
+     -23,
+     11.5,
+     50.5
+    ],
+    "led.17.neon_orange": [
+     -23,
+     15.5,
+     50.5
+    ],
+    "led.18.signal_green": [
+     -23,
+     -3.5,
+     26.5
+    ],
+    "led.19.neon_orange": [
+     -23,
+     -3.5,
+     22.5
+    ]
+   }
+  }
+ },
+ "whiteboard": {
+  "voxel": {
+   "faktor": 4,
+   "ursprung": [
+    251,
+    143,
+    168
+   ],
+   "stufen": [
+    418,
+    1755,
+    8970
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -2,
+     -11,
+     0,
+     0,
+     10,
+     13
+    ],
+    [
+     -4,
+     -22,
+     0,
+     0,
+     21,
+     27
+    ],
+    [
+     -7,
+     -44,
+     0,
+     1,
+     43,
+     55
+    ]
+   ],
+   "palette": [
+    "#4D96FF",
+    "#2E3A70",
+    "#3A3D4A",
+    "#B8C2CC",
+    "#4A4F5C",
+    "#FF8FA3",
+    "#7FDCC5",
+    "#F0604D",
+    "#6EC6FF",
+    "#FFD35A",
+    "#FFFFFF"
+   ],
+   "namen": [
+    "cloth_b",
+    "cloth_navy",
+    "frame",
+    "metal",
+    "metal_dark",
+    "wall_coral",
+    "wall_mint",
+    "wall_red",
+    "wall_sky",
+    "wall_yellow",
+    "white"
+   ],
+   "punkte": {
+    "papier_a": [
+     0,
+     -40,
+     8
+    ],
+    "papier_b": [
+     0,
+     40,
+     52
+    ]
+   }
+  }
+ },
+ "poster": {
+  "voxel": {
+   "faktor": 4,
+   "ursprung": [
+    226,
+    155,
+    182
+   ],
+   "stufen": [
+    694,
+    2776,
+    11168
+   ],
+   "format": "abstand",
+   "boxen": [
+    [
+     -25,
+     -1,
+     0,
+     24,
+     0,
+     12
+    ],
+    [
+     -50,
+     -1,
+     0,
+     49,
+     0,
+     25
+    ],
+    [
+     -100,
+     -2,
+     0,
+     99,
+     1,
+     51
+    ]
+   ],
+   "palette": [
+    "#3A3D4A",
+    "#B8C2CC",
+    "#2D2B45",
+    "#3E9E73",
+    "#8C939E",
+    "#FF8FA3",
+    "#FFC8A2",
+    "#6EC6FF",
+    "#FFFBF2",
+    "#FFD35A",
+    "#FFFFFF",
+    "#8A5A38",
+    "#F2CC94"
+   ],
+   "namen": [
+    "frame",
+    "metal",
+    "sign_dark",
+    "train_green",
+    "train_roof",
+    "wall_coral",
+    "wall_peach",
+    "wall_sky",
+    "wall_white",
+    "wall_yellow",
+    "white",
+    "wood_dark",
+    "wood_light"
+   ],
+   "punkte": {
+    "papier_a.timer": [
+     -100,
+     0,
+     4
+    ],
+    "papier_b.timer": [
+     -60,
+     0,
+     48
+    ],
+    "papier_a.meter": [
+     -48,
+     0,
+     4
+    ],
+    "papier_b.meter": [
+     16,
+     0,
+     48
+    ],
+    "papier_a.ui": [
+     32,
+     0,
+     4
+    ],
+    "papier_b.ui": [
+     96,
+     0,
+     48
+    ]
+   }
+  }
+ }
+}

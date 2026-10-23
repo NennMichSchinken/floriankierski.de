@@ -1,0 +1,44 @@
+/* Seitennavigation für alle Unterseiten (Runde 77, Florians Wahl A): eine schlichte Liste der Themen dieser Seite,
+   angelehnt an die Stationsliste der Startseite, nur leiser (keine Bilder, keine anderen Läden – dorthin geht es über
+   die Gasse). Links fest und von Anfang an da; oben der Name der Seite mit dem Punkt in der Ladenfarbe (führt nach
+   oben), darunter die Abschnitte, der aktuelle getönt. Schmal: unten eine Pille mit dem aktuellen Abschnitt, die die
+   Liste aufklappt. Farben von der Seite: --k (Ladenfarbe), --k-text (Schrift in Ladenfarbe auf hellem Grund).
+   Platz links schafft die Seite selbst mit --sn (Breite samt Rand, 0 wenn die Liste unten sitzt). */
+:root { --sn: 0px; --sn-grund: #fff9f2; --sn-hell: color-mix(in srgb, var(--k, #1a9cbf) 16%, var(--sn-grund)); }
+.seitennav { position: fixed; z-index: 40; left: 24px; top: 50%; translate: 0 -50%; width: 196px; box-sizing: border-box;
+  padding: 16px 8px 8px; border-radius: 26px; background: var(--sn-grund); color: #2d2b45;
+  box-shadow: 0 14px 40px rgba(58, 42, 53, .18); font: 700 15px/1.25 'Hanken Grotesk', system-ui, sans-serif; }
+.seitennav a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.sn-name { display: flex; align-items: center; gap: 9px; padding: 0 12px 12px; font-size: 16px; font-weight: 800; }
+.sn-name::before { content: ''; width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--k, #1a9cbf);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--k, #1a9cbf) 22%, transparent); }
+.sn-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.sn-liste a { display: flex; align-items: center; gap: 9px; padding: 8px 12px; border-radius: 14px; color: #6f6577;
+  transition: background-color .2s, color .2s; }
+.sn-liste a::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex: none; background: currentColor;
+  opacity: .35; transition: opacity .2s, transform .2s; }
+.sn-liste a:hover, .sn-liste a:focus-visible { background: var(--sn-hell); color: #2d2b45; }
+.sn-liste a.aktiv { background: var(--sn-hell); color: var(--k-text, #0b7491); }
+.sn-liste a.aktiv::before { opacity: 1; transform: scale(1.35); }
+.sn-liste .sym { width: 16px; height: 16px; margin-left: auto; }
+.sn-knopf { display: none; }
+
+@media (min-width: 1180px) and (min-height: 560px) { :root { --sn: 236px; } }
+@media (max-width: 1179.98px), (max-height: 559.98px) {
+  /* unten eine Pille: Name und aktueller Abschnitt; ein Tipp klappt die Liste nach oben auf */
+  .seitennav { left: 50%; top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); translate: -50% 0;
+    width: min(340px, calc(100% - 32px)); padding: 6px; border-radius: 24px; }
+  .sn-name { display: none; }
+  .sn-knopf { display: flex; align-items: center; gap: 9px; width: 100%; border: 0; background: none; padding: 9px 12px;
+    border-radius: 18px; font: inherit; color: #2d2b45; cursor: pointer; text-align: left; }
+  .sn-knopf::before { content: ''; width: 11px; height: 11px; border-radius: 50%; flex: none; background: var(--k, #1a9cbf); }
+  .sn-knopf .sn-jetzt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sn-knopf .sn-jetzt b { font-weight: 800; }
+  .sn-knopf .sn-jetzt span { color: var(--k-text, #0b7491); }
+  .sn-knopf .sym { width: 18px; height: 18px; transition: rotate .25s; }
+  .seitennav.offen .sn-knopf .sym { rotate: 180deg; }
+  .sn-liste { display: none; padding: 4px 0 6px; }
+  .seitennav.offen .sn-liste { display: grid; }
+  .seitennav.offen { box-shadow: 0 14px 40px rgba(58, 42, 53, .26); }
+}
+@media (prefers-reduced-motion: reduce) { .sn-liste a, .sn-liste a::before, .sn-knopf .sym { transition: none; } }
