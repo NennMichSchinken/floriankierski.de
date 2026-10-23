@@ -331,13 +331,13 @@
   "samples": 128,
   "glaetten": 3,
   "geraet": "OPTIX",
-  "backen_s": 185.2,
-  "backen2_s": 153.7,
+  "backen_s": 183.4,
+  "backen2_s": 156.1,
   "gruppen": 45,
   "samples_allein": 32,
-  "ecken": 1594376,
-  "glb_kb": 3619,
-  "gesamt_s": 411.5,
+  "ecken": 1591980,
+  "glb_kb": 3617,
+  "gesamt_s": 413.4,
   "qpos": 14,
   "qfarbe": 16
  }

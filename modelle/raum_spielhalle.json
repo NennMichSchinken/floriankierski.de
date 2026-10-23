@@ -251,7 +251,7 @@
   {
    "text": "Katze (Easter Egg)",
    "pos": [
-    0.625,
+    0.5312,
     4.5,
     -12.5
    ]
@@ -296,7 +296,7 @@
    "name": "Katze",
    "symbol": "ei",
    "pos": [
-    0.625,
+    0.5312,
     5.5,
     -12.5
    ]
@@ -332,13 +332,13 @@
   "glaetten": 3,
   "raum": "Spielhalle",
   "geraet": "OPTIX",
-  "backen_s": 25.9,
-  "backen2_s": 16.2,
+  "backen_s": 13.7,
+  "backen2_s": 11.6,
   "gruppen": 42,
   "samples_allein": 32,
-  "ecken": 69368,
+  "ecken": 68908,
   "glb_kb": 216,
-  "gesamt_s": 46.9,
+  "gesamt_s": 28.9,
   "qpos": 14,
   "qfarbe": 16
  }
